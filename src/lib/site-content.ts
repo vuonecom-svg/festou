@@ -11,10 +11,37 @@ export const FEATURES = [
   { icon: "BarChart3", titulo: "Relatórios que decidem", desc: "Descubra qual brinquedo dá mais lucro, quais clientes mais alugam e o ticket médio da sua locadora." },
 ];
 
-export const PLANS = [
-  { nome: "Começando", preco: "49", destaque: false, resumo: "Para quem está saindo do caderno.", itens: ["Até 15 brinquedos", "1 usuário", "Agenda + disponibilidade", "Orçamentos e pedidos", "Dashboard"] },
-  { nome: "Profissional", preco: "129", destaque: true, resumo: "O favorito das locadoras que já rodam.", itens: ["Até 60 brinquedos", "5 usuários", "Tudo do Começando", "Contratos em PDF", "Financeiro e relatórios", "CRM comercial"] },
-  { nome: "Locadora+", preco: "249", destaque: false, resumo: "Operação completa, sem limites.", itens: ["Brinquedos ilimitados", "Usuários ilimitados", "Equipe, rotas e app de rua", "Manutenção e limpeza", "Catálogo público", "Suporte prioritário"] },
+// Pagamentos via Kiwify. Substitua "/dashboard" pelos links de checkout de
+// cada ciclo quando os produtos estiverem criados na Kiwify.
+export const KIWIFY = {
+  mensal: "/dashboard", // TODO: colar link do checkout Kiwify (plano mensal R$44,90)
+  semestral: "/dashboard", // TODO: link do checkout Kiwify (semestral R$239,40)
+  anual: "/dashboard", // TODO: link do checkout Kiwify (anual R$358,80)
+};
+
+// Plano único "Festou Completo" com 3 ciclos de cobrança.
+export const BILLING: {
+  ciclo: string; precoMes: string; total: string | null; economia: string | null;
+  destaque: boolean; link: string; obs: string;
+}[] = [
+  { ciclo: "Mensal", precoMes: "44,90", total: null, economia: null, destaque: false, link: KIWIFY.mensal, obs: "cobrança mensal recorrente" },
+  { ciclo: "Semestral", precoMes: "39,90", total: "239,40", economia: "~11%", destaque: false, link: KIWIFY.semestral, obs: "6 meses em uma parcela" },
+  { ciclo: "Anual", precoMes: "29,90", total: "358,80", economia: "~33%", destaque: true, link: KIWIFY.anual, obs: "12 meses em uma parcela" },
+];
+
+export const PLAN_FEATURES = [
+  "Brinquedos ilimitados",
+  "Usuários ilimitados",
+  "Locações ilimitadas",
+  "Orçamentos ilimitados",
+  "Agenda anti-overbooking",
+  "Disponibilidade por data e horário",
+  "Contratos em PDF",
+  "Controle financeiro completo",
+  "Relatórios de faturamento",
+  "Cadastro de clientes e catálogo",
+  "Acesso pelo celular e computador",
+  "WhatsApp e rotas (em breve)",
 ];
 
 export const FAQS = [
@@ -24,7 +51,8 @@ export const FAQS = [
   { q: "Consigo gerar contrato e orçamento em PDF?", a: "Sim. Com um clique você gera o orçamento e o contrato de locação em PDF, prontos para enviar ao cliente pelo WhatsApp ou e-mail." },
   { q: "Tem controle financeiro?", a: "Tem. Você controla o sinal, o valor restante, contas a receber e vê o faturamento do mês, além de relatórios de qual brinquedo dá mais lucro." },
   { q: "Meus dados ficam separados de outras empresas?", a: "Sim. O Festou é multiempresa: cada locadora tem seu próprio ambiente isolado, com seus clientes, brinquedos, agenda e financeiro. Uma empresa nunca vê os dados da outra." },
-  { q: "Tem período de teste?", a: "Sim, você testa grátis por 7 dias, sem precisar de cartão de crédito. Se gostar, escolhe o plano que cabe no seu momento." },
+  { q: "Como funciona o teste grátis?", a: "Você tem 30 dias grátis para usar tudo. No cadastro você informa um cartão de crédito, mas nada é cobrado no primeiro mês. Depois dos 30 dias, o plano escolhido é cobrado automaticamente pela Kiwify — no anual e no semestral em parcela única, e no mensal de forma recorrente. Você pode cancelar quando quiser." },
+  { q: "Quais as formas de pagamento?", a: "Os pagamentos são processados com segurança pela Kiwify, que aceita cartão de crédito. Você escolhe o ciclo (mensal, semestral ou anual) e a cobrança acontece após o período gratuito de 30 dias." },
   { q: "E se eu tiver mais de um brinquedo igual?", a: "Você cadastra cada unidade, e o sistema controla a disponibilidade unidade por unidade — assim você sabe exatamente quantos pula-pulas estão livres em cada data." },
 ];
 

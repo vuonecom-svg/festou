@@ -59,7 +59,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div>
             <p className="font-medium mb-2">Comece agora</p>
-            <p className="text-muted mb-2">7 dias grátis, sem cartão.</p>
+            <p className="text-muted mb-2">30 dias grátis para testar.</p>
             <Link href="/dashboard" className="inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 font-medium hover:bg-primary/90">
               Testar grátis
             </Link>

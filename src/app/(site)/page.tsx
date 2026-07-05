@@ -4,7 +4,7 @@ import {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
   ShieldCheck, Check, ArrowRight, Sparkles, type LucideIcon,
 } from "lucide-react";
-import { FEATURES, PLANS, FAQS } from "@/lib/site-content";
+import { FEATURES, BILLING, PLAN_FEATURES, FAQS } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Festou — Sistema de gestão para locadoras de brinquedos",
@@ -33,14 +33,14 @@ export default function LandingPage() {
             Do orçamento no WhatsApp ao brinquedo de volta na base: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">
-              Testar grátis por 7 dias <ArrowRight size={18} />
+            <Link href="/#precos" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">
+              Testar grátis por 30 dias <ArrowRight size={18} />
             </Link>
             <Link href="/#funcionalidades" className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-6 h-12 font-semibold hover:bg-background">
               Ver funcionalidades
             </Link>
           </div>
-          <p className="mt-3 text-sm text-muted">Sem cartão de crédito · Acesso pelo celular ou computador</p>
+          <p className="mt-3 text-sm text-muted">30 dias grátis · Acesso pelo celular ou computador</p>
         </div>
       </section>
 
@@ -139,31 +139,53 @@ export default function LandingPage() {
       </section>
 
       {/* Preços */}
-      <section id="precos" className="mx-auto max-w-6xl px-4 py-16">
+      <section id="precos" className="mx-auto max-w-5xl px-4 py-16">
         <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold">Planos que cabem no seu momento</h2>
-          <p className="mt-3 text-muted">Comece grátis por 7 dias. Sem cartão, sem fidelidade.</p>
+          <h2 className="text-3xl font-bold">Festou Completo</h2>
+          <p className="mt-3 text-muted">Acesso completo a todas as funcionalidades. Escolha o ciclo que cabe no seu bolso.</p>
         </div>
-        <div className="mt-10 grid gap-6 lg:grid-cols-3 items-start">
-          {PLANS.map((p) => (
-            <div key={p.nome} className={"card p-6 " + (p.destaque ? "ring-2 ring-primary relative" : "")}>
-              {p.destaque && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-fg text-xs font-semibold px-3 py-1 rounded-full">Mais popular</span>
+
+        <div className="mt-12 grid gap-5 sm:grid-cols-3 items-stretch">
+          {BILLING.map((b) => (
+            <a
+              key={b.ciclo}
+              href={b.link}
+              className={"card p-6 flex flex-col text-center relative " + (b.destaque ? "ring-2 ring-primary" : "")}
+            >
+              {b.economia && (
+                <span className={"absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap " + (b.destaque ? "bg-primary text-primary-fg" : "bg-emerald-100 text-emerald-700")}>
+                  Economize {b.economia}
+                </span>
               )}
-              <h3 className="font-semibold text-lg">{p.nome}</h3>
-              <p className="text-sm text-muted mt-1">{p.resumo}</p>
-              <p className="mt-4"><span className="text-4xl font-bold">R${p.preco}</span><span className="text-muted">/mês</span></p>
-              <Link href="/dashboard" className={"mt-5 w-full inline-flex items-center justify-center rounded-lg h-11 font-semibold " + (p.destaque ? "bg-primary text-primary-fg hover:bg-primary/90" : "border border-border bg-surface hover:bg-background")}>
+              <p className="font-semibold text-lg">{b.ciclo}</p>
+              <p className="mt-3 leading-none">
+                <span className="text-muted align-top text-lg">R$ </span>
+                <span className="text-4xl font-bold">{b.precoMes}</span>
+              </p>
+              <p className="text-sm text-muted mt-1">/mês</p>
+              <p className="text-xs text-muted mt-1 min-h-[1rem]">{b.total ? `R$ ${b.total} no total` : " "}</p>
+              <span className={"mt-5 inline-flex items-center justify-center rounded-lg h-11 font-semibold " + (b.destaque ? "bg-primary text-primary-fg hover:bg-primary/90" : "border border-border hover:bg-background")}>
                 Começar grátis
-              </Link>
-              <ul className="mt-5 space-y-2 text-sm">
-                {p.itens.map((i) => (
-                  <li key={i} className="flex items-start gap-2"><Check size={16} className="text-emerald-500 mt-0.5 shrink-0" /> {i}</li>
-                ))}
-              </ul>
-            </div>
+              </span>
+              <p className="text-xs text-muted mt-2">{b.obs}</p>
+            </a>
           ))}
         </div>
+
+        <div className="mt-8 card p-6">
+          <p className="text-center font-medium mb-4">Tudo isso incluído — em qualquer ciclo:</p>
+          <div className="grid gap-2.5 sm:grid-cols-2 max-w-3xl mx-auto">
+            {PLAN_FEATURES.map((f) => (
+              <div key={f} className="flex items-center gap-2 text-sm">
+                <Check size={16} className="text-emerald-500 shrink-0" /> {f}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-muted mt-6">
+          🎁 <strong className="text-foreground">30 dias grátis</strong> — cadastre o cartão e não pague nada no primeiro mês. Cancele quando quiser.
+        </p>
       </section>
 
       {/* FAQ teaser */}
