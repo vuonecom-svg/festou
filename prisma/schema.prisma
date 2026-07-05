@@ -1,0 +1,859 @@
+// Festou — SaaS de gestão para locadoras de brinquedos e itens de festa.
+// Multi-tenant: TODA tabela de negócio carrega empresa_id + RLS no Supabase.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // A URL de conexão é lida de prisma.config.ts (process.env.DATABASE_URL).
+}
+
+// ────────────────────────────────────────────────────────────
+// ENUMS
+// ────────────────────────────────────────────────────────────
+
+enum UserRole {
+  admin
+  gerente
+  atendente
+  financeiro
+  equipe
+  vendedor
+}
+
+enum AssinaturaStatus {
+  trial
+  ativa
+  inadimplente
+  cancelada
+}
+
+enum BrinquedoStatus {
+  disponivel
+  alugado
+  manutencao
+  limpeza
+  inativo
+}
+
+enum ItemTipo {
+  mesa
+  cadeira
+  tenda
+  maquina
+  gerador
+  extensao
+  lona
+  tapete
+  grade
+  outro
+}
+
+enum OrcamentoStatus {
+  novo
+  enviado
+  visualizado
+  aguardando_resposta
+  aguardando_sinal
+  aprovado
+  recusado
+  expirado
+  cancelado
+}
+
+enum PedidoStatusOperacional {
+  aguardando_separacao
+  separado
+  carregado
+  saiu_entrega
+  chegou_local
+  em_montagem
+  montado
+  em_evento
+  em_retirada
+  retirado
+  retornou_base
+  finalizado
+  cancelado
+  reagendado
+}
+
+enum PedidoStatusFinanceiro {
+  aguardando_sinal
+  sinal_pago
+  quitado
+  reembolsado
+}
+
+enum PagamentoTipo {
+  sinal
+  restante
+  extra
+}
+
+enum PagamentoForma {
+  pix
+  dinheiro
+  cartao
+  boleto
+  transferencia
+}
+
+enum PagamentoStatus {
+  pendente
+  pago
+}
+
+enum LeadEtapa {
+  novo
+  atendimento
+  orcamento_enviado
+  aguardando_resposta
+  aguardando_sinal
+  confirmado
+  perdido
+  reativacao
+}
+
+enum DespesaCategoria {
+  combustivel
+  funcionario
+  manutencao
+  limpeza
+  compra
+  espaco
+  marketing
+  imposto
+  outros
+}
+
+enum FuncionarioFuncao {
+  montador
+  motorista
+  ajudante
+}
+
+enum RotaTipo {
+  entrega
+  retirada
+}
+
+enum ManutencaoTipo {
+  preventiva
+  corretiva
+  limpeza
+}
+
+enum ManutencaoStatus {
+  aberta
+  em_andamento
+  concluida
+}
+
+enum ChecklistTipo {
+  saida
+  montagem
+  retirada
+}
+
+// ────────────────────────────────────────────────────────────
+// NÚCLEO / SaaS
+// ────────────────────────────────────────────────────────────
+
+model Plano {
+  id              String   @id @default(uuid())
+  nome            String
+  precoMensal     Decimal  @map("preco_mensal") @db.Decimal(10, 2)
+  limiteBrinquedos Int?    @map("limite_brinquedos")
+  limiteUsuarios  Int?     @map("limite_usuarios")
+  limiteEventosMes Int?    @map("limite_eventos_mes")
+  features        Json     @default("{}")
+  ativo           Boolean  @default(true)
+  criadoEm        DateTime @default(now()) @map("criado_em")
+
+  empresas    Empresa[]
+  assinaturas Assinatura[]
+
+  @@map("plano")
+}
+
+model Empresa {
+  id                String           @id @default(uuid())
+  nome              String
+  cnpj              String?
+  logoUrl           String?          @map("logo_url")
+  corPrimaria       String?          @map("cor_primaria")
+  telefone          String?
+  planoId           String?          @map("plano_id")
+  statusAssinatura  AssinaturaStatus @default(trial) @map("status_assinatura")
+  trialAte          DateTime?        @map("trial_ate")
+  criadoEm          DateTime         @default(now()) @map("criado_em")
+
+  plano Plano? @relation(fields: [planoId], references: [id])
+
+  usuarios          Usuario[]
+  assinaturas       Assinatura[]
+  auditLogs         AuditLog[]
+  categorias        Categoria[]
+  brinquedos        Brinquedo[]
+  itensAdicionais   ItemAdicional[]
+  combos            Combo[]
+  clientes          Cliente[]
+  leads             Lead[]
+  orcamentos        Orcamento[]
+  enderecosEvento   EnderecoEvento[]
+  pedidos           Pedido[]
+  reservaItens      ReservaItem[]
+  contratos         Contrato[]
+  pagamentos        Pagamento[]
+  despesas          Despesa[]
+  funcionarios      Funcionario[]
+  veiculos          Veiculo[]
+  equipes           Equipe[]
+  rotas             Rota[]
+  checklistTemplates ChecklistTemplate[]
+  manutencoes       Manutencao[]
+
+  @@map("empresa")
+}
+
+model Assinatura {
+  id             String           @id @default(uuid())
+  empresaId      String           @map("empresa_id")
+  planoId        String           @map("plano_id")
+  status         AssinaturaStatus @default(trial)
+  inicio         DateTime         @default(now())
+  proximaCobranca DateTime?       @map("proxima_cobranca")
+  gatewayRef     String?          @map("gateway_ref")
+  criadoEm       DateTime         @default(now()) @map("criado_em")
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  plano   Plano   @relation(fields: [planoId], references: [id])
+
+  @@index([empresaId])
+  @@map("assinatura")
+}
+
+model Usuario {
+  id         String   @id @default(uuid())
+  empresaId  String   @map("empresa_id")
+  authUserId String?  @unique @map("auth_user_id") // id do Supabase Auth
+  nome       String
+  email      String
+  telefone   String?
+  papel      UserRole @default(atendente)
+  ativo      Boolean  @default(true)
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  empresa           Empresa           @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  auditLogs         AuditLog[]
+  leadsAtendidos    Lead[]            @relation("lead_atendente")
+  orcamentosVendidos Orcamento[]      @relation("orcamento_vendedor")
+  pedidoHistoricos  PedidoHistorico[]
+  funcionario       Funcionario?
+
+  @@unique([empresaId, email])
+  @@index([empresaId])
+  @@map("usuario")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  empresaId   String   @map("empresa_id")
+  usuarioId   String?  @map("usuario_id")
+  entidade    String
+  entidadeId  String   @map("entidade_id")
+  acao        String
+  dadosAntes  Json?    @map("dados_antes")
+  dadosDepois Json?    @map("dados_depois")
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  empresa Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([empresaId, entidade, entidadeId])
+  @@map("audit_log")
+}
+
+// ────────────────────────────────────────────────────────────
+// CATÁLOGO
+// ────────────────────────────────────────────────────────────
+
+model Categoria {
+  id        String @id @default(uuid())
+  empresaId String @map("empresa_id")
+  nome      String
+
+  empresa    Empresa     @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  brinquedos Brinquedo[]
+
+  @@index([empresaId])
+  @@map("categoria")
+}
+
+model Brinquedo {
+  id                 String          @id @default(uuid())
+  empresaId          String          @map("empresa_id")
+  codigoInterno      String?         @map("codigo_interno")
+  nome               String
+  categoriaId        String?         @map("categoria_id")
+  descricao          String?
+  medidas            String?
+  pesoKg             Decimal?        @map("peso_kg") @db.Decimal(10, 2)
+  capacidadeCriancas Int?            @map("capacidade_criancas")
+  idadeMin           Int?            @map("idade_min")
+  idadeMax           Int?            @map("idade_max")
+  valorDiaria        Decimal         @default(0) @map("valor_diaria") @db.Decimal(10, 2)
+  valorPeriodo       Decimal?        @map("valor_periodo") @db.Decimal(10, 2)
+  valorHoraExtra     Decimal?        @map("valor_hora_extra") @db.Decimal(10, 2)
+  valorPromocional   Decimal?        @map("valor_promocional") @db.Decimal(10, 2)
+  status             BrinquedoStatus @default(disponivel)
+  precisaEnergia     Boolean         @default(false) @map("precisa_energia")
+  precisaAgua        Boolean         @default(false) @map("precisa_agua")
+  qtdMotores         Int             @default(0) @map("qtd_motores")
+  pisoIrregular      Boolean         @default(false) @map("piso_irregular")
+  localAberto        Boolean         @default(true) @map("local_aberto")
+  localCoberto       Boolean         @default(true) @map("local_coberto")
+  tempoMontagemMin   Int             @default(30) @map("tempo_montagem_min")
+  tempoDesmontagemMin Int            @default(20) @map("tempo_desmontagem_min")
+  tempoLimpezaMin    Int             @default(30) @map("tempo_limpeza_min")
+  custoManutMedio    Decimal?        @map("custo_manut_medio") @db.Decimal(10, 2)
+  ultimaManutencao   DateTime?       @map("ultima_manutencao")
+  ultimaLimpeza      DateTime?       @map("ultima_limpeza")
+  proximaManutencao  DateTime?       @map("proxima_manutencao")
+  obsInternas        String?         @map("obs_internas")
+  ativo              Boolean         @default(true)
+  criadoEm           DateTime        @default(now()) @map("criado_em")
+
+  empresa      Empresa          @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  categoria    Categoria?       @relation(fields: [categoriaId], references: [id])
+  fotos        BrinquedoFoto[]
+  comboItens   ComboItem[]
+  orcamentoItens OrcamentoItem[]
+  reservaItens ReservaItem[]
+  manutencoes  Manutencao[]
+
+  @@unique([empresaId, codigoInterno])
+  @@index([empresaId, status])
+  @@map("brinquedo")
+}
+
+model BrinquedoFoto {
+  id          String @id @default(uuid())
+  brinquedoId String @map("brinquedo_id")
+  url         String
+  ordem       Int    @default(0)
+
+  brinquedo Brinquedo @relation(fields: [brinquedoId], references: [id], onDelete: Cascade)
+
+  @@index([brinquedoId])
+  @@map("brinquedo_foto")
+}
+
+model ItemAdicional {
+  id         String   @id @default(uuid())
+  empresaId  String   @map("empresa_id")
+  nome       String
+  tipo       ItemTipo @default(outro)
+  valorUnit  Decimal  @default(0) @map("valor_unit") @db.Decimal(10, 2)
+  estoqueQtd Int      @default(0) @map("estoque_qtd")
+  ativo      Boolean  @default(true)
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  empresa        Empresa         @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  comboItens     ComboItem[]
+  orcamentoItens OrcamentoItem[]
+
+  @@index([empresaId])
+  @@map("item_adicional")
+}
+
+model Combo {
+  id        String   @id @default(uuid())
+  empresaId String   @map("empresa_id")
+  nome      String
+  descricao String?
+  valor     Decimal  @default(0) @db.Decimal(10, 2)
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  empresa        Empresa         @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  itens          ComboItem[]
+  orcamentoItens OrcamentoItem[]
+
+  @@index([empresaId])
+  @@map("combo")
+}
+
+model ComboItem {
+  id          String  @id @default(uuid())
+  comboId     String  @map("combo_id")
+  brinquedoId String? @map("brinquedo_id")
+  itemId      String? @map("item_id")
+  qtd         Int     @default(1)
+
+  combo     Combo          @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  brinquedo Brinquedo?     @relation(fields: [brinquedoId], references: [id])
+  item      ItemAdicional? @relation(fields: [itemId], references: [id])
+
+  @@index([comboId])
+  @@map("combo_item")
+}
+
+// ────────────────────────────────────────────────────────────
+// CLIENTES
+// ────────────────────────────────────────────────────────────
+
+model Cliente {
+  id         String   @id @default(uuid())
+  empresaId  String   @map("empresa_id")
+  nome       String
+  doc        String? // CPF ou CNPJ
+  telefone   String?
+  whatsapp   String?
+  email      String?
+  nascimento DateTime?
+  avaliacao  Int? // 1-5
+  obs        String?
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  empresa    Empresa           @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  enderecos  ClienteEndereco[]
+  tags       ClienteTag[]
+  leads      Lead[]
+  orcamentos Orcamento[]
+  pedidos    Pedido[]
+
+  @@index([empresaId])
+  @@map("cliente")
+}
+
+model ClienteEndereco {
+  id          String  @id @default(uuid())
+  clienteId   String  @map("cliente_id")
+  rua         String?
+  numero      String?
+  bairro      String?
+  cidade      String?
+  cep         String?
+  complemento String?
+  tipo        String  @default("residencial")
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+  @@map("cliente_endereco")
+}
+
+model ClienteTag {
+  id        String @id @default(uuid())
+  clienteId String @map("cliente_id")
+  tag       String // recorrente | escola | condominio | empresa | particular
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@unique([clienteId, tag])
+  @@map("cliente_tag")
+}
+
+// ────────────────────────────────────────────────────────────
+// COMERCIAL / OPERAÇÃO
+// ────────────────────────────────────────────────────────────
+
+model Lead {
+  id              String    @id @default(uuid())
+  empresaId       String    @map("empresa_id")
+  clienteId       String?   @map("cliente_id")
+  atendenteId     String?   @map("atendente_id")
+  origem          String? // instagram | whatsapp | google | indicacao | site | cliente_antigo | campanha
+  etapa           LeadEtapa @default(novo)
+  primeiroContato DateTime? @map("primeiro_contato")
+  proximaAcao     String?   @map("proxima_acao")
+  motivoPerda     String?   @map("motivo_perda")
+  obs             String?
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+
+  empresa   Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  cliente   Cliente?  @relation(fields: [clienteId], references: [id])
+  atendente Usuario?  @relation("lead_atendente", fields: [atendenteId], references: [id])
+  orcamentos Orcamento[]
+
+  @@index([empresaId, etapa])
+  @@map("lead")
+}
+
+model EnderecoEvento {
+  id              String   @id @default(uuid())
+  empresaId       String   @map("empresa_id")
+  nomeLocal       String?  @map("nome_local")
+  tipoLocal       String?  @map("tipo_local") // casa | salao | chacara | escola | condominio | igreja | empresa | espaco
+  rua             String?
+  numero          String?
+  bairro          String?
+  cidade          String?
+  cep             String?
+  complemento     String?
+  pontoReferencia String?  @map("ponto_referencia")
+  responsavelNome String?  @map("responsavel_nome")
+  responsavelTel  String?  @map("responsavel_tel")
+  janelaEntrada   String?  @map("janela_entrada")
+  janelaRetirada  String?  @map("janela_retirada")
+  temPortaria     Boolean  @default(false) @map("tem_portaria")
+  temEscada       Boolean  @default(false) @map("tem_escada")
+  temElevador     Boolean  @default(false) @map("tem_elevador")
+  caminhaoEntra   Boolean  @default(true) @map("caminhao_entra")
+  temEnergia      Boolean  @default(true) @map("tem_energia")
+  temAgua         Boolean  @default(true) @map("tem_agua")
+  coberto         Boolean  @default(false)
+  obs             String?
+
+  empresa    Empresa     @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  orcamentos Orcamento[]
+  pedidos    Pedido[]
+
+  @@index([empresaId])
+  @@map("endereco_evento")
+}
+
+model Orcamento {
+  id               String          @id @default(uuid())
+  empresaId        String          @map("empresa_id")
+  numero           Int
+  clienteId        String          @map("cliente_id")
+  leadId           String?         @map("lead_id")
+  vendedorId       String?         @map("vendedor_id")
+  enderecoEventoId String?         @map("endereco_evento_id")
+  dataEvento       DateTime        @map("data_evento")
+  horaEntrega      String?         @map("hora_entrega")
+  horaRetirada     String?         @map("hora_retirada")
+  subtotal         Decimal         @default(0) @db.Decimal(10, 2)
+  desconto         Decimal         @default(0) @db.Decimal(10, 2)
+  motivoDesconto   String?         @map("motivo_desconto")
+  taxaEntrega      Decimal         @default(0) @map("taxa_entrega") @db.Decimal(10, 2)
+  taxaMontagem     Decimal         @default(0) @map("taxa_montagem") @db.Decimal(10, 2)
+  total            Decimal         @default(0) @db.Decimal(10, 2)
+  valorSinal       Decimal         @default(0) @map("valor_sinal") @db.Decimal(10, 2)
+  valorRestante    Decimal         @default(0) @map("valor_restante") @db.Decimal(10, 2)
+  formaPagamento   String?         @map("forma_pagamento")
+  validade         DateTime?
+  obs              String?
+  status           OrcamentoStatus @default(novo)
+  criadoEm         DateTime        @default(now()) @map("criado_em")
+
+  empresa        Empresa         @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  cliente        Cliente         @relation(fields: [clienteId], references: [id])
+  lead           Lead?           @relation(fields: [leadId], references: [id])
+  vendedor       Usuario?        @relation("orcamento_vendedor", fields: [vendedorId], references: [id])
+  enderecoEvento EnderecoEvento? @relation(fields: [enderecoEventoId], references: [id])
+  itens          OrcamentoItem[]
+  pedido         Pedido?
+
+  @@unique([empresaId, numero])
+  @@index([empresaId, status])
+  @@map("orcamento")
+}
+
+model OrcamentoItem {
+  id          String  @id @default(uuid())
+  orcamentoId String  @map("orcamento_id")
+  brinquedoId String? @map("brinquedo_id")
+  itemId      String? @map("item_id")
+  comboId     String? @map("combo_id")
+  descricao   String?
+  qtd         Int     @default(1)
+  valorUnit   Decimal @default(0) @map("valor_unit") @db.Decimal(10, 2)
+  valorTotal  Decimal @default(0) @map("valor_total") @db.Decimal(10, 2)
+
+  orcamento Orcamento      @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  brinquedo Brinquedo?     @relation(fields: [brinquedoId], references: [id])
+  item      ItemAdicional? @relation(fields: [itemId], references: [id])
+  combo     Combo?         @relation(fields: [comboId], references: [id])
+
+  @@index([orcamentoId])
+  @@map("orcamento_item")
+}
+
+model Pedido {
+  id               String                  @id @default(uuid())
+  empresaId        String                  @map("empresa_id")
+  numero           Int
+  orcamentoId      String?                 @unique @map("orcamento_id")
+  clienteId        String                  @map("cliente_id")
+  enderecoEventoId String?                 @map("endereco_evento_id")
+  equipeId         String?                 @map("equipe_id")
+  veiculoId        String?                 @map("veiculo_id")
+  dataEvento       DateTime                @map("data_evento")
+  horaEntrega      String?                 @map("hora_entrega")
+  horaRetirada     String?                 @map("hora_retirada")
+  total            Decimal                 @default(0) @db.Decimal(10, 2)
+  sinalPago        Decimal                 @default(0) @map("sinal_pago") @db.Decimal(10, 2)
+  valorRestante    Decimal                 @default(0) @map("valor_restante") @db.Decimal(10, 2)
+  formaPagamento   String?                 @map("forma_pagamento")
+  statusOperacional PedidoStatusOperacional @default(aguardando_separacao) @map("status_operacional")
+  statusFinanceiro PedidoStatusFinanceiro  @default(aguardando_sinal) @map("status_financeiro")
+  obsInternas      String?                 @map("obs_internas")
+  criadoEm         DateTime                @default(now()) @map("criado_em")
+
+  empresa        Empresa           @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  orcamento      Orcamento?        @relation(fields: [orcamentoId], references: [id])
+  cliente        Cliente           @relation(fields: [clienteId], references: [id])
+  enderecoEvento EnderecoEvento?   @relation(fields: [enderecoEventoId], references: [id])
+  equipe         Equipe?           @relation(fields: [equipeId], references: [id])
+  veiculo        Veiculo?          @relation(fields: [veiculoId], references: [id])
+  reservaItens   ReservaItem[]
+  pagamentos     Pagamento[]
+  despesas       Despesa[]
+  historico      PedidoHistorico[]
+  contrato       Contrato?
+  checklistRespostas ChecklistResposta[]
+  rotaParadas    RotaParada[]
+
+  @@unique([empresaId, numero])
+  @@index([empresaId, dataEvento])
+  @@map("pedido")
+}
+
+// Coração anti-overbooking. A janela [inicio, fim] já inclui buffers de
+// transporte/montagem/limpeza. Exclusion constraint (btree_gist) impede
+// no BANCO qualquer sobreposição por brinquedo — ver migração SQL manual.
+model ReservaItem {
+  id           String   @id @default(uuid())
+  empresaId    String   @map("empresa_id")
+  pedidoId     String   @map("pedido_id")
+  brinquedoId  String   @map("brinquedo_id")
+  qtd          Int      @default(1)
+  janelaInicio DateTime @map("janela_inicio")
+  janelaFim    DateTime @map("janela_fim")
+
+  empresa   Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  pedido    Pedido    @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  brinquedo Brinquedo @relation(fields: [brinquedoId], references: [id])
+
+  @@index([brinquedoId, janelaInicio, janelaFim])
+  @@index([empresaId])
+  @@map("reserva_item")
+}
+
+model PedidoHistorico {
+  id        String   @id @default(uuid())
+  pedidoId  String   @map("pedido_id")
+  usuarioId String?  @map("usuario_id")
+  campo     String
+  de        String?
+  para      String?
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  pedido  Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([pedidoId])
+  @@map("pedido_historico")
+}
+
+// ────────────────────────────────────────────────────────────
+// CONTRATOS & FINANCEIRO
+// ────────────────────────────────────────────────────────────
+
+model Contrato {
+  id            String    @id @default(uuid())
+  empresaId     String    @map("empresa_id")
+  pedidoId      String    @unique @map("pedido_id")
+  html          String?
+  pdfUrl        String?   @map("pdf_url")
+  assinado      Boolean   @default(false)
+  assinadoEm    DateTime? @map("assinado_em")
+  assinaturaUrl String?   @map("assinatura_url")
+  ipAssinatura  String?   @map("ip_assinatura")
+  criadoEm      DateTime  @default(now()) @map("criado_em")
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([empresaId])
+  @@map("contrato")
+}
+
+model Pagamento {
+  id             String          @id @default(uuid())
+  empresaId      String          @map("empresa_id")
+  pedidoId       String          @map("pedido_id")
+  tipo           PagamentoTipo
+  forma          PagamentoForma
+  valor          Decimal         @db.Decimal(10, 2)
+  status         PagamentoStatus @default(pendente)
+  pagoEm         DateTime?       @map("pago_em")
+  comprovanteUrl String?         @map("comprovante_url")
+  criadoEm       DateTime        @default(now()) @map("criado_em")
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([empresaId, status])
+  @@index([pedidoId])
+  @@map("pagamento")
+}
+
+model Despesa {
+  id        String           @id @default(uuid())
+  empresaId String           @map("empresa_id")
+  pedidoId  String?          @map("pedido_id")
+  categoria DespesaCategoria
+  valor     Decimal          @db.Decimal(10, 2)
+  data      DateTime         @default(now())
+  descricao String?
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  pedido  Pedido? @relation(fields: [pedidoId], references: [id])
+
+  @@index([empresaId, categoria])
+  @@map("despesa")
+}
+
+// ────────────────────────────────────────────────────────────
+// LOGÍSTICA & MANUTENÇÃO
+// ────────────────────────────────────────────────────────────
+
+model Funcionario {
+  id        String            @id @default(uuid())
+  empresaId String            @map("empresa_id")
+  usuarioId String?           @unique @map("usuario_id")
+  nome      String
+  funcao    FuncionarioFuncao @default(ajudante)
+  telefone  String?
+  ativo     Boolean           @default(true)
+
+  empresa      Empresa        @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  usuario      Usuario?       @relation(fields: [usuarioId], references: [id])
+  equipeMembros EquipeMembro[]
+
+  @@index([empresaId])
+  @@map("funcionario")
+}
+
+model Veiculo {
+  id         String @id @default(uuid())
+  empresaId  String @map("empresa_id")
+  placa      String?
+  modelo     String?
+  capacidade String?
+  ativo      Boolean @default(true)
+
+  empresa Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  pedidos Pedido[]
+  rotas   Rota[]
+
+  @@index([empresaId])
+  @@map("veiculo")
+}
+
+model Equipe {
+  id        String @id @default(uuid())
+  empresaId String @map("empresa_id")
+  nome      String
+
+  empresa Empresa        @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  membros EquipeMembro[]
+  pedidos Pedido[]
+
+  @@index([empresaId])
+  @@map("equipe")
+}
+
+model EquipeMembro {
+  id            String @id @default(uuid())
+  equipeId      String @map("equipe_id")
+  funcionarioId String @map("funcionario_id")
+
+  equipe      Equipe      @relation(fields: [equipeId], references: [id], onDelete: Cascade)
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+
+  @@unique([equipeId, funcionarioId])
+  @@map("equipe_membro")
+}
+
+model Rota {
+  id        String   @id @default(uuid())
+  empresaId String   @map("empresa_id")
+  data      DateTime
+  tipo      RotaTipo
+  veiculoId String?  @map("veiculo_id")
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  empresa Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  veiculo Veiculo?     @relation(fields: [veiculoId], references: [id])
+  paradas RotaParada[]
+
+  @@index([empresaId, data])
+  @@map("rota")
+}
+
+model RotaParada {
+  id          String   @id @default(uuid())
+  rotaId      String   @map("rota_id")
+  pedidoId    String   @map("pedido_id")
+  ordem       Int      @default(0)
+  horaPrevista String? @map("hora_prevista")
+  status      String   @default("pendente")
+
+  rota   Rota   @relation(fields: [rotaId], references: [id], onDelete: Cascade)
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([rotaId])
+  @@map("rota_parada")
+}
+
+model ChecklistTemplate {
+  id        String        @id @default(uuid())
+  empresaId String        @map("empresa_id")
+  tipo      ChecklistTipo
+  nome      String
+  itens     Json          @default("[]")
+
+  empresa   Empresa             @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  respostas ChecklistResposta[]
+
+  @@index([empresaId])
+  @@map("checklist_template")
+}
+
+model ChecklistResposta {
+  id            String   @id @default(uuid())
+  pedidoId      String   @map("pedido_id")
+  templateId    String   @map("template_id")
+  respostas     Json     @default("{}")
+  fotos         Json     @default("[]")
+  avariasTexto  String?  @map("avarias_texto")
+  assinaturaUrl String?  @map("assinatura_url")
+  criadoEm      DateTime @default(now()) @map("criado_em")
+
+  pedido   Pedido            @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  template ChecklistTemplate @relation(fields: [templateId], references: [id])
+
+  @@index([pedidoId])
+  @@map("checklist_resposta")
+}
+
+model Manutencao {
+  id           String           @id @default(uuid())
+  empresaId    String           @map("empresa_id")
+  brinquedoId  String           @map("brinquedo_id")
+  tipo         ManutencaoTipo
+  status       ManutencaoStatus @default(aberta)
+  descricao    String?
+  custo        Decimal?         @db.Decimal(10, 2)
+  responsavel  String?
+  fotoAntes    String?          @map("foto_antes")
+  fotoDepois   String?          @map("foto_depois")
+  abertura     DateTime         @default(now())
+  fechamento   DateTime?
+
+  empresa   Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  brinquedo Brinquedo @relation(fields: [brinquedoId], references: [id], onDelete: Cascade)
+
+  @@index([empresaId, status])
+  @@map("manutencao")
+}
