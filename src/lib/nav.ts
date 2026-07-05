@@ -21,24 +21,56 @@ export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  fase?: "mvp" | "v2" | "v3";
+  ready: boolean; // já implementado e funcional?
 };
 
-// Menu lateral do Festou (item 8 do planejamento).
-export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, fase: "mvp" },
-  { href: "/agenda", label: "Agenda", icon: Calendar, fase: "mvp" },
-  { href: "/orcamentos", label: "Orçamentos", icon: FileText, fase: "mvp" },
-  { href: "/pedidos", label: "Locações", icon: ShoppingCart, fase: "mvp" },
-  { href: "/clientes", label: "Clientes", icon: Users, fase: "mvp" },
-  { href: "/brinquedos", label: "Brinquedos", icon: Package, fase: "mvp" },
-  { href: "/combos", label: "Combos", icon: Boxes, fase: "v2" },
-  { href: "/equipe", label: "Equipe", icon: HardHat, fase: "v2" },
-  { href: "/rotas", label: "Rotas", icon: Truck, fase: "v2" },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, fase: "v2" },
-  { href: "/financeiro", label: "Financeiro", icon: Wallet, fase: "mvp" },
-  { href: "/crm", label: "CRM", icon: Filter, fase: "v2" },
-  { href: "/contratos", label: "Contratos", icon: FileSignature, fase: "mvp" },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart3, fase: "mvp" },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, fase: "mvp" },
+export type NavGroup = {
+  titulo?: string;
+  itens: NavItem[];
+};
+
+// Menu agrupado por área. `ready:false` = módulo planejado ("Em breve").
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    itens: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, ready: true },
+      { href: "/agenda", label: "Agenda", icon: Calendar, ready: true },
+    ],
+  },
+  {
+    titulo: "Comercial",
+    itens: [
+      { href: "/orcamentos", label: "Orçamentos", icon: FileText, ready: true },
+      { href: "/pedidos", label: "Locações", icon: ShoppingCart, ready: true },
+      { href: "/clientes", label: "Clientes", icon: Users, ready: true },
+      { href: "/crm", label: "CRM", icon: Filter, ready: false },
+    ],
+  },
+  {
+    titulo: "Catálogo",
+    itens: [
+      { href: "/brinquedos", label: "Brinquedos", icon: Package, ready: true },
+      { href: "/combos", label: "Combos", icon: Boxes, ready: false },
+    ],
+  },
+  {
+    titulo: "Gestão",
+    itens: [
+      { href: "/relatorios", label: "Relatórios", icon: BarChart3, ready: true },
+      { href: "/financeiro", label: "Financeiro", icon: Wallet, ready: false },
+      { href: "/contratos", label: "Contratos", icon: FileSignature, ready: false },
+      { href: "/configuracoes", label: "Configurações", icon: Settings, ready: false },
+    ],
+  },
+  {
+    titulo: "Operação de rua",
+    itens: [
+      { href: "/equipe", label: "Equipe", icon: HardHat, ready: false },
+      { href: "/rotas", label: "Rotas", icon: Truck, ready: false },
+      { href: "/manutencao", label: "Manutenção", icon: Wrench, ready: false },
+    ],
+  },
 ];
+
+// Lista plana (usada, por ex., pela topbar para achar o título da rota atual).
+export const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.itens);

@@ -3,12 +3,11 @@ import { Hammer, type LucideIcon } from "lucide-react";
 export function EmConstrucao({
   titulo,
   descricao,
-  fase = "MVP",
   icon: Icon = Hammer,
 }: {
   titulo: string;
   descricao: string;
-  fase?: string;
+  fase?: string; // aceito por compatibilidade; não exibido
   icon?: LucideIcon;
 }) {
   return (
@@ -16,11 +15,14 @@ export function EmConstrucao({
       <span className="mx-auto grid place-items-center h-14 w-14 rounded-2xl bg-primary-soft text-primary mb-4">
         <Icon size={26} />
       </span>
+      <span className="inline-block text-[11px] font-semibold uppercase tracking-wide rounded-full bg-primary-soft text-primary px-3 py-1 mb-3">
+        🚧 Em breve
+      </span>
       <h2 className="text-xl font-semibold">{titulo}</h2>
       <p className="text-muted mt-2">{descricao}</p>
-      <span className="inline-block mt-4 text-[11px] uppercase tracking-wide rounded-full bg-slate-100 text-slate-600 px-3 py-1">
-        Fase {fase}
-      </span>
+      <p className="text-sm text-muted/80 mt-4">
+        Estamos preparando este módulo. Enquanto isso, aproveite tudo que já está pronto no menu. 🎈
+      </p>
     </div>
   );
 }
