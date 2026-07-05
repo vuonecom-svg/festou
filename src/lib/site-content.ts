@@ -19,14 +19,14 @@ export const KIWIFY = {
   anual: "/dashboard", // TODO: link do checkout Kiwify (anual R$358,80)
 };
 
-// Plano único "Festou Completo" com 3 ciclos de cobrança.
+// Plano único "Festou Completo" — MESMO acesso em todos; muda só o ciclo/pacote.
 export const BILLING: {
-  ciclo: string; precoMes: string; total: string | null; economia: string | null;
-  destaque: boolean; link: string; obs: string;
+  ciclo: string; precoMes: string; meses: number; total: string | null;
+  economia: string | null; destaque: boolean; link: string;
 }[] = [
-  { ciclo: "Mensal", precoMes: "44,90", total: null, economia: null, destaque: false, link: KIWIFY.mensal, obs: "cobrança mensal recorrente" },
-  { ciclo: "Semestral", precoMes: "39,90", total: "239,40", economia: "~11%", destaque: false, link: KIWIFY.semestral, obs: "6 meses em uma parcela" },
-  { ciclo: "Anual", precoMes: "29,90", total: "358,80", economia: "~33%", destaque: true, link: KIWIFY.anual, obs: "12 meses em uma parcela" },
+  { ciclo: "Mensal", precoMes: "44,90", meses: 1, total: null, economia: null, destaque: false, link: KIWIFY.mensal },
+  { ciclo: "Semestral", precoMes: "39,90", meses: 6, total: "239,40", economia: "~11%", destaque: false, link: KIWIFY.semestral },
+  { ciclo: "Anual", precoMes: "29,90", meses: 12, total: "358,80", economia: "~33%", destaque: true, link: KIWIFY.anual },
 ];
 
 export const PLAN_FEATURES = [

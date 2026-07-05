@@ -1,5 +1,8 @@
-// Dados da empresa (locadora) — usados no cabeçalho de orçamentos e contratos.
-// Mock por enquanto; virá da tabela `empresa` (multi-tenant) com o Supabase.
+// Dados da empresa (locadora) — sobre Postgres. Usados no cabeçalho de
+// orçamentos/contratos e editáveis em Configurações.
+
+import { prisma } from "@/lib/prisma";
+import { getCurrentEmpresaId } from "@/lib/tenant";
 
 export type Empresa = {
   nome: string;
@@ -12,13 +15,31 @@ export type Empresa = {
 };
 
 export async function getEmpresa(): Promise<Empresa> {
+  const id = await getCurrentEmpresaId();
+  const e = await prisma.empresa.findUnique({ where: { id } });
   return {
-    nome: "Festa Feliz Locações",
-    cnpj: "12.345.678/0001-90",
-    telefone: "(19) 99999-0000",
-    email: "contato@festafeliz.com.br",
-    endereco: "Rua das Alegrias, 123 — Centro",
-    cidade: "Indaiatuba/SP",
-    responsavel: "Dona Festa",
+    nome: e?.nome ?? "Minha Locadora",
+    cnpj: e?.cnpj ?? "",
+    telefone: e?.telefone ?? "",
+    email: e?.email ?? "",
+    endereco: e?.endereco ?? "",
+    cidade: e?.cidade ?? "",
+    responsavel: e?.responsavel ?? "",
   };
+}
+
+export async function updateEmpresa(input: Partial<Empresa>): Promise<void> {
+  const id = await getCurrentEmpresaId();
+  await prisma.empresa.update({
+    where: { id },
+    data: {
+      ...(input.nome !== undefined ? { nome: input.nome } : {}),
+      cnpj: input.cnpj || null,
+      telefone: input.telefone || null,
+      email: input.email || null,
+      endereco: input.endereco || null,
+      cidade: input.cidade || null,
+      responsavel: input.responsavel || null,
+    },
+  });
 }

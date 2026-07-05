@@ -43,31 +43,31 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/orcamentos", label: "Orçamentos", icon: FileText, ready: true },
       { href: "/pedidos", label: "Locações", icon: ShoppingCart, ready: true },
       { href: "/clientes", label: "Clientes", icon: Users, ready: true },
-      { href: "/crm", label: "CRM", icon: Filter, ready: false },
+      { href: "/crm", label: "CRM", icon: Filter, ready: true },
     ],
   },
   {
     titulo: "Catálogo",
     itens: [
       { href: "/brinquedos", label: "Brinquedos", icon: Package, ready: true },
-      { href: "/combos", label: "Combos", icon: Boxes, ready: false },
+      { href: "/combos", label: "Combos", icon: Boxes, ready: true },
     ],
   },
   {
     titulo: "Gestão",
     itens: [
       { href: "/relatorios", label: "Relatórios", icon: BarChart3, ready: true },
-      { href: "/financeiro", label: "Financeiro", icon: Wallet, ready: false },
-      { href: "/contratos", label: "Contratos", icon: FileSignature, ready: false },
-      { href: "/configuracoes", label: "Configurações", icon: Settings, ready: false },
+      { href: "/financeiro", label: "Financeiro", icon: Wallet, ready: true },
+      { href: "/contratos", label: "Contratos", icon: FileSignature, ready: true },
+      { href: "/configuracoes", label: "Configurações", icon: Settings, ready: true },
     ],
   },
   {
-    titulo: "Operação de rua",
+    titulo: "Operação",
     itens: [
-      { href: "/equipe", label: "Equipe", icon: HardHat, ready: false },
+      { href: "/equipe", label: "Equipe", icon: HardHat, ready: true },
+      { href: "/manutencao", label: "Manutenção", icon: Wrench, ready: true },
       { href: "/rotas", label: "Rotas", icon: Truck, ready: false },
-      { href: "/manutencao", label: "Manutenção", icon: Wrench, ready: false },
     ],
   },
 ];

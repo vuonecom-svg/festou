@@ -188,6 +188,10 @@ model Empresa {
   logoUrl           String?          @map("logo_url")
   corPrimaria       String?          @map("cor_primaria")
   telefone          String?
+  email             String?
+  endereco          String?
+  cidade            String?
+  responsavel       String?
   planoId           String?          @map("plano_id")
   statusAssinatura  AssinaturaStatus @default(trial) @map("status_assinatura")
   trialAte          DateTime?        @map("trial_ate")
