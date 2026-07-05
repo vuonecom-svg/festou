@@ -1,21 +1,28 @@
 @import "tailwindcss";
 
-/* ── Festou — design system ────────────────────────────────
-   SaaS claro, limpo, cards grandes. Paleta: índigo/roxo festivo
-   como primária, cinza-ardósia para texto/superfícies. */
+/* ── Festou — design system (identidade da marca) ──────────
+   Azul-marinho como cor principal + teal / laranja / roxo /
+   amarelo de apoio (paleta do logotipo). */
 
 :root {
-  --background: #f6f7fb;
+  --background: #f5f7fb;
   --surface: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #14204a;      /* navy do wordmark */
   --muted: #64748b;
-  --border: #e2e8f0;
-  --primary: #6d28d9;
+  --border: #e3e8f0;
+
+  --primary: #182a5c;         /* azul-marinho da marca */
   --primary-fg: #ffffff;
-  --primary-soft: #f3e8ff;
-  --sidebar: #1e1b2e;
-  --sidebar-fg: #cbd5e1;
-  --sidebar-active: #7c3aed;
+  --primary-soft: #e9edf8;
+
+  --accent: #17b3c4;          /* teal */
+  --accent-orange: #f26a26;
+  --accent-purple: #7c3aed;
+  --accent-yellow: #f4c220;
+
+  --sidebar: #141f47;         /* navy escuro */
+  --sidebar-fg: #b8c2db;
+  --sidebar-active: #0f8ea3;  /* teal (item ativo) */
 }
 
 @theme inline {
@@ -27,6 +34,10 @@
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
   --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-yellow: var(--accent-yellow);
   --color-sidebar: var(--sidebar);
   --color-sidebar-fg: var(--sidebar-fg);
   --color-sidebar-active: var(--sidebar-active);
@@ -44,10 +55,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Utilitário de card reutilizável */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.875rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 2px rgba(20, 32, 74, 0.05);
 }

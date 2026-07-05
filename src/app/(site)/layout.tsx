@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PartyPopper } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,10 +7,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-border">
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary text-primary-fg">
-              <PartyPopper size={20} />
-            </span>
-            <span className="font-semibold text-lg">Festou</span>
+            <BrandMark size={32} />
+            <span className="font-semibold text-lg tracking-wide">Festou</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-foreground/70">
             <Link href="/#funcionalidades" className="hover:text-foreground">Funcionalidades</Link>
@@ -35,12 +33,10 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="grid place-items-center h-8 w-8 rounded-lg bg-primary text-primary-fg">
-                <PartyPopper size={17} />
-              </span>
+              <BrandMark size={28} />
               <span className="font-semibold">Festou</span>
             </div>
-            <p className="text-muted">Gestão completa para locadoras de brinquedos e itens de festa.</p>
+            <p className="text-muted">Agende. Alugue. Celebre. Gestão completa para locadoras de brinquedos e itens de festa.</p>
           </div>
           <div>
             <p className="font-medium mb-2">Produto</p>

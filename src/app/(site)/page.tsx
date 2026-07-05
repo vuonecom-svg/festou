@@ -27,10 +27,13 @@ export default function LandingPage() {
             <Sparkles size={15} /> Feito para locadoras de brinquedos
           </span>
           <h1 className="mt-5 text-4xl sm:text-5xl font-bold tracking-tight max-w-3xl mx-auto leading-tight">
-            Organize sua locadora e <span className="text-primary">nunca mais alugue o mesmo brinquedo duas vezes</span>
+            Organize sua locadora e <span className="text-accent">nunca mais alugue o mesmo brinquedo duas vezes</span>
           </h1>
           <p className="mt-5 text-lg text-muted max-w-2xl mx-auto">
             Do orçamento no WhatsApp ao brinquedo de volta na base: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
+          </p>
+          <p className="mt-5 text-sm font-bold uppercase tracking-[0.2em]">
+            <span className="text-accent">Agende.</span> <span className="text-accent-orange">Alugue.</span> <span className="text-accent-purple">Celebre.</span>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/#precos" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">

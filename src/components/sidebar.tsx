@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PartyPopper } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { NAV_GROUPS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -11,13 +11,11 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col bg-sidebar text-sidebar-fg">
-      <Link href="/dashboard" className="flex items-center gap-2 px-5 h-16 border-b border-white/10">
-        <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary text-primary-fg">
-          <PartyPopper size={20} />
-        </span>
+      <Link href="/dashboard" className="flex items-center gap-2.5 px-5 h-16 border-b border-white/10">
+        <BrandMark size={34} />
         <div className="leading-tight">
-          <p className="font-semibold text-white text-lg">Festou</p>
-          <p className="text-[11px] text-sidebar-fg/70">Gestão de locação</p>
+          <p className="font-semibold text-white text-lg tracking-wide">Festou</p>
+          <p className="text-[10px] text-sidebar-fg/60 uppercase tracking-wider">Agende · Alugue · Celebre</p>
         </div>
       </Link>
 
