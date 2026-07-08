@@ -1,28 +1,27 @@
 @import "tailwindcss";
 
-/* ── Festou — design system (identidade da marca) ──────────
-   Azul-marinho como cor principal + teal / laranja / roxo /
-   amarelo de apoio (paleta do logotipo). */
+/* ── FesFlow — design system (identidade da marca) ─────────
+   Azul Noite + Teal + Índigo + Roxo + Laranja. Visual moderno,
+   geométrico e fluido. */
 
 :root {
-  --background: #f5f7fb;
+  --background: #f1f5f9;      /* Cinza Claro */
   --surface: #ffffff;
-  --foreground: #14204a;      /* navy do wordmark */
+  --foreground: #0b1b33;      /* Azul Noite */
   --muted: #64748b;
-  --border: #e3e8f0;
+  --border: #e2e8f0;
 
-  --primary: #182a5c;         /* azul-marinho da marca */
+  --primary: #4f46e5;         /* Índigo (ação) */
   --primary-fg: #ffffff;
-  --primary-soft: #e9edf8;
+  --primary-soft: #eceafd;
 
-  --accent: #17b3c4;          /* teal */
-  --accent-orange: #f26a26;
-  --accent-purple: #7c3aed;
-  --accent-yellow: #f4c220;
+  --accent: #06b6b4;          /* Teal */
+  --accent-purple: #7c3aed;   /* Roxo */
+  --accent-orange: #f59e0b;   /* Laranja */
 
-  --sidebar: #141f47;         /* navy escuro */
-  --sidebar-fg: #b8c2db;
-  --sidebar-active: #0f8ea3;  /* teal (item ativo) */
+  --sidebar: #0b1b33;         /* Azul Noite */
+  --sidebar-fg: #aebbd2;
+  --sidebar-active: #4f46e5;  /* Índigo (item ativo) */
 }
 
 @theme inline {
@@ -35,9 +34,8 @@
   --color-primary-fg: var(--primary-fg);
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
-  --color-accent-orange: var(--accent-orange);
   --color-accent-purple: var(--accent-purple);
-  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-orange: var(--accent-orange);
   --color-sidebar: var(--sidebar);
   --color-sidebar-fg: var(--sidebar-fg);
   --color-sidebar-active: var(--sidebar-active);
@@ -59,5 +57,13 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.875rem;
-  box-shadow: 0 1px 2px rgba(20, 32, 74, 0.05);
+  box-shadow: 0 1px 2px rgba(11, 27, 51, 0.05);
+}
+
+/* Gradiente da marca (para textos e detalhes "flow") */
+.text-flow {
+  background: linear-gradient(90deg, #06b6b4, #4f46e5 55%, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

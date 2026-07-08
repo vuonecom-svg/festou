@@ -128,7 +128,7 @@ export function OrcamentoDoc({
 
         <Text style={s.footer}>
           Este orçamento é uma proposta e não garante a reserva dos brinquedos até a confirmação do pagamento do sinal.
-          {"  "}Gerado por Festou — gestão para locadoras de brinquedos.
+          {"  "}Gerado por FesFlow — gestão para locadoras de brinquedos.
         </Text>
       </Page>
     </Document>

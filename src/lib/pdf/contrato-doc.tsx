@@ -115,7 +115,7 @@ export function ContratoDoc({
           <View style={s.assBox}><Text>{empresa.nome}</Text><Text>LOCADORA</Text></View>
         </View>
 
-        <Text style={s.footer}>Gerado por Festou — gestão para locadoras de brinquedos.</Text>
+        <Text style={s.footer}>Gerado por FesFlow — gestão para locadoras de brinquedos.</Text>
       </Page>
     </Document>
   );

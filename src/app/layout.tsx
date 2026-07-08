@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
-  title: "Festou — Gestão para locadoras de brinquedos",
+  title: "FesFlow — Gestão para locadoras de brinquedos",
   description:
     "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
 };

@@ -8,7 +8,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <BrandMark size={32} />
-            <span className="font-semibold text-lg tracking-wide">Festou</span>
+            <span className="font-semibold text-lg tracking-wide">FesFlow</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-foreground/70">
             <Link href="/#funcionalidades" className="hover:text-foreground">Funcionalidades</Link>
@@ -34,9 +34,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           <div>
             <div className="flex items-center gap-2 mb-3">
               <BrandMark size={28} />
-              <span className="font-semibold">Festou</span>
+              <span className="font-semibold">FesFlow</span>
             </div>
-            <p className="text-muted">Agende. Alugue. Celebre. Gestão completa para locadoras de brinquedos e itens de festa.</p>
+            <p className="text-muted">Agenda inteligente para locações de festa. Do pedido à devolução, tudo flui.</p>
           </div>
           <div>
             <p className="font-medium mb-2">Produto</p>
@@ -63,8 +63,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="border-t border-border">
           <div className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted flex flex-wrap justify-between gap-2">
-            <span>© 2026 Festou. Todos os direitos reservados.</span>
-            <span>Feito para locadoras de brinquedos 🎈</span>
+            <span>© 2026 FesFlow. Todos os direitos reservados.</span>
+            <span>Feitas para quem faz momentos acontecerem 🎈</span>
           </div>
         </div>
       </footer>

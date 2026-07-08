@@ -6,7 +6,7 @@ import { Clock, ArrowRight } from "lucide-react";
 import { POSTS } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-  title: "Blog — Festou",
+  title: "Blog — FesFlow",
   description: "Dicas e ideias para organizar e crescer sua locadora de brinquedos e itens de festa.",
 };
 
@@ -14,7 +14,7 @@ export default function BlogPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-16">
       <div className="text-center">
-        <h1 className="text-4xl font-bold">Blog do Festou</h1>
+        <h1 className="text-4xl font-bold">Blog do FesFlow</h1>
         <p className="mt-3 text-muted">Ideias práticas para organizar e crescer sua locadora de brinquedos.</p>
       </div>
 

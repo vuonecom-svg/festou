@@ -14,8 +14,8 @@ export function Sidebar() {
       <Link href="/dashboard" className="flex items-center gap-2.5 px-5 h-16 border-b border-white/10">
         <BrandMark size={34} />
         <div className="leading-tight">
-          <p className="font-semibold text-white text-lg tracking-wide">Festou</p>
-          <p className="text-[10px] text-sidebar-fg/60 uppercase tracking-wider">Agende · Alugue · Celebre</p>
+          <p className="font-semibold text-white text-lg tracking-wide">FesFlow</p>
+          <p className="text-[10px] text-sidebar-fg/60 uppercase tracking-wider">Locações de festa</p>
         </div>
       </Link>
 
@@ -59,7 +59,7 @@ export function Sidebar() {
       </nav>
 
       <div className="px-4 py-3 border-t border-white/10 text-[11px] text-sidebar-fg/50">
-        Festou · v0.1
+        FesFlow · v0.1
       </div>
     </aside>
   );

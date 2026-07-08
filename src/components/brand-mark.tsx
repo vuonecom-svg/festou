@@ -1,38 +1,43 @@
-// Ícone da marca Festou — pula-pula (torres + domo + base) com check e estrela,
-// nas cores do logotipo. Simplificado para ler bem em tamanhos pequenos.
+// Ícone da marca FesFlow — fita/chama "flow" em gradiente (teal → índigo →
+// roxo → azul noite) com estrela e confetes. Recriação fiel do logotipo.
 export function BrandMark({ size = 32, className }: { size?: number; className?: string }) {
+  const gid = "fesflow-grad";
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden="true"
     >
-      {/* torres laterais */}
-      <rect x="3.5" y="12" width="6" height="15" rx="2" fill="#f26a26" />
-      <rect x="22.5" y="12" width="6" height="15" rx="2" fill="#7c3aed" />
-      {/* domo (corpo do pula-pula) */}
-      <path d="M8 27 V18 a8 8 0 0 1 16 0 V27 Z" fill="#17b3c4" />
-      {/* porta */}
-      <path d="M13 27 V22.5 a3 3 0 0 1 6 0 V27 Z" fill="#0f8ea3" />
-      {/* base */}
-      <rect x="2.5" y="25" width="27" height="5" rx="2.5" fill="#182a5c" />
-      {/* check */}
+      <defs>
+        <linearGradient id={gid} x1="8" y1="36" x2="32" y2="6" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#0b1b33" />
+          <stop offset="0.38" stopColor="#4f46e5" />
+          <stop offset="0.72" stopColor="#06b6b4" />
+          <stop offset="1" stopColor="#7c3aed" />
+        </linearGradient>
+      </defs>
+
+      {/* fita traseira (flow) */}
       <path
-        d="M12 17.8 l2.6 2.6 l5.2 -5.8"
-        stroke="#ffffff"
-        strokeWidth="2.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M25 6 C 14 8.5, 11 16.5, 17.5 21.5 C 22 25, 15.5 28.5, 13.5 34 C 23 32, 30 25.5, 26.5 16.5 C 24.8 12, 28 9, 25 6 Z"
+        fill={`url(#${gid})`}
+      />
+      {/* realce frontal teal */}
+      <path
+        d="M23 10.5 C 16.5 12.5, 15.5 17.5, 19.5 21 C 22.6 23.7, 18 27, 17 31 C 23.5 29, 27.5 23.5, 25 17 C 23.9 14, 25.2 12.4, 23 10.5 Z"
+        fill="#06b6b4"
+        opacity="0.55"
       />
       {/* estrela */}
-      <path
-        d="M16 3 l1.3 2.7 3 .4 -2.2 2.1 .5 3 -2.6 -1.4 -2.6 1.4 .5 -3 -2.2 -2.1 3 -.4 Z"
-        fill="#f4c220"
-      />
+      <path d="M31 4 l1.15 2.35 2.6 .35 -1.9 1.8 .5 2.6 -2.35 -1.25 -2.35 1.25 .5 -2.6 -1.9 -1.8 2.6 -.35 Z" fill="#f59e0b" />
+      {/* confetes */}
+      <circle cx="9.5" cy="8" r="1.7" fill="#7c3aed" />
+      <circle cx="34" cy="15" r="1.4" fill="#06b6b4" />
+      <circle cx="8.5" cy="15" r="1.2" fill="#f59e0b" />
     </svg>
   );
 }

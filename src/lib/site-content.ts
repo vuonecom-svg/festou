@@ -19,7 +19,7 @@ export const KIWIFY = {
   anual: "/dashboard", // TODO: link do checkout Kiwify (anual R$358,80)
 };
 
-// Plano único "Festou Completo" — MESMO acesso em todos; muda só o ciclo/pacote.
+// Plano único "FesFlow Completo" — MESMO acesso em todos; muda só o ciclo/pacote.
 export const BILLING: {
   ciclo: string; precoMes: string; meses: number; total: string | null;
   economia: string | null; destaque: boolean; link: string;
@@ -45,12 +45,12 @@ export const PLAN_FEATURES = [
 ];
 
 export const FAQS = [
-  { q: "O Festou serve para a minha locadora de brinquedos?", a: "Sim. O Festou foi feito sob medida para locadoras de pula-pula, infláveis, cama elástica, piscina de bolinha, tobogã, mesas, cadeiras, tendas e itens de festa. Se você aluga brinquedos para festas e eventos, ele foi feito para você." },
+  { q: "O FesFlow serve para a minha locadora de brinquedos?", a: "Sim. O FesFlow foi feito sob medida para locadoras de pula-pula, infláveis, cama elástica, piscina de bolinha, tobogã, mesas, cadeiras, tendas e itens de festa. Se você aluga brinquedos para festas e eventos, ele foi feito para você." },
   { q: "Como o sistema impede alugar o mesmo brinquedo duas vezes?", a: "Cada reserva bloqueia o brinquedo por uma janela que inclui o tempo de transporte, montagem, desmontagem e limpeza. Se você tentar reservar o mesmo item num período que conflita, o sistema bloqueia automaticamente — a garantia é feita no banco de dados, então nem por engano acontece." },
-  { q: "Preciso instalar alguma coisa?", a: "Não. O Festou funciona 100% no navegador, pelo computador, tablet ou celular. Você acessa de qualquer lugar, inclusive a equipe na rua." },
+  { q: "Preciso instalar alguma coisa?", a: "Não. O FesFlow funciona 100% no navegador, pelo computador, tablet ou celular. Você acessa de qualquer lugar, inclusive a equipe na rua." },
   { q: "Consigo gerar contrato e orçamento em PDF?", a: "Sim. Com um clique você gera o orçamento e o contrato de locação em PDF, prontos para enviar ao cliente pelo WhatsApp ou e-mail." },
   { q: "Tem controle financeiro?", a: "Tem. Você controla o sinal, o valor restante, contas a receber e vê o faturamento do mês, além de relatórios de qual brinquedo dá mais lucro." },
-  { q: "Meus dados ficam separados de outras empresas?", a: "Sim. O Festou é multiempresa: cada locadora tem seu próprio ambiente isolado, com seus clientes, brinquedos, agenda e financeiro. Uma empresa nunca vê os dados da outra." },
+  { q: "Meus dados ficam separados de outras empresas?", a: "Sim. O FesFlow é multiempresa: cada locadora tem seu próprio ambiente isolado, com seus clientes, brinquedos, agenda e financeiro. Uma empresa nunca vê os dados da outra." },
   { q: "Como funciona o teste grátis?", a: "Você tem 30 dias grátis para usar tudo. No cadastro você informa um cartão de crédito, mas nada é cobrado no primeiro mês. Depois dos 30 dias, o plano escolhido é cobrado automaticamente pela Kiwify — no anual e no semestral em parcela única, e no mensal de forma recorrente. Você pode cancelar quando quiser." },
   { q: "Quais as formas de pagamento?", a: "Os pagamentos são processados com segurança pela Kiwify, que aceita cartão de crédito. Você escolhe o ciclo (mensal, semestral ou anual) e a cobrança acontece após o período gratuito de 30 dias." },
   { q: "E se eu tiver mais de um brinquedo igual?", a: "Você cadastra cada unidade, e o sistema controla a disponibilidade unidade por unidade — assim você sabe exatamente quantos pula-pulas estão livres em cada data." },
@@ -76,7 +76,7 @@ export const POSTS: Post[] = [
       { p: ["Poucos erros doem tanto quanto perceber, na sexta à noite, que você prometeu o mesmo brinquedo para duas festas no sábado. Alguém vai ficar sem — e a sua reputação vai junto."] },
       { h: "Por que o overbooking acontece", p: ["Na correria do WhatsApp, agenda de papel e planilha, é fácil confirmar uma data sem checar se o brinquedo já está comprometido. Pior: mesmo quando a festa 'cabe' no horário, você esquece que o brinquedo precisa de tempo para ser transportado, montado, desmontado e limpo entre um evento e outro."] },
       { h: "A conta que quase ninguém faz", p: ["Um pula-pula que sai às 8h para uma festa às 10h não pode estar em outra festa às 9h do outro lado da cidade. Entre a retirada de uma festa e a entrega da próxima, existe transporte e limpeza. Ignorar isso é receita para atraso e cliente insatisfeito."] },
-      { h: "Como o Festou resolve", p: ["No Festou, cada reserva bloqueia o brinquedo por uma janela que já inclui transporte, montagem, desmontagem e limpeza. Quando você tenta reservar o mesmo item num período conflitante, o sistema simplesmente não deixa."], ul: ["Disponibilidade ao vivo ao montar o orçamento", "Bloqueio automático considerando os tempos de operação", "Garantia no banco de dados — nem um erro humano fura a agenda"] },
+      { h: "Como o FesFlow resolve", p: ["No FesFlow, cada reserva bloqueia o brinquedo por uma janela que já inclui transporte, montagem, desmontagem e limpeza. Quando você tenta reservar o mesmo item num período conflitante, o sistema simplesmente não deixa."], ul: ["Disponibilidade ao vivo ao montar o orçamento", "Bloqueio automático considerando os tempos de operação", "Garantia no banco de dados — nem um erro humano fura a agenda"] },
       { p: ["O resultado é simples: você para de perder festas, para de pagar a conta do erro e passa a prometer só o que consegue entregar."] },
     ],
   },
@@ -92,7 +92,7 @@ export const POSTS: Post[] = [
       { h: "3. Brinquedo indo sujo ou quebrado para a festa", p: ["Falta de controle de limpeza e manutenção gera reclamação, devolução e, no limite, acidente. Um brinquedo bloqueado para manutenção não pode sair — e o sistema precisa saber disso."] },
       { h: "4. Perder o histórico do cliente", p: ["Cliente recorrente é ouro. Sem histórico, você não sabe quem já alugou, quanto gastou, nem quando vale a pena oferecer de novo."] },
       { h: "5. Atendimento desorganizado no WhatsApp", p: ["Orçamento que se perde na conversa, cliente que some, follow-up que não acontece. Um funil comercial simples recupera vendas que hoje escorrem pelo ralo."] },
-      { p: ["A boa notícia: todos esses vazamentos se resolvem com organização. É exatamente para isso que o Festou existe."] },
+      { p: ["A boa notícia: todos esses vazamentos se resolvem com organização. É exatamente para isso que o FesFlow existe."] },
     ],
   },
   {
@@ -104,7 +104,7 @@ export const POSTS: Post[] = [
     secoes: [
       { p: ["Trabalhar sem contrato é apostar que nada vai dar errado — e, quando dá, é a sua locadora que paga. Um termo simples e claro protege os dois lados e passa profissionalismo."] },
       { h: "O que todo contrato precisa ter", ul: ["Dados da empresa e do cliente", "Data, horário e endereço do evento", "Brinquedos alugados e valores (sinal e restante)", "Responsabilidade pelo uso correto e supervisão", "Regras de segurança e proibições (objetos cortantes, excesso de crianças)", "O que acontece em caso de chuva", "Cancelamento, reagendamento e multa por atraso", "Responsabilidade por danos ao equipamento"] },
-      { h: "Gere em segundos", p: ["No Festou, o contrato é gerado automaticamente a partir do pedido, já com as cláusulas de segurança e a área de assinatura. Você economiza tempo e nunca mais esquece uma cláusula importante."] },
+      { h: "Gere em segundos", p: ["No FesFlow, o contrato é gerado automaticamente a partir do pedido, já com as cláusulas de segurança e a área de assinatura. Você economiza tempo e nunca mais esquece uma cláusula importante."] },
     ],
   },
 ];

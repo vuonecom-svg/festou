@@ -9,7 +9,7 @@ export function Topbar() {
   const title =
     NAV_ITEMS.find(
       (i) => pathname === i.href || pathname.startsWith(i.href + "/")
-    )?.label ?? "Festou";
+    )?.label ?? "FesFlow";
 
   return (
     <header className="h-16 shrink-0 bg-surface border-b border-border flex items-center gap-4 px-4 md:px-6">

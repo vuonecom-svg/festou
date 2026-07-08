@@ -17,8 +17,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
-  if (!post) return { title: "Artigo não encontrado — Festou" };
-  return { title: `${post.titulo} — Festou`, description: post.resumo };
+  if (!post) return { title: "Artigo não encontrado — FesFlow" };
+  return { title: `${post.titulo} — FesFlow`, description: post.resumo };
 }
 
 export default async function PostPage({
@@ -64,7 +64,7 @@ export default async function PostPage({
       </div>
 
       <div className="mt-12 card p-8 text-center bg-primary-soft/50">
-        <h2 className="text-xl font-semibold">Coloque isso em prática com o Festou</h2>
+        <h2 className="text-xl font-semibold">Coloque isso em prática com o FesFlow</h2>
         <p className="mt-2 text-muted">Agenda anti-overbooking, contratos e financeiro numa plataforma só.</p>
         <Link href="/dashboard" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
           Testar grátis <ArrowRight size={16} />
