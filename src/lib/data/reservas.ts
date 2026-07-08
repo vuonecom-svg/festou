@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
 import {
-  janelaBloqueio,
   verificarDisponibilidade,
   type Buffers,
   type ResultadoDisponibilidade,

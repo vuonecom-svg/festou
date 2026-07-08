@@ -72,7 +72,7 @@ export default function LandingPage() {
             </span>
             <h2 className="mt-4 text-3xl font-bold text-white">Overbooking impossível — garantido no banco de dados</h2>
             <p className="mt-4 text-sidebar-fg/90">
-              Todo sistema promete "controle de disponibilidade". O FesFlow vai além: cada reserva bloqueia o brinquedo por uma janela que já inclui <strong className="text-white">transporte, montagem, retirada e limpeza</strong>. Se conflita, o sistema não deixa reservar — nem por erro humano.
+              Todo sistema promete “controle de disponibilidade”. O FesFlow vai além: cada reserva bloqueia o brinquedo por uma janela que já inclui <strong className="text-white">transporte, montagem, retirada e limpeza</strong>. Se conflita, o sistema não deixa reservar — nem por erro humano.
             </p>
             <ul className="mt-6 space-y-2">
               {["Disponibilidade ao vivo ao montar o orçamento", "Buffers automáticos entre uma festa e outra", "Bloqueio físico no banco, não só na tela"].map((i) => (
