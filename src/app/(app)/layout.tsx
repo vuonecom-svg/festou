@@ -1,13 +1,20 @@
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { verificarAcesso } from "@/lib/access-check";
 
 // Páginas da plataforma são renderizadas por requisição (leem o banco).
 // Evita tentar pré-renderizar no build (que exigiria o banco no build-time).
 export const dynamic = "force-dynamic";
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const acesso = await verificarAcesso();
+  if (!acesso.ok) {
+    redirect(acesso.motivo === "bloqueado" ? "/acesso-bloqueado" : "/entrar");
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />

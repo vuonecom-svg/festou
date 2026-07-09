@@ -5,7 +5,7 @@ import type { Empresa } from "@/lib/data/empresa";
 import type { Orcamento } from "@/lib/data/orcamentos";
 import type { Cliente } from "@/lib/data/clientes";
 
-const PRIMARY = "#6d28d9";
+const PRIMARY = "#182a5c";
 const brl = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const dataExt = (d: string) =>
@@ -23,7 +23,7 @@ const s = StyleSheet.create({
   col: { flex: 1 },
   label: { color: "#64748b", fontSize: 8.5 },
   value: { fontSize: 10, marginBottom: 3 },
-  tHead: { flexDirection: "row", backgroundColor: "#f3e8ff", paddingVertical: 5, paddingHorizontal: 6, fontFamily: "Helvetica-Bold", fontSize: 9 },
+  tHead: { flexDirection: "row", backgroundColor: "#e9edf8", paddingVertical: 5, paddingHorizontal: 6, fontFamily: "Helvetica-Bold", fontSize: 9 },
   tRow: { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 6, borderBottom: "0.5 solid #e2e8f0" },
   cItem: { flex: 4 },
   cQtd: { flex: 1, textAlign: "center" },
