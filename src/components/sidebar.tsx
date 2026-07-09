@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { NAV_GROUPS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import { sairAction } from "@/app/entrar/actions";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -58,8 +60,12 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-4 py-3 border-t border-white/10 text-[11px] text-sidebar-fg/50">
-        FesFlow · v0.1
+      <div className="px-3 py-3 border-t border-white/10">
+        <form action={sairAction}>
+          <button className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-fg/70 hover:bg-white/5 hover:text-white transition-colors">
+            <LogOut size={18} /> Sair
+          </button>
+        </form>
       </div>
     </aside>
   );
