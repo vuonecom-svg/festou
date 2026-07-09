@@ -1,32 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { inputClass } from "@/components/ui/form";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+type Supa = ReturnType<typeof createSupabaseBrowserClient>;
 
 export default function DefinirSenhaPage() {
   const [senha, setSenha] = useState("");
   const [confirma, setConfirma] = useState("");
   const [status, setStatus] = useState<"idle" | "salvando" | "ok" | "erro" | "semsessao">("idle");
   const [msg, setMsg] = useState("");
+  const supaRef = useRef<Supa | null>(null);
 
-  const supabase = createSupabaseBrowserClient();
-
+  // Cria o cliente Supabase só no navegador (nunca no build/SSR).
   useEffect(() => {
-    // O link do convite estabelece a sessão automaticamente (detectSessionInUrl).
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) setStatus("semsessao");
-    });
-  }, [supabase]);
+    try {
+      const supa = createSupabaseBrowserClient();
+      supaRef.current = supa;
+      supa.auth.getSession().then(({ data }) => {
+        if (!data.session) setStatus("semsessao");
+      });
+    } catch {
+      setStatus("semsessao");
+    }
+  }, []);
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (senha.length < 6) { setMsg("A senha precisa ter ao menos 6 caracteres."); setStatus("erro"); return; }
     if (senha !== confirma) { setMsg("As senhas não conferem."); setStatus("erro"); return; }
+    const supa = supaRef.current;
+    if (!supa) { setMsg("Não foi possível iniciar. Recarregue a página."); setStatus("erro"); return; }
     setStatus("salvando");
-    const { error } = await supabase.auth.updateUser({ password: senha });
+    const { error } = await supa.auth.updateUser({ password: senha });
     if (error) { setMsg(error.message); setStatus("erro"); return; }
     setStatus("ok");
     setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
