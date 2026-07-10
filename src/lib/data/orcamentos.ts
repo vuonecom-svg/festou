@@ -43,12 +43,34 @@ export type Orcamento = {
   status: OrcStatus; pedidoId?: string; criadoEm: string;
 };
 
+export type OrcModo = "diaria" | "periodo";
+
 export type OrcamentoInput = {
   clienteId: string; dataEvento: string; horaEntrega: string; horaRetirada: string;
-  endereco: EnderecoEvento; itens: { brinquedoId: string; qtd: number; valorUnit?: number }[];
+  endereco: EnderecoEvento;
+  itens: { brinquedoId: string; qtd: number; modo?: OrcModo; horasExtras?: number }[];
   desconto: number; motivoDesconto: string; taxaEntrega: number; taxaMontagem: number;
   valorSinal: number; formaPagamento: string; obs: string;
 };
+
+// Preço unitário de um item conforme a base de cobrança escolhida.
+// Recalculado no SERVIDOR a partir dos valores reais do brinquedo (não confia
+// em preço vindo da tela). Base diária respeita o preço promocional.
+export function precoUnitario(
+  b: { valorDiaria: number; valorPeriodo: number | null; valorHoraExtra: number | null; valorPromocional: number | null },
+  modo: OrcModo,
+  horasExtras: number
+): { valorUnit: number; sufixo: string } {
+  const base = modo === "periodo" && b.valorPeriodo != null
+    ? b.valorPeriodo
+    : (b.valorPromocional ?? b.valorDiaria);
+  const horas = Math.max(0, Math.trunc(horasExtras) || 0);
+  const extra = horas * (b.valorHoraExtra ?? 0);
+  const partes: string[] = [];
+  if (modo === "periodo" && b.valorPeriodo != null) partes.push("período");
+  if (horas > 0) partes.push(`+${horas}h`);
+  return { valorUnit: base + extra, sufixo: partes.length ? ` (${partes.join(", ")})` : "" };
+}
 
 const include = {
   itens: true,
@@ -121,12 +143,12 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
   for (const it of input.itens) {
     const b = await getBrinquedo(it.brinquedoId);
     if (!b) continue;
-    const valorUnit = it.valorUnit ?? (b.valorPromocional ?? b.valorDiaria);
+    const { valorUnit, sufixo } = precoUnitario(b, it.modo ?? "diaria", it.horasExtras ?? 0);
     const qtd = Math.max(1, it.qtd);
     const valorTotal = valorUnit * qtd;
     subtotal += valorTotal;
     itensData.push({
-      brinquedo: { connect: { id: b.id } }, descricao: b.nome, qtd, valorUnit, valorTotal,
+      brinquedo: { connect: { id: b.id } }, descricao: b.nome + sufixo, qtd, valorUnit, valorTotal,
     });
   }
   const total = Math.max(0, subtotal - input.desconto + input.taxaEntrega + input.taxaMontagem);

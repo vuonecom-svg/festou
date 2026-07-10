@@ -14,12 +14,16 @@ type BrinquedoW = {
   id: string;
   nome: string;
   valorDiaria: number;
+  valorPeriodo: number | null;
+  valorHoraExtra: number | null;
   valorPromocional: number | null;
   quantidade: number;
   tempoMontagemMin: number;
   tempoDesmontagemMin: number;
   tempoLimpezaMin: number;
 };
+
+type Modo = "diaria" | "periodo";
 
 type ClienteW = { id: string; nome: string; cidade: string };
 
@@ -45,6 +49,8 @@ export function OrcamentoWizard({
     nomeLocal: "", tipoLocal: "Casa", rua: "", numero: "", bairro: "", cidade: "", complemento: "", referencia: "",
   });
   const [sel, setSel] = useState<Record<string, number>>({});
+  const [modoSel, setModoSel] = useState<Record<string, Modo>>({});
+  const [horasSel, setHorasSel] = useState<Record<string, number>>({});
   const [desconto, setDesconto] = useState(0);
   const [motivoDesconto, setMotivoDesconto] = useState("");
   const [taxaEntrega, setTaxaEntrega] = useState(0);
@@ -53,7 +59,14 @@ export function OrcamentoWizard({
   const [formaPagamento, setFormaPagamento] = useState("Pix");
   const [obs, setObs] = useState("");
 
-  const preco = (b: BrinquedoW) => Number(b.valorPromocional ?? b.valorDiaria);
+  // Base de cobrança do item (respeita o preço promocional na diária).
+  const modoDe = (b: BrinquedoW): Modo =>
+    modoSel[b.id] === "periodo" && b.valorPeriodo != null ? "periodo" : "diaria";
+  const horasDe = (b: BrinquedoW): number => (b.valorHoraExtra != null ? Math.max(0, horasSel[b.id] ?? 0) : 0);
+  const precoBase = (b: BrinquedoW): number =>
+    modoDe(b) === "periodo" && b.valorPeriodo != null ? b.valorPeriodo : Number(b.valorPromocional ?? b.valorDiaria);
+  // Preço unitário: base (diária/período) + horas adicionais.
+  const preco = (b: BrinquedoW): number => precoBase(b) + horasDe(b) * Number(b.valorHoraExtra ?? 0);
 
   // janela válida?
   const janela = useMemo(() => {
@@ -105,6 +118,10 @@ export function OrcamentoWizard({
     });
   }
 
+  function setHoras(id: string, delta: number) {
+    setHorasSel((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) + delta) }));
+  }
+
   function onClienteChange(id: string) {
     setClienteId(id);
     const c = clientes.find((x) => x.id === id);
@@ -115,7 +132,7 @@ export function OrcamentoWizard({
     clienteId, dataEvento, horaEntrega, horaRetirada, endereco,
     itens: itensSel.map(([brinquedoId, qtd]) => {
       const b = brinquedos.find((x) => x.id === brinquedoId)!;
-      return { brinquedoId, qtd, valorUnit: preco(b) };
+      return { brinquedoId, qtd, modo: modoDe(b), horasExtras: horasDe(b) };
     }),
     desconto, motivoDesconto, taxaEntrega, taxaMontagem, valorSinal, formaPagamento, obs,
   });
@@ -198,42 +215,87 @@ export function OrcamentoWizard({
               const qtd = sel[b.id] ?? 0;
               const max = janela && disp ? disp.livres : Infinity;
               return (
-                <div key={b.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
-                  <span className="grid place-items-center h-9 w-9 rounded-lg bg-primary-soft text-primary shrink-0">
-                    <Package size={16} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{b.nome}</p>
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-muted">{formatBRL(preco(b))} / diária</span>
-                      {janela && disp && (
-                        disp.disponivel ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-600">
-                            <CheckCircle2 size={12} /> Livre{disp.quantidade > 1 ? ` (${disp.livres}/${disp.quantidade})` : ""}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-rose-600">
-                            <XCircle size={12} /> Ocupado{disp.conflito ? ` — ${disp.conflito}` : ""}
-                          </span>
-                        )
-                      )}
+                <div key={b.id} className="rounded-lg border border-border p-3">
+                  <div className="flex items-center gap-3">
+                    <span className="grid place-items-center h-9 w-9 rounded-lg bg-primary-soft text-primary shrink-0">
+                      <Package size={16} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{b.nome}</p>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-muted">{formatBRL(preco(b))} / un.</span>
+                        {janela && disp && (
+                          disp.disponivel ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-600">
+                              <CheckCircle2 size={12} /> Livre{disp.quantidade > 1 ? ` (${disp.livres}/${disp.quantidade})` : ""}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-rose-600">
+                              <XCircle size={12} /> Ocupado{disp.conflito ? ` — ${disp.conflito}` : ""}
+                            </span>
+                          )
+                        )}
+                      </div>
                     </div>
+                    {qtd === 0 ? (
+                      <button type="button" onClick={() => setQtd(b.id, 1)} disabled={max <= 0}
+                        className="h-9 px-3 rounded-lg text-sm border border-border hover:bg-background inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <Plus size={14} /> Adicionar
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <button type="button" onClick={() => setQtd(b.id, -1)} className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background">
+                          <Minus size={14} />
+                        </button>
+                        <span className="w-8 text-center text-sm tabular-nums font-medium">{qtd}</span>
+                        <button type="button" onClick={() => setQtd(b.id, 1)} disabled={qtd >= max}
+                          className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed">
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  {qtd === 0 ? (
-                    <button type="button" onClick={() => setQtd(b.id, 1)} disabled={max <= 0}
-                      className="h-9 px-3 rounded-lg text-sm border border-border hover:bg-background inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
-                      <Plus size={14} /> Adicionar
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1.5">
-                      <button type="button" onClick={() => setQtd(b.id, -1)} className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background">
-                        <Minus size={14} />
-                      </button>
-                      <span className="w-8 text-center text-sm tabular-nums font-medium">{qtd}</span>
-                      <button type="button" onClick={() => setQtd(b.id, 1)} disabled={qtd >= max}
-                        className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed">
-                        <Plus size={14} />
-                      </button>
+
+                  {/* Cobrança: diária/período + horas adicionais (só quando selecionado) */}
+                  {qtd > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-end gap-x-5 gap-y-3">
+                      <div>
+                        <label className="block text-[11px] text-muted mb-1">Cobrança</label>
+                        {b.valorPeriodo != null ? (
+                          <select
+                            value={modoDe(b)}
+                            onChange={(e) => setModoSel((m) => ({ ...m, [b.id]: e.target.value as Modo }))}
+                            className="h-8 rounded-lg border border-border bg-surface px-2 text-sm outline-none focus:border-primary"
+                          >
+                            <option value="diaria">Diária — {formatBRL(Number(b.valorPromocional ?? b.valorDiaria))}</option>
+                            <option value="periodo">Período — {formatBRL(b.valorPeriodo)}</option>
+                          </select>
+                        ) : (
+                          <span className="text-sm">Diária — {formatBRL(Number(b.valorPromocional ?? b.valorDiaria))}</span>
+                        )}
+                      </div>
+
+                      {b.valorHoraExtra != null && (
+                        <div>
+                          <label className="block text-[11px] text-muted mb-1">
+                            Horas adicionais ({formatBRL(b.valorHoraExtra)}/h)
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <button type="button" onClick={() => setHoras(b.id, -1)} className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background">
+                              <Minus size={14} />
+                            </button>
+                            <span className="w-6 text-center text-sm tabular-nums font-medium">{horasDe(b)}</span>
+                            <button type="button" onClick={() => setHoras(b.id, 1)} className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background">
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="ml-auto text-right">
+                        <p className="text-[11px] text-muted">Unitário{qtd > 1 ? ` × ${qtd}` : ""}</p>
+                        <p className="text-sm font-semibold tabular-nums">{formatBRL(preco(b) * qtd)}</p>
+                      </div>
                     </div>
                   )}
                 </div>

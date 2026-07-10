@@ -20,6 +20,8 @@ export default async function NovoOrcamentoPage() {
       id: b.id,
       nome: b.nome,
       valorDiaria: Number(b.valorDiaria),
+      valorPeriodo: b.valorPeriodo != null ? Number(b.valorPeriodo) : null,
+      valorHoraExtra: b.valorHoraExtra != null ? Number(b.valorHoraExtra) : null,
       valorPromocional: b.valorPromocional != null ? Number(b.valorPromocional) : null,
       quantidade: b.quantidade,
       tempoMontagemMin: b.tempoMontagemMin,

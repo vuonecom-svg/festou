@@ -40,7 +40,8 @@ export async function criarOrcamentoAction(fd: FormData) {
       ? p.itens.map((i: Record<string, unknown>) => ({
           brinquedoId: String(i.brinquedoId ?? ""),
           qtd: Math.max(1, n(i.qtd)),
-          valorUnit: i.valorUnit != null ? n(i.valorUnit) : undefined,
+          modo: i.modo === "periodo" ? ("periodo" as const) : ("diaria" as const),
+          horasExtras: Math.max(0, n(i.horasExtras)),
         }))
       : [],
     desconto: n(p.desconto),
