@@ -215,6 +215,7 @@ model Empresa {
   contratos         Contrato[]
   pagamentos        Pagamento[]
   despesas          Despesa[]
+  receitas          Receita[]
   funcionarios      Funcionario[]
   veiculos          Veiculo[]
   equipes           Equipe[]
@@ -720,6 +721,24 @@ model Despesa {
 
   @@index([empresaId, categoria])
   @@map("despesa")
+}
+
+// Receita avulsa: dinheiro recebido fora de um pedido formal
+// (ex.: montou o brinquedo no evento e recebeu na hora).
+model Receita {
+  id        String   @id @default(uuid())
+  empresaId String   @map("empresa_id")
+  categoria String   @default("locacao_avulsa")
+  valor     Decimal  @db.Decimal(10, 2)
+  data      DateTime @default(now())
+  forma     String?
+  descricao String?
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@index([empresaId, categoria])
+  @@map("receita")
 }
 
 // ────────────────────────────────────────────────────────────
