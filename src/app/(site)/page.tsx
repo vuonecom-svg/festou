@@ -9,7 +9,7 @@ import { FEATURES, BILLING, PLAN_FEATURES, FAQS } from "@/lib/site-content";
 export const metadata: Metadata = {
   title: "FesFlow — Sistema de gestão para locadoras de brinquedos",
   description:
-    "Agenda inteligente para locações de festa: anti-overbooking, orçamentos, contratos em PDF e financeiro. Teste grátis por 30 dias.",
+    "Agenda inteligente para locações de festa: anti-overbooking, orçamentos, contratos em PDF e financeiro. 1º mês por R$ 5.",
 };
 
 const ICONS: Record<string, LucideIcon> = {
@@ -37,13 +37,13 @@ export default function LandingPage() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/#precos" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">
-              Testar grátis por 30 dias <ArrowRight size={18} />
+              Começar — 1º mês por R$ 5 <ArrowRight size={18} />
             </Link>
             <Link href="/#funcionalidades" className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-6 h-12 font-semibold hover:bg-background">
               Ver funcionalidades
             </Link>
           </div>
-          <p className="mt-3 text-sm text-muted">30 dias grátis · Acesso pelo celular ou computador</p>
+          <p className="mt-3 text-sm text-muted">1º mês por R$ 5 · Acesso pelo celular ou computador</p>
         </div>
       </section>
 
@@ -168,7 +168,7 @@ export default function LandingPage() {
               <p className="text-sm text-muted mt-1">/mês</p>
               <p className="text-xs text-muted mt-1 min-h-[1rem]">{b.total ? `Referente ao pacote de ${b.meses} meses — R$ ${b.total} em parcela única` : " "}</p>
               <span className={"mt-5 inline-flex items-center justify-center rounded-lg h-11 font-semibold " + (b.destaque ? "bg-primary text-primary-fg hover:bg-primary/90" : "border border-border hover:bg-background")}>
-                Começar grátis
+                Assinar
               </span>
             </a>
           ))}
@@ -186,7 +186,7 @@ export default function LandingPage() {
         </div>
 
         <p className="text-center text-sm text-muted mt-6">
-          🎁 <strong className="text-foreground">30 dias grátis</strong> — cadastre o cartão e não pague nada no primeiro mês. Cancele quando quiser.
+          🎁 <strong className="text-foreground">1º mês por apenas R$ 5</strong> no plano mensal — depois R$ 44,90/mês. Cancele quando quiser.
         </p>
       </section>
 
@@ -213,9 +213,9 @@ export default function LandingPage() {
       {/* CTA final */}
       <section className="mx-auto max-w-6xl px-4 py-20 text-center">
         <h2 className="text-3xl sm:text-4xl font-bold max-w-2xl mx-auto">Pronto para organizar sua locadora de vez?</h2>
-        <p className="mt-4 text-muted">Comece agora, leve 7 dias para testar e veja a diferença já na primeira festa.</p>
-        <Link href="/dashboard" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-8 h-13 py-3.5 font-semibold hover:bg-primary/90">
-          Criar minha conta grátis <ArrowRight size={18} />
+        <p className="mt-4 text-muted">Comece hoje — 1º mês por R$ 5 — e veja a diferença já na primeira festa.</p>
+        <Link href="/#precos" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-8 h-13 py-3.5 font-semibold hover:bg-primary/90">
+          Ver planos e começar <ArrowRight size={18} />
         </Link>
       </section>
     </>

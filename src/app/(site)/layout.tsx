@@ -17,11 +17,11 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Link href="/faq" className="hover:text-foreground">FAQ</Link>
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/dashboard" className="text-sm font-medium px-3 h-9 inline-flex items-center rounded-lg hover:bg-background">
+            <Link href="/entrar" className="text-sm font-medium px-3 h-9 inline-flex items-center rounded-lg hover:bg-background">
               Entrar
             </Link>
-            <Link href="/dashboard" className="text-sm font-medium px-4 h-9 inline-flex items-center rounded-lg bg-primary text-primary-fg hover:bg-primary/90">
-              Testar grátis
+            <Link href="/#precos" className="text-sm font-medium px-4 h-9 inline-flex items-center rounded-lg bg-primary text-primary-fg hover:bg-primary/90">
+              Começar
             </Link>
           </div>
         </div>
@@ -55,9 +55,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div>
             <p className="font-medium mb-2">Comece agora</p>
-            <p className="text-muted mb-2">30 dias grátis para testar.</p>
-            <Link href="/dashboard" className="inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 font-medium hover:bg-primary/90">
-              Testar grátis
+            <p className="text-muted mb-2">Comece por R$ 5 no primeiro mês.</p>
+            <Link href="/#precos" className="inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 font-medium hover:bg-primary/90">
+              Ver planos
             </Link>
           </div>
         </div>

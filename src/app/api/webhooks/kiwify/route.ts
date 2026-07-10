@@ -25,6 +25,13 @@ export async function POST(req: Request) {
     }
   }
 
+  // O webhook da Kiwify é "Todos que sou produtor" (o mesmo token vale para todos).
+  // Só agimos em vendas do FesFlow — os produtos se chamam "FesFlow Completo (...)".
+  // Vendas de outros produtos da conta (FINLOCA, SCANAFIN, etc.) são ignoradas.
+  if (!raw.toLowerCase().includes("fesflow")) {
+    return Response.json({ ok: true, acao: "ignorado-nao-fesflow" });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(raw);

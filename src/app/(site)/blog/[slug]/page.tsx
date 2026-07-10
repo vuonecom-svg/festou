@@ -66,8 +66,8 @@ export default async function PostPage({
       <div className="mt-12 card p-8 text-center bg-primary-soft/50">
         <h2 className="text-xl font-semibold">Coloque isso em prática com o FesFlow</h2>
         <p className="mt-2 text-muted">Agenda anti-overbooking, contratos e financeiro numa plataforma só.</p>
-        <Link href="/dashboard" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
-          Testar grátis <ArrowRight size={16} />
+        <Link href="/#precos" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
+          Ver planos <ArrowRight size={16} />
         </Link>
       </div>
     </article>

@@ -29,9 +29,9 @@ export default function FaqPage() {
 
       <div className="mt-12 card p-8 text-center bg-primary-soft/50">
         <h2 className="text-xl font-semibold">Ainda com dúvida?</h2>
-        <p className="mt-2 text-muted">Teste grátis por 7 dias e veja o FesFlow funcionando na sua locadora.</p>
-        <Link href="/dashboard" className="mt-5 inline-flex items-center rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
-          Testar grátis
+        <p className="mt-2 text-muted">Comece por R$ 5 no primeiro mês e veja o FesFlow funcionando na sua locadora.</p>
+        <Link href="/#precos" className="mt-5 inline-flex items-center rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
+          Ver planos
         </Link>
       </div>
     </div>
