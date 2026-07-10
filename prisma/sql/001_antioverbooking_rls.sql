@@ -7,17 +7,20 @@
 -- No Supabase: cole no SQL Editor, ou aplique via MCP/CLI.
 -- ============================================================
 
--- ── (1) ANTI-OVERBOOKING ────────────────────────────────────
--- Um mesmo brinquedo NUNCA pode ter duas reservas cujas janelas
--- (já com buffers de transporte/montagem/limpeza) se sobreponham.
--- A janela [janela_inicio, janela_fim) é um range meio-aberto:
--- fim de uma locação encostando no início da próxima NÃO conflita.
+-- ── (1) ANTI-OVERBOOKING (por unidade física) ───────────────
+-- Um brinquedo pode ter N unidades físicas iguais (brinquedo.quantidade).
+-- Cada reserva ocupa uma UNIDADE específica (reserva_item.unidade). Duas
+-- reservas da MESMA unidade nunca podem ter janelas sobrepostas — mas
+-- unidades diferentes do mesmo brinquedo podem ser alugadas em paralelo.
+-- A janela [janela_inicio, janela_fim) é meio-aberta: fim encostando no
+-- início da próxima NÃO conflita.
 create extension if not exists btree_gist;
 
 alter table reserva_item
   add constraint reserva_item_sem_overbooking
   exclude using gist (
     brinquedo_id with =,
+    unidade with =,
     tsrange(janela_inicio, janela_fim, '[)') with &&
   );
 
@@ -25,6 +28,7 @@ alter table reserva_item
 create index if not exists reserva_item_janela_gist
   on reserva_item using gist (
     brinquedo_id,
+    unidade,
     tsrange(janela_inicio, janela_fim, '[)')
   );
 

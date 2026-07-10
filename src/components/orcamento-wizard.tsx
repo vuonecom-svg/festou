@@ -15,6 +15,7 @@ type BrinquedoW = {
   nome: string;
   valorDiaria: number;
   valorPromocional: number | null;
+  quantidade: number;
   tempoMontagemMin: number;
   tempoDesmontagemMin: number;
   tempoLimpezaMin: number;
@@ -65,16 +66,22 @@ export function OrcamentoWizard({
 
   // disponibilidade por brinquedo na janela
   const dispMap = useMemo(() => {
-    const map: Record<string, { disponivel: boolean; conflito?: string }> = {};
+    const map: Record<string, { disponivel: boolean; livres: number; quantidade: number; conflito?: string }> = {};
     if (!janela) return map;
     for (const b of brinquedos) {
       const r = verificarDisponibilidade(
         b.id, janela.ini, janela.fim,
         { transporteMin: TRANSPORTE, montagemMin: b.tempoMontagemMin, desmontagemMin: b.tempoDesmontagemMin, limpezaMin: b.tempoLimpezaMin },
+        b.quantidade,
         reservas
       );
       const c = r.conflitos[0] as (typeof reservas)[number] | undefined;
-      map[b.id] = { disponivel: r.disponivel, conflito: c ? `${c.clienteNome} · ${c.cidade}` : undefined };
+      map[b.id] = {
+        disponivel: r.disponivel,
+        livres: r.unidadesLivres.length,
+        quantidade: b.quantidade,
+        conflito: c ? `${c.clienteNome} · ${c.cidade}` : undefined,
+      };
     }
     return map;
   }, [janela, brinquedos, reservas]);
@@ -189,6 +196,7 @@ export function OrcamentoWizard({
             {brinquedos.map((b) => {
               const disp = dispMap[b.id];
               const qtd = sel[b.id] ?? 0;
+              const max = janela && disp ? disp.livres : Infinity;
               return (
                 <div key={b.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
                   <span className="grid place-items-center h-9 w-9 rounded-lg bg-primary-soft text-primary shrink-0">
@@ -201,7 +209,7 @@ export function OrcamentoWizard({
                       {janela && disp && (
                         disp.disponivel ? (
                           <span className="inline-flex items-center gap-1 text-emerald-600">
-                            <CheckCircle2 size={12} /> Livre
+                            <CheckCircle2 size={12} /> Livre{disp.quantidade > 1 ? ` (${disp.livres}/${disp.quantidade})` : ""}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-rose-600">
@@ -212,8 +220,8 @@ export function OrcamentoWizard({
                     </div>
                   </div>
                   {qtd === 0 ? (
-                    <button type="button" onClick={() => setQtd(b.id, 1)}
-                      className="h-9 px-3 rounded-lg text-sm border border-border hover:bg-background inline-flex items-center gap-1">
+                    <button type="button" onClick={() => setQtd(b.id, 1)} disabled={max <= 0}
+                      className="h-9 px-3 rounded-lg text-sm border border-border hover:bg-background inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
                       <Plus size={14} /> Adicionar
                     </button>
                   ) : (
@@ -222,7 +230,8 @@ export function OrcamentoWizard({
                         <Minus size={14} />
                       </button>
                       <span className="w-8 text-center text-sm tabular-nums font-medium">{qtd}</span>
-                      <button type="button" onClick={() => setQtd(b.id, 1)} className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background">
+                      <button type="button" onClick={() => setQtd(b.id, 1)} disabled={qtd >= max}
+                        className="h-8 w-8 grid place-items-center rounded-lg border border-border hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed">
                         <Plus size={14} />
                       </button>
                     </div>

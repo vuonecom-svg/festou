@@ -315,6 +315,7 @@ model Brinquedo {
   valorPeriodo       Decimal?        @map("valor_periodo") @db.Decimal(10, 2)
   valorHoraExtra     Decimal?        @map("valor_hora_extra") @db.Decimal(10, 2)
   valorPromocional   Decimal?        @map("valor_promocional") @db.Decimal(10, 2)
+  quantidade         Int             @default(1) // nº de unidades físicas iguais em estoque
   status             BrinquedoStatus @default(disponivel)
   precisaEnergia     Boolean         @default(false) @map("precisa_energia")
   precisaAgua        Boolean         @default(false) @map("precisa_agua")
@@ -632,6 +633,7 @@ model ReservaItem {
   pedidoId     String   @map("pedido_id")
   brinquedoId  String   @map("brinquedo_id")
   qtd          Int      @default(1)
+  unidade      Int      @default(1) // qual unidade física (1..brinquedo.quantidade) — anti-overbooking por unidade
   janelaInicio DateTime @map("janela_inicio")
   janelaFim    DateTime @map("janela_fim")
 

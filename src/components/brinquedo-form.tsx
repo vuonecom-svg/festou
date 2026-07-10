@@ -30,6 +30,9 @@ export function BrinquedoForm({
           <Field label="Categoria" htmlFor="categoriaNome">
             <input id="categoriaNome" name="categoriaNome" defaultValue={b?.categoriaNome} className={inputClass} placeholder="Infláveis" />
           </Field>
+          <Field label="Quantidade em estoque" htmlFor="quantidade" hint="Quantas unidades iguais você tem (a agenda permite alugar todas ao mesmo tempo)" className="sm:col-span-2">
+            <input id="quantidade" name="quantidade" type="number" min="1" step="1" defaultValue={b?.quantidade ?? 1} className={inputClass} placeholder="1" />
+          </Field>
           <Field label="Descrição" htmlFor="descricao" className="sm:col-span-2">
             <textarea id="descricao" name="descricao" defaultValue={b?.descricao} className={textareaClass} placeholder="Detalhes para o cliente…" />
           </Field>

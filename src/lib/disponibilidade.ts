@@ -40,6 +40,7 @@ export function sobrepoe(a: Janela, b: Janela): boolean {
 export type ReservaLike = {
   id: string;
   brinquedoId: string;
+  unidade?: number; // qual unidade física ficou ocupada (default 1)
   janelaInicio: string | Date;
   janelaFim: string | Date;
 };
@@ -51,18 +52,23 @@ function toJanela(r: ReservaLike): Janela {
 export type ResultadoDisponibilidade<T extends ReservaLike = ReservaLike> = {
   disponivel: boolean;
   janela: Janela; // janela de bloqueio calculada para o pedido
-  conflitos: T[]; // reservas existentes que colidem
+  conflitos: T[]; // reservas existentes que colidem (em qualquer unidade)
+  unidadesLivres: number[]; // unidades físicas livres na janela (1..quantidade)
+  unidadeLivre: number | null; // menor unidade livre (null se lotado)
 };
 
 /**
- * Verifica se um brinquedo está livre numa janela de festa desejada.
- * Ignora `ignorarReservaId` (útil ao reagendar a própria reserva).
+ * Verifica se um brinquedo está livre numa janela de festa desejada,
+ * considerando `quantidade` unidades físicas iguais. Disponível se ao menos
+ * uma unidade não tem reserva sobreposta. Ignora `ignorarReservaId` (útil ao
+ * reagendar a própria reserva).
  */
 export function verificarDisponibilidade<T extends ReservaLike>(
   brinquedoId: string,
   eventoInicio: Date,
   eventoFim: Date,
   buffers: Buffers,
+  quantidade: number,
   reservasExistentes: T[],
   ignorarReservaId?: string
 ): ResultadoDisponibilidade<T> {
@@ -73,5 +79,15 @@ export function verificarDisponibilidade<T extends ReservaLike>(
       r.id !== ignorarReservaId &&
       sobrepoe(janela, toJanela(r))
   );
-  return { disponivel: conflitos.length === 0, janela, conflitos };
+  const ocupadas = new Set(conflitos.map((r) => r.unidade ?? 1));
+  const total = Math.max(1, Math.trunc(quantidade) || 1);
+  const unidadesLivres: number[] = [];
+  for (let u = 1; u <= total; u++) if (!ocupadas.has(u)) unidadesLivres.push(u);
+  return {
+    disponivel: unidadesLivres.length > 0,
+    janela,
+    conflitos,
+    unidadesLivres,
+    unidadeLivre: unidadesLivres[0] ?? null,
+  };
 }

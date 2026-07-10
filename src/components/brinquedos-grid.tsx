@@ -92,6 +92,7 @@ export function BrinquedosGrid({ brinquedos }: { brinquedos: Brinquedo[] }) {
                   <p className="text-xs text-muted mt-0.5">
                     {b.codigoInterno}
                     {b.categoriaNome ? ` · ${b.categoriaNome}` : ""}
+                    {b.quantidade > 1 ? ` · ${b.quantidade} un.` : ""}
                   </p>
                   <div className="flex items-center justify-between mt-2.5">
                     <span className="font-semibold">{formatBRL(b.valorDiaria)}</span>

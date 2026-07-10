@@ -46,6 +46,7 @@ function parse(fd: FormData): BrinquedoInput {
     valorPeriodo: numOrNull(fd, "valorPeriodo"),
     valorHoraExtra: numOrNull(fd, "valorHoraExtra"),
     valorPromocional: numOrNull(fd, "valorPromocional"),
+    quantidade: Math.max(1, Math.trunc(num(fd, "quantidade")) || 1),
     status: (str(fd, "status") || "disponivel") as BrinquedoStatus,
     precisaEnergia: bool(fd, "precisaEnergia"),
     precisaAgua: bool(fd, "precisaAgua"),

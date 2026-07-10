@@ -27,6 +27,7 @@ export const RESERVA_STATUS: Record<ReservaStatus, { label: string; badge: strin
 export type Reserva = {
   id: string;
   brinquedoId: string;
+  unidade: number;
   brinquedoNome: string;
   clienteNome: string;
   cidade: string;
@@ -75,6 +76,7 @@ function toDTO(r: ReservaRow): Reserva {
   return {
     id: r.id,
     brinquedoId: r.brinquedoId,
+    unidade: r.unidade ?? 1,
     brinquedoNome: r.brinquedo?.nome ?? "",
     clienteNome: ped?.cliente?.nome ?? "",
     cidade: ped?.enderecoEvento?.cidade ?? "",
@@ -135,11 +137,11 @@ export async function verificarBrinquedo(
   const empresaId = await getCurrentEmpresaId();
   const brinquedo = await getBrinquedo(brinquedoId);
   if (!brinquedo) {
-    return { disponivel: false, janela: { inicio: eventoInicio, fim: eventoFim }, conflitos: [], brinquedo: null };
+    return { disponivel: false, janela: { inicio: eventoInicio, fim: eventoFim }, conflitos: [], unidadesLivres: [], unidadeLivre: null, brinquedo: null };
   }
   const existentes = await reservasDoBrinquedo(empresaId, brinquedoId, ignorarPedidoId);
   const res = verificarDisponibilidade(
-    brinquedoId, eventoInicio, eventoFim, buffersDe(brinquedo, transporteMin), existentes
+    brinquedoId, eventoInicio, eventoFim, buffersDe(brinquedo, transporteMin), brinquedo.quantidade, existentes
   );
   return { ...res, brinquedo };
 }

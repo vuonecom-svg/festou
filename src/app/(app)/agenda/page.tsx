@@ -27,6 +27,7 @@ export default async function AgendaPage() {
   const brinquedosDisp = brinquedos.map((b) => ({
     id: b.id,
     nome: b.nome,
+    quantidade: b.quantidade,
     tempoMontagemMin: b.tempoMontagemMin,
     tempoDesmontagemMin: b.tempoDesmontagemMin,
     tempoLimpezaMin: b.tempoLimpezaMin,

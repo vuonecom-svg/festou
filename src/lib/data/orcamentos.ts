@@ -188,22 +188,33 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
   const eventoFim = new Date(`${dia}T${o.horaRetirada || "18:00"}:00`);
   if (eventoFim <= eventoInicio) throw new Error("Horário do evento inválido (retirada deve ser após a entrega).");
 
-  // Pré-checagem (mensagem amigável) + coleta das janelas de bloqueio
-  const reservas: { brinquedoId: string; janelaInicio: Date; janelaFim: Date; qtd: number }[] = [];
+  // Pré-checagem (mensagem amigável) + coleta das janelas de bloqueio.
+  // Cada unidade pedida ocupa uma unidade física distinta (1..quantidade).
+  const reservas: { brinquedoId: string; unidade: number; janelaInicio: Date; janelaFim: Date }[] = [];
+  const usadas: Record<string, Set<number>> = {}; // unidades já reservadas por brinquedo NESTE pedido
   for (const it of o.itens) {
     if (!it.brinquedoId) continue;
     const check = await verificarBrinquedo(it.brinquedoId, eventoInicio, eventoFim);
     if (!check.brinquedo) throw new Error(`Brinquedo do item "${it.descricao}" não existe mais.`);
-    if (!check.disponivel) {
+    const jaUsadas = usadas[it.brinquedoId] ?? new Set<number>();
+    const livres = check.unidadesLivres.filter((u) => !jaUsadas.has(u));
+    const precisa = Math.max(1, it.qtd);
+    if (livres.length < precisa) {
       const c = check.conflitos[0];
-      throw new Error(
-        `${it.descricao} já está reservado nesse período` +
-          (c ? ` (${c.clienteNome} · ${c.cidade})` : "") +
-          `. O bloqueio considera transporte, montagem e limpeza.`
-      );
+      const detalhe =
+        check.brinquedo.quantidade > 1
+          ? `${it.descricao}: só há ${livres.length} de ${check.brinquedo.quantidade} unidade(s) livre(s) nesse período (pedido: ${precisa}).`
+          : `${it.descricao} já está reservado nesse período` +
+            (c ? ` (${c.clienteNome} · ${c.cidade})` : "") + ".";
+      throw new Error(detalhe + " O bloqueio considera transporte, montagem e limpeza.");
     }
     const jan = janelaBloqueio(eventoInicio, eventoFim, buffersDe(check.brinquedo, TRANSPORTE_PADRAO_MIN));
-    reservas.push({ brinquedoId: it.brinquedoId, janelaInicio: jan.inicio, janelaFim: jan.fim, qtd: it.qtd });
+    for (let k = 0; k < precisa; k++) {
+      const u = livres[k];
+      jaUsadas.add(u);
+      reservas.push({ brinquedoId: it.brinquedoId, unidade: u, janelaInicio: jan.inicio, janelaFim: jan.fim });
+    }
+    usadas[it.brinquedoId] = jaUsadas;
   }
 
   const numero = await proximoNumero("pedido", empresaId, 1000);
@@ -229,7 +240,7 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
         await tx.reservaItem.create({
           data: {
             empresaId, pedidoId: ped.id, brinquedoId: r.brinquedoId,
-            qtd: r.qtd, janelaInicio: r.janelaInicio, janelaFim: r.janelaFim,
+            qtd: 1, unidade: r.unidade, janelaInicio: r.janelaInicio, janelaFim: r.janelaFim,
           },
         });
       }

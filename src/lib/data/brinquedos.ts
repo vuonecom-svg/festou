@@ -29,6 +29,7 @@ export type Brinquedo = {
   valorPeriodo: number | null;
   valorHoraExtra: number | null;
   valorPromocional: number | null;
+  quantidade: number;
   status: BrinquedoStatus;
   precisaEnergia: boolean;
   precisaAgua: boolean;
@@ -73,6 +74,7 @@ function toDTO(b: BrinquedoRow): Brinquedo {
     valorPeriodo: dec(b.valorPeriodo),
     valorHoraExtra: dec(b.valorHoraExtra),
     valorPromocional: dec(b.valorPromocional),
+    quantidade: b.quantidade,
     status: b.status as BrinquedoStatus,
     precisaEnergia: b.precisaEnergia,
     precisaAgua: b.precisaAgua,
@@ -113,6 +115,7 @@ function dadosBrinquedo(input: BrinquedoInput) {
     valorPeriodo: input.valorPeriodo,
     valorHoraExtra: input.valorHoraExtra,
     valorPromocional: input.valorPromocional,
+    quantidade: Math.max(1, Math.trunc(input.quantidade) || 1),
     status: input.status,
     precisaEnergia: input.precisaEnergia,
     precisaAgua: input.precisaAgua,

@@ -10,6 +10,7 @@ import { inputClass, Field } from "@/components/ui/form";
 export type BrinquedoDisp = {
   id: string;
   nome: string;
+  quantidade: number;
   tempoMontagemMin: number;
   tempoDesmontagemMin: number;
   tempoLimpezaMin: number;
@@ -18,6 +19,7 @@ export type BrinquedoDisp = {
 export type ReservaDisp = {
   id: string;
   brinquedoId: string;
+  unidade?: number;
   brinquedoNome: string;
   clienteNome: string;
   cidade: string;
@@ -65,9 +67,10 @@ export function VerificadorDisponibilidade({
         desmontagemMin: b.tempoDesmontagemMin,
         limpezaMin: b.tempoLimpezaMin,
       },
+      b.quantidade,
       reservas
     );
-    return { ...r, nome: b.nome };
+    return { ...r, nome: b.nome, quantidade: b.quantidade };
   }, [brinquedoId, data, horaIni, horaFim, brinquedos, reservas, transporteMin]);
 
   return (
@@ -108,6 +111,11 @@ export function VerificadorDisponibilidade({
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
               <p className="flex items-center gap-2 font-medium text-emerald-700">
                 <CheckCircle2 size={18} /> Disponível!
+                {resultado.quantidade > 1 && (
+                  <span className="text-xs font-normal text-emerald-700/80">
+                    ({resultado.unidadesLivres.length} de {resultado.quantidade} unidades livres)
+                  </span>
+                )}
               </p>
               <p className="text-sm text-emerald-700/80 mt-1">
                 {resultado.nome} pode ser reservado. O brinquedo fica bloqueado de{" "}
