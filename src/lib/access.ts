@@ -16,52 +16,67 @@ export async function provisionarAcesso(input: {
   const email = input.email.trim().toLowerCase();
   if (!email) throw new Error("E-mail ausente no webhook.");
 
-  // Já existe? Apenas reativa (renovação / pagamento em dia).
-  const existente = await prisma.usuario.findFirst({ where: { email } });
-  if (existente) {
-    await prisma.usuario.updateMany({ where: { email }, data: { ativo: true } });
-    await prisma.empresa.update({
-      where: { id: existente.empresaId },
-      data: { statusAssinatura: "ativa" },
-    });
-    return { empresaId: existente.empresaId, novo: false };
-  }
+  // Idempotência: a Kiwify REENVIA webhooks e pode entregar o mesmo evento em
+  // paralelo. Um advisory lock por e-mail serializa o provisionamento, então
+  // dois eventos simultâneos nunca criam duas empresas para o mesmo cliente.
+  const res = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${email})::int8)`;
 
-  // Novo cliente: cria a empresa isolada dele.
-  const empresa = await prisma.empresa.create({
-    data: {
-      nome: input.nome?.trim() || "Minha Locadora",
-      statusAssinatura: "ativa",
-      trialAte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    },
+    const existente = await tx.usuario.findFirst({ where: { email } });
+    if (existente) {
+      // Já existe (renovação / reenvio) — apenas reativa.
+      await tx.usuario.updateMany({ where: { email }, data: { ativo: true } });
+      await tx.empresa.update({
+        where: { id: existente.empresaId },
+        data: { statusAssinatura: "ativa" },
+      });
+      return { empresaId: existente.empresaId, novo: false, usuarioId: null as string | null };
+    }
+
+    // Novo cliente: cria a empresa isolada dele + o usuário admin.
+    const empresa = await tx.empresa.create({
+      data: {
+        nome: input.nome?.trim() || "Minha Locadora",
+        statusAssinatura: "ativa",
+        trialAte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+    const usuario = await tx.usuario.create({
+      data: {
+        empresaId: empresa.id,
+        authUserId: null,
+        nome: input.nome?.trim() || "Responsável",
+        email,
+        papel: "admin",
+        ativo: true,
+      },
+    });
+    return { empresaId: empresa.id, novo: true, usuarioId: usuario.id };
   });
 
-  // Convida o usuário no Supabase (cria conta + envia e-mail para definir senha).
-  let authUserId: string | null = null;
-  try {
-    const admin = supabaseAdmin();
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${APP_URL}/definir-senha`,
-      data: { empresaId: empresa.id, nome: input.nome ?? "", ciclo: input.ciclo ?? "" },
-    });
-    if (error) console.error("Supabase invite error:", error.message);
-    authUserId = data?.user?.id ?? null;
-  } catch (e) {
-    console.error("Falha ao convidar usuário:", (e as Error).message);
+  // Convite por e-mail só para cliente NOVO — fora da transação (é chamada HTTP).
+  if (res.novo && res.usuarioId) {
+    try {
+      const admin = supabaseAdmin();
+      const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
+        redirectTo: `${APP_URL}/definir-senha`,
+        data: { empresaId: res.empresaId, nome: input.nome ?? "", ciclo: input.ciclo ?? "" },
+      });
+      if (error) console.error("Supabase invite error:", error.message);
+      const authUserId = data?.user?.id ?? null;
+      if (authUserId) {
+        await prisma.usuario.update({ where: { id: res.usuarioId }, data: { authUserId } });
+        // empresa_id em app_metadata: é o claim que o RLS usa (usuário não edita).
+        await admin.auth.admin.updateUserById(authUserId, {
+          app_metadata: { empresa_id: res.empresaId },
+        });
+      }
+    } catch (e) {
+      console.error("Falha ao convidar usuário:", (e as Error).message);
+    }
   }
 
-  await prisma.usuario.create({
-    data: {
-      empresaId: empresa.id,
-      authUserId,
-      nome: input.nome?.trim() || "Responsável",
-      email,
-      papel: "admin",
-      ativo: true,
-    },
-  });
-
-  return { empresaId: empresa.id, novo: true };
+  return { empresaId: res.empresaId, novo: res.novo };
 }
 
 export async function bloquearAcesso(email: string): Promise<void> {

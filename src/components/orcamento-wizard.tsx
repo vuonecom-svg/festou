@@ -286,7 +286,7 @@ export function OrcamentoWizard({
           </div>
 
           <div className="mt-4 space-y-2">
-            <SubmitButton className="w-full">Criar orçamento</SubmitButton>
+            <SubmitButton className="w-full" disabled={!podeEnviar}>Criar orçamento</SubmitButton>
             {!podeEnviar && (
               <p className="text-xs text-muted text-center">Selecione cliente, data e ao menos um brinquedo.</p>
             )}

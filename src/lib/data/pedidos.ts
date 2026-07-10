@@ -112,17 +112,20 @@ export async function getPedido(id: string): Promise<Pedido | null> {
   return row ? toDTO(row) : null;
 }
 
+// Arredonda para centavos (evita 0.01 residual / falha no "quitado" por float).
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
 export async function registrarPagamento(id: string, valor: number): Promise<Pedido | null> {
   const empresaId = await getCurrentEmpresaId();
   const p = await prisma.pedido.findFirst({ where: { id, empresaId } });
   if (!p) return null;
-  const total = Number(p.total);
-  const sinalPago = Math.min(total, Number(p.sinalPago) + valor);
+  const total = round2(Number(p.total));
+  const sinalPago = round2(Math.min(total, Number(p.sinalPago) + valor));
   await prisma.pedido.update({
     where: { id },
     data: {
       sinalPago,
-      valorRestante: Math.max(0, total - sinalPago),
+      valorRestante: round2(Math.max(0, total - sinalPago)),
       statusFinanceiro: statusFin(total, sinalPago),
     },
   });
@@ -146,4 +149,20 @@ export async function pedidoStats() {
     aReceber: Number(agg._sum.valorRestante ?? 0),
     faturamento: Number(agg._sum.total ?? 0),
   };
+}
+
+/** Financeiro do dashboard: faturamento do mês corrente + nº de pedidos com
+ *  pagamento pendente — agregado no banco. */
+export async function dashboardFinanceiro(agora: Date) {
+  const empresaId = await getCurrentEmpresaId();
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  const inicioProxMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+  const [fat, pendentes] = await Promise.all([
+    prisma.pedido.aggregate({
+      where: { empresaId, dataEvento: { gte: inicioMes, lt: inicioProxMes } },
+      _sum: { total: true },
+    }),
+    prisma.pedido.count({ where: { empresaId, valorRestante: { gt: 0 } } }),
+  ]);
+  return { faturamentoMes: Number(fat._sum.total ?? 0), pagamentosPendentes: pendentes };
 }

@@ -1,8 +1,9 @@
-// Agregações de relatórios a partir dos pedidos (e orçamentos p/ conversão).
+// Agregações de relatórios — feitas no BANCO (aggregate/count/GROUP BY),
+// não carregando o histórico inteiro para a memória.
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { listPedidos } from "./pedidos";
-import { listOrcamentos } from "./orcamentos";
+import { prisma } from "@/lib/prisma";
+import { getCurrentEmpresaId } from "@/lib/tenant";
 
 export type LinhaRanking = { nome: string; qtd: number; total: number };
 export type BarraMes = { chave: string; label: string; total: number };
@@ -20,59 +21,58 @@ export type Relatorios = {
   conversao: { orcamentos: number; convertidos: number; taxa: number | null };
 };
 
-export async function gerarRelatorios(): Promise<Relatorios> {
-  const [pedidos, orcamentos] = await Promise.all([listPedidos(), listOrcamentos()]);
+type RankRow = { nome: string; qtd: number; total: number };
 
-  const faturamentoTotal = pedidos.reduce((s, p) => s + p.total, 0);
-  const recebido = pedidos.reduce((s, p) => s + p.sinalPago, 0);
-  const aReceber = pedidos.reduce((s, p) => s + p.valorRestante, 0);
-  const qtdPedidos = pedidos.length;
+export async function gerarRelatorios(): Promise<Relatorios> {
+  const empresaId = await getCurrentEmpresaId();
+
+  const [tot, orcTotal, convertidos, porMesRows, brinqRows, cliRows, cidRows] = await Promise.all([
+    prisma.pedido.aggregate({
+      where: { empresaId },
+      _sum: { total: true, sinalPago: true, valorRestante: true },
+      _count: { _all: true },
+    }),
+    prisma.orcamento.count({ where: { empresaId } }),
+    prisma.orcamento.count({ where: { empresaId, pedido: { isNot: null } } }),
+    prisma.$queryRaw<{ chave: string; total: number }[]>`
+      SELECT to_char(date_trunc('month', data_evento), 'YYYY-MM') AS chave,
+             SUM(total)::float8 AS total
+      FROM pedido WHERE empresa_id = ${empresaId}::uuid
+      GROUP BY 1 ORDER BY 1`,
+    prisma.$queryRaw<RankRow[]>`
+      SELECT oi.descricao AS nome, SUM(oi.qtd)::int AS qtd, SUM(oi.valor_total)::float8 AS total
+      FROM orcamento_item oi
+      JOIN pedido p ON p.orcamento_id = oi.orcamento_id
+      WHERE p.empresa_id = ${empresaId}::uuid AND oi.descricao IS NOT NULL
+      GROUP BY oi.descricao ORDER BY total DESC LIMIT 6`,
+    prisma.$queryRaw<RankRow[]>`
+      SELECT c.nome AS nome, COUNT(*)::int AS qtd, SUM(p.total)::float8 AS total
+      FROM pedido p JOIN cliente c ON c.id = p.cliente_id
+      WHERE p.empresa_id = ${empresaId}::uuid
+      GROUP BY c.nome ORDER BY total DESC LIMIT 6`,
+    prisma.$queryRaw<RankRow[]>`
+      SELECT COALESCE(e.cidade, '—') AS nome, COUNT(*)::int AS qtd, SUM(p.total)::float8 AS total
+      FROM pedido p LEFT JOIN endereco_evento e ON e.id = p.endereco_evento_id
+      WHERE p.empresa_id = ${empresaId}::uuid
+      GROUP BY COALESCE(e.cidade, '—') ORDER BY total DESC LIMIT 6`,
+  ]);
+
+  const faturamentoTotal = Number(tot._sum.total ?? 0);
+  const recebido = Number(tot._sum.sinalPago ?? 0);
+  const aReceber = Number(tot._sum.valorRestante ?? 0);
+  const qtdPedidos = tot._count._all;
   const ticketMedio = qtdPedidos ? faturamentoTotal / qtdPedidos : 0;
 
-  // Faturamento por mês (pela data do evento)
-  const mesMap = new Map<string, number>();
-  for (const p of pedidos) {
-    if (!p.dataEvento) continue;
-    const chave = p.dataEvento.slice(0, 7); // yyyy-mm
-    mesMap.set(chave, (mesMap.get(chave) ?? 0) + p.total);
-  }
-  const porMes: BarraMes[] = [...mesMap.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([chave, total]) => ({
-      chave,
-      label: format(parseISO(chave + "-01"), "LLL/yy", { locale: ptBR }),
-      total,
-    }));
+  const porMes: BarraMes[] = porMesRows.map((m) => ({
+    chave: m.chave,
+    label: format(parseISO(m.chave + "-01"), "LLL/yy", { locale: ptBR }),
+    total: Number(m.total),
+  }));
 
-  // Rankings
-  const brinqMap = new Map<string, LinhaRanking>();
-  const cliMap = new Map<string, LinhaRanking>();
-  const cidMap = new Map<string, LinhaRanking>();
+  const norm = (rows: RankRow[]): LinhaRanking[] =>
+    rows.map((r) => ({ nome: r.nome, qtd: Number(r.qtd), total: Number(r.total) }));
 
-  for (const p of pedidos) {
-    for (const it of p.itens) {
-      const r = brinqMap.get(it.nome) ?? { nome: it.nome, qtd: 0, total: 0 };
-      r.qtd += it.qtd;
-      r.total += it.valorTotal;
-      brinqMap.set(it.nome, r);
-    }
-    const c = cliMap.get(p.clienteNome) ?? { nome: p.clienteNome, qtd: 0, total: 0 };
-    c.qtd += 1;
-    c.total += p.total;
-    cliMap.set(p.clienteNome, c);
-
-    const cidade = p.cidade || "—";
-    const ci = cidMap.get(cidade) ?? { nome: cidade, qtd: 0, total: 0 };
-    ci.qtd += 1;
-    ci.total += p.total;
-    cidMap.set(cidade, ci);
-  }
-
-  const ordena = (m: Map<string, LinhaRanking>) =>
-    [...m.values()].sort((a, b) => b.total - a.total);
-
-  const convertidos = orcamentos.filter((o) => o.status === "convertido").length;
-  const taxa = orcamentos.length ? convertidos / orcamentos.length : null;
+  const taxa = orcTotal ? convertidos / orcTotal : null;
 
   return {
     faturamentoTotal,
@@ -81,9 +81,9 @@ export async function gerarRelatorios(): Promise<Relatorios> {
     qtdPedidos,
     ticketMedio,
     porMes,
-    brinquedos: ordena(brinqMap),
-    clientes: ordena(cliMap),
-    cidades: ordena(cidMap),
-    conversao: { orcamentos: orcamentos.length, convertidos, taxa },
+    brinquedos: norm(brinqRows),
+    clientes: norm(cliRows),
+    cidades: norm(cidRows),
+    conversao: { orcamentos: orcTotal, convertidos, taxa },
   };
 }

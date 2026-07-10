@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, XCircle, CalendarSearch } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -39,9 +39,13 @@ export function VerificadorDisponibilidade({
   transporteMin?: number;
 }) {
   const [brinquedoId, setBrinquedoId] = useState(brinquedos[0]?.id ?? "");
-  const [data, setData] = useState("2026-07-05");
+  const [data, setData] = useState(""); // preenchido com "hoje" no cliente (evita data fixa/hydration mismatch)
   const [horaIni, setHoraIni] = useState("14:00");
   const [horaFim, setHoraFim] = useState("18:00");
+
+  useEffect(() => {
+    setData(new Date().toISOString().slice(0, 10));
+  }, []);
 
   const resultado = useMemo(() => {
     const b = brinquedos.find((x) => x.id === brinquedoId);

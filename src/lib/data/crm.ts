@@ -49,6 +49,9 @@ export async function listLeads(): Promise<Lead[]> {
 export async function createLead(input: { clienteId: string; origem: string; obs: string }): Promise<void> {
   const empresaId = await getCurrentEmpresaId();
   if (!input.clienteId) return;
+  // Segurança: o cliente precisa ser desta empresa.
+  const donoOk = await prisma.cliente.count({ where: { id: input.clienteId, empresaId } });
+  if (!donoOk) throw new Error("Cliente inválido.");
   await prisma.lead.create({
     data: { empresaId, clienteId: input.clienteId, origem: input.origem || null, etapa: "novo", obs: input.obs || null },
   });

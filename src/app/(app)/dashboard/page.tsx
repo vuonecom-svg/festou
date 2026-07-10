@@ -3,42 +3,31 @@ import {
   CalendarDays, CalendarRange, Truck, PackageCheck, Package, Wrench, Sparkles,
   Wallet, TrendingUp, AlertTriangle, Clock, User, MapPin,
 } from "lucide-react";
-import { format, parseISO, isSameDay, isWithinInterval, startOfDay, addDays, isSameMonth } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { StatCard } from "@/components/ui/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL } from "@/lib/utils";
 import { brinquedoStats } from "@/lib/data/brinquedos";
-import { listReservas, RESERVA_STATUS } from "@/lib/data/reservas";
-import { listPedidos, pedidoStats } from "@/lib/data/pedidos";
+import { dashboardEventos, RESERVA_STATUS } from "@/lib/data/reservas";
+import { pedidoStats, dashboardFinanceiro } from "@/lib/data/pedidos";
 import { orcamentoStats } from "@/lib/data/orcamentos";
 
 export default async function DashboardPage() {
   const agora = new Date();
-  const [brinq, reservas, pedidos, pStats, oStats] = await Promise.all([
+  const [brinq, eventos, fin, pStats, oStats] = await Promise.all([
     brinquedoStats(),
-    listReservas(),
-    listPedidos(),
+    dashboardEventos(agora),
+    dashboardFinanceiro(agora),
     pedidoStats(),
     orcamentoStats(),
   ]);
 
-  const hoje = reservas.filter((r) => isSameDay(parseISO(r.eventoInicio), agora));
-  const semana = reservas.filter((r) =>
-    isWithinInterval(parseISO(r.eventoInicio), { start: startOfDay(agora), end: addDays(agora, 7) })
-  );
-  const proximas = reservas
-    .filter((r) => parseISO(r.eventoInicio) >= startOfDay(agora))
-    .slice(0, 5);
-
-  const faturamentoMes = pedidos
-    .filter((p) => p.dataEvento && isSameMonth(parseISO(p.dataEvento + "T00:00"), agora))
-    .reduce((s, p) => s + p.total, 0);
-
-  const pagamentosPendentes = pedidos.filter((p) => p.valorRestante > 0);
+  const { hoje, semana, proximas } = eventos;
+  const { faturamentoMes, pagamentosPendentes } = fin;
 
   const alertas: { icon: typeof Wrench; tone: string; texto: string }[] = [];
-  if (pagamentosPendentes.length > 0)
-    alertas.push({ icon: Wallet, tone: "warning", texto: `${pagamentosPendentes.length} pedido(s) com pagamento pendente (${formatBRL(pStats.aReceber)})` });
+  if (pagamentosPendentes > 0)
+    alertas.push({ icon: Wallet, tone: "warning", texto: `${pagamentosPendentes} pedido(s) com pagamento pendente (${formatBRL(pStats.aReceber)})` });
   if (brinq.manutencao > 0)
     alertas.push({ icon: Wrench, tone: "warning", texto: `${brinq.manutencao} brinquedo(s) em manutenção — indisponíveis para locação` });
   if (brinq.limpeza > 0)
@@ -57,10 +46,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Eventos hoje" value={hoje.length} icon={CalendarDays} />
-        <StatCard label="Eventos na semana" value={semana.length} icon={CalendarRange} tone="info" />
+        <StatCard label="Eventos hoje" value={hoje} icon={CalendarDays} />
+        <StatCard label="Eventos na semana" value={semana} icon={CalendarRange} tone="info" />
         <StatCard label="Faturamento do mês" value={formatBRL(faturamentoMes)} icon={TrendingUp} tone="success" />
-        <StatCard label="A receber" value={formatBRL(pStats.aReceber)} hint={`${pagamentosPendentes.length} pendentes`} icon={Wallet} tone="warning" />
+        <StatCard label="A receber" value={formatBRL(pStats.aReceber)} hint={`${pagamentosPendentes} pendentes`} icon={Wallet} tone="warning" />
       </section>
 
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">

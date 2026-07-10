@@ -6,7 +6,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function entrarAction(fd: FormData) {
   const email = String(fd.get("email") ?? "").trim();
   const senha = String(fd.get("senha") ?? "");
-  const next = String(fd.get("next") ?? "/dashboard") || "/dashboard";
+  // Só aceita caminho interno — evita open-redirect (?next=https://evil.com ou //evil.com).
+  const nextRaw = String(fd.get("next") ?? "/dashboard");
+  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/dashboard";
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });

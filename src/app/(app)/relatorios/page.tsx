@@ -56,7 +56,7 @@ export default async function RelatoriosPage() {
           </div>
           {r.conversao.taxa == null ? (
             <p className="text-sm text-muted">
-              Ainda não há orçamentos criados nesta sessão. Crie orçamentos e converta em pedidos para ver a taxa aqui.
+              Ainda não há orçamentos cadastrados. Crie orçamentos e converta em pedidos para ver a taxa de conversão aqui.
             </p>
           ) : (
             <div>
@@ -70,7 +70,7 @@ export default async function RelatoriosPage() {
       </section>
 
       <p className="text-xs text-muted text-center">
-        Dados de exemplo (pré-Supabase). Ao conectar o banco, estes números passam a refletir sua operação real.
+        Os números refletem sua operação em tempo real, com base nos pedidos e orçamentos cadastrados.
       </p>
     </div>
   );

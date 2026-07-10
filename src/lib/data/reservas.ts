@@ -96,6 +96,25 @@ export async function reservasParaEngine() {
   return listReservas();
 }
 
+/** Dados de agenda do dashboard: contagens + próximos 5 (tudo no banco, sem
+ *  carregar a tabela inteira). */
+export async function dashboardEventos(agora: Date) {
+  const empresaId = await getCurrentEmpresaId();
+  const inicioHoje = new Date(agora); inicioHoje.setHours(0, 0, 0, 0);
+  const inicioAmanha = new Date(inicioHoje); inicioAmanha.setDate(inicioAmanha.getDate() + 1);
+  const fimSemana = new Date(inicioHoje); fimSemana.setDate(fimSemana.getDate() + 7);
+
+  const [hoje, semana, proximasRows] = await Promise.all([
+    prisma.reservaItem.count({ where: { empresaId, pedido: { dataEvento: { gte: inicioHoje, lt: inicioAmanha } } } }),
+    prisma.reservaItem.count({ where: { empresaId, pedido: { dataEvento: { gte: inicioHoje, lt: fimSemana } } } }),
+    prisma.reservaItem.findMany({
+      where: { empresaId, pedido: { dataEvento: { gte: inicioHoje } } },
+      include, orderBy: { janelaInicio: "asc" }, take: 5,
+    }),
+  ]);
+  return { hoje, semana, proximas: proximasRows.map(toDTO) };
+}
+
 /** Reservas cruas (janela) para checagem de conflito de um brinquedo. */
 async function reservasDoBrinquedo(empresaId: string, brinquedoId: string, ignorarPedidoId?: string) {
   const rows = await prisma.reservaItem.findMany({

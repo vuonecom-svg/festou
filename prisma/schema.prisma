@@ -618,6 +618,8 @@ model Pedido {
 
   @@unique([empresaId, numero])
   @@index([empresaId, dataEvento])
+  @@index([empresaId, criadoEm])
+  @@index([clienteId])
   @@map("pedido")
 }
 
@@ -639,6 +641,7 @@ model ReservaItem {
 
   @@index([brinquedoId, janelaInicio, janelaFim])
   @@index([empresaId])
+  @@index([pedidoId])
   @@map("reserva_item")
 }
 

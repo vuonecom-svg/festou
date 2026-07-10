@@ -65,7 +65,9 @@ export default async function EditarClientePage({
           </div>
         </div>
         <div className="card p-4 flex items-center justify-center text-center text-sm text-muted">
-          Histórico de locações aparece aqui quando o módulo de Pedidos estiver ligado.
+          {cliente.qtdEventos > 0
+            ? `${cliente.qtdEventos} ${cliente.qtdEventos === 1 ? "locação" : "locações"} · ${formatBRL(cliente.totalGasto)} em pedidos`
+            : "Este cliente ainda não tem locações registradas."}
         </div>
       </div>
 

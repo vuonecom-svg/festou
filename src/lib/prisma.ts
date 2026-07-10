@@ -6,7 +6,17 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL não definida — configure a variável de ambiente do banco.");
+}
+
+// Pool enxuto: em serverless cada instância atende ~1 requisição por vez,
+// então um pool grande só segura conexões ociosas contra o pooler do Supabase.
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  idleTimeoutMillis: 10_000,
+});
 
 export const prisma =
   globalForPrisma.prisma ??

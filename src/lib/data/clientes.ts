@@ -38,12 +38,13 @@ export type ClienteInput = Omit<Cliente, "id" | "criadoEm" | "qtdEventos" | "tot
 const include = {
   enderecos: { where: { tipo: "residencial" }, take: 1 },
   tags: true,
-  pedidos: { select: { total: true } },
+  _count: { select: { pedidos: true } },
 } satisfies Prisma.ClienteInclude;
 
 type ClienteRow = Prisma.ClienteGetPayload<{ include: typeof include }>;
 
-function toDTO(c: ClienteRow): Cliente {
+// totalGasto é somado no BANCO (não puxando todos os pedidos pra JS).
+function toDTO(c: ClienteRow, totalGasto: number): Cliente {
   const end = c.enderecos[0];
   return {
     id: c.id,
@@ -62,10 +63,15 @@ function toDTO(c: ClienteRow): Cliente {
     cep: end?.cep ?? "",
     complemento: end?.complemento ?? "",
     tags: c.tags.map((t) => t.tag).filter((t): t is ClienteTag => TAGS_VALIDAS.includes(t as ClienteTag)),
-    qtdEventos: c.pedidos.length,
-    totalGasto: c.pedidos.reduce((s, p) => s + Number(p.total), 0),
+    qtdEventos: c._count.pedidos,
+    totalGasto,
     criadoEm: c.criadoEm.toISOString(),
   };
+}
+
+async function totalGastoDe(clienteId: string): Promise<number> {
+  const agg = await prisma.pedido.aggregate({ where: { clienteId }, _sum: { total: true } });
+  return Number(agg._sum.total ?? 0);
 }
 
 function dadosCliente(input: ClienteInput) {
@@ -104,14 +110,18 @@ async function sincronizaTags(clienteId: string, tags: ClienteTag[]) {
 
 export async function listClientes(): Promise<Cliente[]> {
   const empresaId = await getCurrentEmpresaId();
-  const rows = await prisma.cliente.findMany({ where: { empresaId }, include, orderBy: { nome: "asc" } });
-  return rows.map(toDTO);
+  const [rows, totais] = await Promise.all([
+    prisma.cliente.findMany({ where: { empresaId }, include, orderBy: { nome: "asc" } }),
+    prisma.pedido.groupBy({ by: ["clienteId"], where: { empresaId }, _sum: { total: true } }),
+  ]);
+  const mapa = new Map(totais.map((t) => [t.clienteId, Number(t._sum.total ?? 0)]));
+  return rows.map((r) => toDTO(r, mapa.get(r.id) ?? 0));
 }
 
 export async function getCliente(id: string): Promise<Cliente | null> {
   const empresaId = await getCurrentEmpresaId();
   const row = await prisma.cliente.findFirst({ where: { id, empresaId }, include });
-  return row ? toDTO(row) : null;
+  return row ? toDTO(row, await totalGastoDe(id)) : null;
 }
 
 export async function createCliente(input: ClienteInput): Promise<Cliente> {
@@ -120,7 +130,7 @@ export async function createCliente(input: ClienteInput): Promise<Cliente> {
   await sincronizaEndereco(criado.id, input);
   await sincronizaTags(criado.id, input.tags);
   const row = await prisma.cliente.findUniqueOrThrow({ where: { id: criado.id }, include });
-  return toDTO(row);
+  return toDTO(row, 0);
 }
 
 export async function updateCliente(id: string, input: Partial<ClienteInput>): Promise<Cliente | null> {
@@ -128,13 +138,13 @@ export async function updateCliente(id: string, input: Partial<ClienteInput>): P
   const atualRow = await prisma.cliente.findFirst({ where: { id, empresaId }, include });
   if (!atualRow) return null;
 
-  const full: ClienteInput = { ...toDTO(atualRow), ...input };
+  const full: ClienteInput = { ...toDTO(atualRow, 0), ...input };
   await prisma.cliente.update({ where: { id }, data: dadosCliente(full) });
   await sincronizaEndereco(id, full);
   await sincronizaTags(id, full.tags);
 
   const row = await prisma.cliente.findUniqueOrThrow({ where: { id }, include });
-  return toDTO(row);
+  return toDTO(row, await totalGastoDe(id));
 }
 
 export async function deleteCliente(id: string): Promise<void> {
@@ -144,13 +154,14 @@ export async function deleteCliente(id: string): Promise<void> {
 
 export async function clienteStats() {
   const empresaId = await getCurrentEmpresaId();
-  const rows = await prisma.cliente.findMany({
-    where: { empresaId },
-    include: { tags: true, pedidos: { select: { total: true } } },
-  });
+  const [total, recorrentes, agg] = await Promise.all([
+    prisma.cliente.count({ where: { empresaId } }),
+    prisma.cliente.count({ where: { empresaId, tags: { some: { tag: "recorrente" } } } }),
+    prisma.pedido.aggregate({ where: { empresaId }, _sum: { total: true } }),
+  ]);
   return {
-    total: rows.length,
-    recorrentes: rows.filter((c) => c.tags.some((t) => t.tag === "recorrente")).length,
-    faturamentoTotal: rows.reduce((s, c) => s + c.pedidos.reduce((a, p) => a + Number(p.total), 0), 0),
+    total,
+    recorrentes,
+    faturamentoTotal: Number(agg._sum.total ?? 0),
   };
 }

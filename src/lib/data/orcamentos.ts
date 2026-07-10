@@ -111,6 +111,10 @@ export async function getOrcamento(id: string): Promise<Orcamento | null> {
 export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento> {
   const empresaId = await getCurrentEmpresaId();
 
+  // Segurança: o cliente precisa pertencer a ESTA empresa (não confia no id vindo do form).
+  const donoOk = await prisma.cliente.count({ where: { id: input.clienteId, empresaId } });
+  if (!donoOk) throw new Error("Cliente inválido.");
+
   // Resolve itens (nome/valor a partir do brinquedo)
   const itensData: Prisma.OrcamentoItemCreateWithoutOrcamentoInput[] = [];
   let subtotal = 0;
@@ -204,17 +208,19 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
 
   const numero = await proximoNumero("pedido", empresaId, 1000);
   const total = Number(o.total);
-  const sinalPago = Number(o.valorSinal);
 
   try {
     const pedido = await prisma.$transaction(async (tx) => {
+      // O "sinal" do orçamento é o valor ESPERADO — ainda não foi recebido.
+      // O pedido nasce aguardando sinal; o dinheiro real entra só via
+      // registrarPagamento (que cria o registro e ajusta o status).
       const ped = await tx.pedido.create({
         data: {
           empresaId, numero, orcamentoId: o.id, clienteId: o.clienteId,
           enderecoEventoId: o.enderecoEventoId, dataEvento: o.dataEvento,
           horaEntrega: o.horaEntrega, horaRetirada: o.horaRetirada,
-          total, sinalPago, valorRestante: Math.max(0, total - sinalPago),
-          statusFinanceiro: sinalPago >= total && total > 0 ? "quitado" : sinalPago > 0 ? "sinal_pago" : "aguardando_sinal",
+          total, sinalPago: 0, valorRestante: total,
+          statusFinanceiro: "aguardando_sinal",
           statusOperacional: "aguardando_separacao",
         },
       });
