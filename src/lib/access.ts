@@ -5,7 +5,7 @@
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://festou-chi.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
 
 export async function provisionarAcesso(input: {
   email: string;

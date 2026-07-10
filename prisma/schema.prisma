@@ -1,4 +1,4 @@
-// Festou — SaaS de gestão para locadoras de brinquedos e itens de festa.
+// FesFlow — SaaS de gestão para locadoras de brinquedos e itens de festa.
 // Multi-tenant: TODA tabela de negócio carrega empresa_id + RLS no Supabase.
 // Docs: https://pris.ly/d/prisma-schema
 

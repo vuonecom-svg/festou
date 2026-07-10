@@ -10,17 +10,17 @@ faça os passos abaixo (são nas suas contas — Kiwify, Supabase, Vercel).
 
 **Authentication → URL Configuration → Redirect URLs** — adicione:
 ```
-https://festou-chi.vercel.app/definir-senha
+https://fesflow.com.br/definir-senha
 ```
 
 **Authentication → Emails / SMTP** — configure um remetente SMTP (o e-mail padrão do
 Supabase tem limite baixo; para produção use Resend, SendGrid, Amazon SES, etc.).
 
 ## 2. Kiwify
-- Crie **3 assinaturas** com **30 dias grátis + cartão**:
-  - Mensal R$ 44,90 · Semestral R$ 239,40 · Anual R$ 358,80
+- Crie **3 assinaturas** (cartão, Pix, boleto):
+  - Mensal — 1ª cobrança R$ 5,00, depois R$ 44,90/mês · Semestral R$ 239,40 · Anual R$ 358,80
 - **Configurações → Webhooks → Adicionar webhook**:
-  - URL: `https://festou-chi.vercel.app/api/webhooks/kiwify`
+  - URL: `https://fesflow.com.br/api/webhooks/kiwify`
   - Eventos: compra aprovada, assinatura renovada, reembolso, cancelamento, chargeback
   - Copie o **token do webhook**.
 - Copie os **3 links de checkout** e cole em `src/lib/site-content.ts` → `KIWIFY`
@@ -30,7 +30,7 @@ Supabase tem limite baixo; para produção use Resend, SendGrid, Amazon SES, etc
 ```
 NEXT_PUBLIC_SUPABASE_ANON_KEY = <anon do passo 1>
 SUPABASE_SERVICE_ROLE_KEY     = <service_role do passo 1>
-NEXT_PUBLIC_APP_URL           = https://festou-chi.vercel.app
+NEXT_PUBLIC_APP_URL           = https://fesflow.com.br
 KIWIFY_WEBHOOK_TOKEN          = <token do passo 2>
 AUTH_ENABLED                  = true
 ```

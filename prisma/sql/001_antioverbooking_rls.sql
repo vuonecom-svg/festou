@@ -1,5 +1,5 @@
 -- ============================================================
--- Festou — Migração manual 001
+-- FesFlow — Migração manual 001
 -- (1) Anti-overbooking físico no banco (btree_gist EXCLUDE)
 -- (2) RLS multi-tenant por empresa_id
 -- ------------------------------------------------------------
@@ -71,7 +71,7 @@ begin
   end loop;
 end $$;
 
--- Observação: o backend do Festou acessa o banco via Prisma com a
+-- Observação: o backend do FesFlow acessa o banco via Prisma com a
 -- connection string do Postgres (role privilegiada), então aplica o
 -- escopo de empresa na aplicação. As policies RLS acima protegem os
 -- acessos diretos via PostgREST/Supabase client (ex.: catálogo público,

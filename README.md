@@ -1,4 +1,4 @@
-# 🎉 Festou
+# 🎉 FesFlow
 
 SaaS de gestão para **locadoras de brinquedos e itens de festa** (pula-pula, infláveis, cama elástica, tendas, mesas, cadeiras…).
 
