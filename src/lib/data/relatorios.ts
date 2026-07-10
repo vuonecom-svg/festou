@@ -37,23 +37,23 @@ export async function gerarRelatorios(): Promise<Relatorios> {
     prisma.$queryRaw<{ chave: string; total: number }[]>`
       SELECT to_char(date_trunc('month', data_evento), 'YYYY-MM') AS chave,
              SUM(total)::float8 AS total
-      FROM pedido WHERE empresa_id = ${empresaId}::uuid
+      FROM pedido WHERE empresa_id = ${empresaId}
       GROUP BY 1 ORDER BY 1`,
     prisma.$queryRaw<RankRow[]>`
       SELECT oi.descricao AS nome, SUM(oi.qtd)::int AS qtd, SUM(oi.valor_total)::float8 AS total
       FROM orcamento_item oi
       JOIN pedido p ON p.orcamento_id = oi.orcamento_id
-      WHERE p.empresa_id = ${empresaId}::uuid AND oi.descricao IS NOT NULL
+      WHERE p.empresa_id = ${empresaId} AND oi.descricao IS NOT NULL
       GROUP BY oi.descricao ORDER BY total DESC LIMIT 6`,
     prisma.$queryRaw<RankRow[]>`
       SELECT c.nome AS nome, COUNT(*)::int AS qtd, SUM(p.total)::float8 AS total
       FROM pedido p JOIN cliente c ON c.id = p.cliente_id
-      WHERE p.empresa_id = ${empresaId}::uuid
+      WHERE p.empresa_id = ${empresaId}
       GROUP BY c.nome ORDER BY total DESC LIMIT 6`,
     prisma.$queryRaw<RankRow[]>`
       SELECT COALESCE(e.cidade, '—') AS nome, COUNT(*)::int AS qtd, SUM(p.total)::float8 AS total
       FROM pedido p LEFT JOIN endereco_evento e ON e.id = p.endereco_evento_id
-      WHERE p.empresa_id = ${empresaId}::uuid
+      WHERE p.empresa_id = ${empresaId}
       GROUP BY COALESCE(e.cidade, '—') ORDER BY total DESC LIMIT 6`,
   ]);
 
