@@ -36,9 +36,28 @@ export function BrinquedoForm({
           <Field label="Descrição" htmlFor="descricao" className="sm:col-span-2">
             <textarea id="descricao" name="descricao" defaultValue={b?.descricao} className={textareaClass} placeholder="Detalhes para o cliente…" />
           </Field>
-          <Field label="URL da foto" htmlFor="fotoUrl" hint="Upload de imagem chega com o Supabase Storage" className="sm:col-span-2">
-            <input id="fotoUrl" name="fotoUrl" defaultValue={b?.fotoUrl} className={inputClass} placeholder="https://…" />
-          </Field>
+          <div className="sm:col-span-2">
+            <span className="block text-sm font-medium mb-1.5">Foto do brinquedo</span>
+            <div className="flex items-start gap-4">
+              <div className="h-20 w-20 shrink-0 rounded-lg border border-border bg-background grid place-items-center overflow-hidden">
+                {b?.fotoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={b.fotoUrl} alt="Foto atual" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-xs text-muted">sem foto</span>
+                )}
+              </div>
+              <div className="flex-1 space-y-3">
+                <Field label="Enviar imagem (PNG/JPG, até 6 MB)" htmlFor="fotoFile">
+                  <input id="fotoFile" name="fotoFile" type="file" accept="image/*"
+                    className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-fg file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/90" />
+                </Field>
+                <Field label="…ou cole o link de uma imagem" htmlFor="fotoUrl">
+                  <input id="fotoUrl" name="fotoUrl" defaultValue={b?.fotoUrl} className={inputClass} placeholder="https://…" />
+                </Field>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

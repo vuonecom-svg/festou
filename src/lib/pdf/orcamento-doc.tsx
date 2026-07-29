@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Empresa } from "@/lib/data/empresa";
@@ -50,11 +50,16 @@ export function OrcamentoDoc({
     <Document title={`Orçamento ${o.numero}`}>
       <Page size="A4" style={s.page}>
         <View style={s.header}>
-          <View>
-            <Text style={s.empresaNome}>{empresa.nome}</Text>
-            <Text style={s.muted}>{empresa.cnpj}</Text>
-            <Text style={s.muted}>{empresa.telefone} · {empresa.email}</Text>
-            <Text style={s.muted}>{empresa.endereco}, {empresa.cidade}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {empresa.logoUrl ? (
+              <Image src={empresa.logoUrl} style={{ width: 46, height: 46, objectFit: "contain", marginRight: 10 }} />
+            ) : null}
+            <View>
+              <Text style={s.empresaNome}>{empresa.nome}</Text>
+              <Text style={s.muted}>{empresa.cnpj}</Text>
+              <Text style={s.muted}>{empresa.telefone} · {empresa.email}</Text>
+              <Text style={s.muted}>{empresa.endereco}, {empresa.cidade}</Text>
+            </View>
           </View>
           <View>
             <Text style={s.docTitle}>ORÇAMENTO Nº {o.numero}</Text>

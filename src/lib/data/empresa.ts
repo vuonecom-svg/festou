@@ -12,6 +12,7 @@ export type Empresa = {
   endereco: string;
   cidade: string;
   responsavel: string;
+  logoUrl: string;
 };
 
 export async function getEmpresa(): Promise<Empresa> {
@@ -25,6 +26,7 @@ export async function getEmpresa(): Promise<Empresa> {
     endereco: e?.endereco ?? "",
     cidade: e?.cidade ?? "",
     responsavel: e?.responsavel ?? "",
+    logoUrl: e?.logoUrl ?? "",
   };
 }
 
@@ -40,6 +42,7 @@ export async function updateEmpresa(input: Partial<Empresa>): Promise<void> {
       endereco: input.endereco || null,
       cidade: input.cidade || null,
       responsavel: input.responsavel || null,
+      ...(input.logoUrl !== undefined ? { logoUrl: input.logoUrl || null } : {}),
     },
   });
 }

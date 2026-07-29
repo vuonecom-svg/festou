@@ -41,6 +41,30 @@ export default async function ConfiguracoesPage() {
             <input id="cidade" name="cidade" defaultValue={empresa.cidade} className={inputClass} placeholder="Indaiatuba/SP" />
           </Field>
         </div>
+
+        <div className="border-t border-border pt-4">
+          <SectionTitle>Logotipo (aparece nos orçamentos e contratos)</SectionTitle>
+          <div className="flex items-start gap-4">
+            <div className="h-20 w-20 shrink-0 rounded-lg border border-border bg-background grid place-items-center overflow-hidden">
+              {empresa.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={empresa.logoUrl} alt="Logo atual" className="h-full w-full object-contain" />
+              ) : (
+                <span className="text-xs text-muted text-center px-1">sem logo</span>
+              )}
+            </div>
+            <div className="flex-1 space-y-3">
+              <Field label="Enviar imagem (PNG/JPG, até 6 MB)" htmlFor="logoFile">
+                <input id="logoFile" name="logoFile" type="file" accept="image/*"
+                  className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-fg file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/90" />
+              </Field>
+              <Field label="…ou cole o link de uma imagem" htmlFor="logoUrl">
+                <input id="logoUrl" name="logoUrl" defaultValue={empresa.logoUrl} className={inputClass} placeholder="https://…" />
+              </Field>
+            </div>
+          </div>
+        </div>
+
         <SubmitButton>Salvar configurações</SubmitButton>
       </form>
 

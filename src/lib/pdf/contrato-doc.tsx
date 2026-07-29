@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Empresa } from "@/lib/data/empresa";
@@ -57,6 +57,9 @@ export function ContratoDoc({
   return (
     <Document title={`Contrato ${p.numero}`}>
       <Page size="A4" style={s.page}>
+        {empresa.logoUrl ? (
+          <Image src={empresa.logoUrl} style={{ width: 54, height: 54, objectFit: "contain", alignSelf: "center", marginBottom: 6 }} />
+        ) : null}
         <Text style={s.title}>CONTRATO DE LOCAÇÃO DE BRINQUEDOS</Text>
         <Text style={s.sub}>Nº {p.numero} · {empresa.nome}</Text>
 

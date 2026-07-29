@@ -10,6 +10,7 @@ import {
   type BrinquedoInput,
   type BrinquedoStatus,
 } from "@/lib/data/brinquedos";
+import { uploadImagem } from "@/lib/upload";
 
 // ── helpers de parsing do FormData ──────────────────────────
 function str(fd: FormData, key: string) {
@@ -64,13 +65,21 @@ function parse(fd: FormData): BrinquedoInput {
 }
 
 export async function createBrinquedoAction(fd: FormData) {
-  await createBrinquedo(parse(fd));
+  const input = parse(fd);
+  const arquivo = fd.get("fotoFile");
+  const enviado = arquivo instanceof File ? await uploadImagem(arquivo, "brinquedos") : null;
+  if (enviado) input.fotoUrl = enviado;
+  await createBrinquedo(input);
   revalidatePath("/brinquedos");
   redirect("/brinquedos");
 }
 
 export async function updateBrinquedoAction(id: string, fd: FormData) {
-  await updateBrinquedo(id, parse(fd));
+  const input = parse(fd);
+  const arquivo = fd.get("fotoFile");
+  const enviado = arquivo instanceof File ? await uploadImagem(arquivo, "brinquedos") : null;
+  if (enviado) input.fotoUrl = enviado;
+  await updateBrinquedo(id, input);
   revalidatePath("/brinquedos");
   revalidatePath(`/brinquedos/${id}`);
   redirect("/brinquedos");
