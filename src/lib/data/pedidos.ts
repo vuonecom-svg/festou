@@ -5,6 +5,9 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
+import { janelaBloqueio } from "../disponibilidade";
+import { buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
+import { getBrinquedo } from "./brinquedos";
 
 export type PedidoStatusFin = "aguardando_sinal" | "sinal_pago" | "quitado";
 export type PedidoStatusOp =
@@ -135,6 +138,66 @@ export async function registrarPagamento(id: string, valor: number): Promise<Ped
 export async function avancarStatusOperacional(id: string, status: PedidoStatusOp): Promise<void> {
   const empresaId = await getCurrentEmpresaId();
   await prisma.pedido.updateMany({ where: { id, empresaId }, data: { statusOperacional: status } });
+}
+
+/** Exclui a locação. As reservas (reserva_item) e pagamentos caem em cascata,
+ *  liberando a agenda. O orçamento de origem volta a ficar sem pedido. */
+export async function deletePedido(id: string): Promise<void> {
+  const empresaId = await getCurrentEmpresaId();
+  await prisma.pedido.deleteMany({ where: { id, empresaId } });
+}
+
+/** Remarca a locação (data + horários), recalculando as janelas de bloqueio de
+ *  cada reserva e checando conflito (ignora as próprias reservas). */
+export async function reagendarPedido(
+  id: string,
+  dataEvento: string,
+  horaEntrega: string,
+  horaRetirada: string
+): Promise<{ ok: boolean; erro?: string }> {
+  const empresaId = await getCurrentEmpresaId();
+  const pedido = await prisma.pedido.findFirst({ where: { id, empresaId }, include: { reservaItens: true } });
+  if (!pedido) return { ok: false, erro: "Locação não encontrada." };
+  if (!dataEvento) return { ok: false, erro: "Informe a data do evento." };
+
+  const eventoInicio = new Date(`${dataEvento}T${horaEntrega || "12:00"}:00Z`);
+  const eventoFim = new Date(`${dataEvento}T${horaRetirada || "18:00"}:00Z`);
+  if (isNaN(eventoInicio.getTime()) || isNaN(eventoFim.getTime()) || eventoFim <= eventoInicio) {
+    return { ok: false, erro: "Horário inválido (retirada deve ser após a entrega)." };
+  }
+
+  const updates: { id: string; janelaInicio: Date; janelaFim: Date }[] = [];
+  for (const ri of pedido.reservaItens) {
+    const b = await getBrinquedo(ri.brinquedoId);
+    if (!b) continue;
+    const jan = janelaBloqueio(eventoInicio, eventoFim, buffersDe(b, TRANSPORTE_PADRAO_MIN));
+    const conflito = await prisma.reservaItem.findFirst({
+      where: {
+        empresaId, brinquedoId: ri.brinquedoId, unidade: ri.unidade,
+        pedidoId: { not: id },
+        janelaInicio: { lt: jan.fim },
+        janelaFim: { gt: jan.inicio },
+      },
+      select: { id: true },
+    });
+    if (conflito) return { ok: false, erro: `${b.nome} já está reservado nesse novo horário.` };
+    updates.push({ id: ri.id, janelaInicio: jan.inicio, janelaFim: jan.fim });
+  }
+
+  await prisma.$transaction([
+    prisma.pedido.update({
+      where: { id },
+      data: {
+        dataEvento: new Date(`${dataEvento}T00:00:00Z`),
+        horaEntrega: horaEntrega || null,
+        horaRetirada: horaRetirada || null,
+      },
+    }),
+    ...updates.map((u) =>
+      prisma.reservaItem.update({ where: { id: u.id }, data: { janelaInicio: u.janelaInicio, janelaFim: u.janelaFim } })
+    ),
+  ]);
+  return { ok: true };
 }
 
 export async function pedidoStats() {

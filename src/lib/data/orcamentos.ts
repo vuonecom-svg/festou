@@ -206,8 +206,9 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
   if (o.itens.length === 0) throw new Error("Orçamento sem brinquedos.");
 
   const dia = o.dataEvento.toISOString().slice(0, 10);
-  const eventoInicio = new Date(`${dia}T${o.horaEntrega || "12:00"}:00`);
-  const eventoFim = new Date(`${dia}T${o.horaRetirada || "18:00"}:00`);
+  // Hora do evento em UTC (base única cliente/servidor) — evita conflito falso por fuso.
+  const eventoInicio = new Date(`${dia}T${o.horaEntrega || "12:00"}:00Z`);
+  const eventoFim = new Date(`${dia}T${o.horaRetirada || "18:00"}:00Z`);
   if (eventoFim <= eventoInicio) throw new Error("Horário do evento inválido (retirada deve ser após a entrega).");
 
   // Pré-checagem (mensagem amigável) + coleta das janelas de bloqueio.

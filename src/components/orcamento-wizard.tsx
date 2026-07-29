@@ -71,8 +71,10 @@ export function OrcamentoWizard({
   // janela válida?
   const janela = useMemo(() => {
     if (!dataEvento || !horaEntrega || !horaRetirada) return null;
-    const ini = new Date(`${dataEvento}T${horaEntrega}`);
-    const fim = new Date(`${dataEvento}T${horaRetirada}`);
+    // Interpreta a hora do evento como UTC (mesma base do servidor/janelas salvas)
+    // para não somar o offset do fuso do navegador e gerar conflito falso.
+    const ini = new Date(`${dataEvento}T${horaEntrega}:00Z`);
+    const fim = new Date(`${dataEvento}T${horaRetirada}:00Z`);
     if (isNaN(ini.getTime()) || isNaN(fim.getTime()) || fim <= ini) return null;
     return { ini, fim };
   }, [dataEvento, horaEntrega, horaRetirada]);

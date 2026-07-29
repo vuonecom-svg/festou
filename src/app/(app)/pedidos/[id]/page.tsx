@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, CalendarCheck, CheckCircle2, FileSignature } from "lucide-react";
+import { ChevronLeft, CalendarCheck, CheckCircle2, FileSignature, Trash2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { inputClass } from "@/components/ui/form";
+import { ConfirmButton } from "@/components/confirm-button";
 import { getPedido, PEDIDO_FIN, PEDIDO_OP, type PedidoStatusOp } from "@/lib/data/pedidos";
 import { formatBRL } from "@/lib/utils";
-import { registrarPagamentoAction, avancarStatusAction } from "../actions";
+import { registrarPagamentoAction, avancarStatusAction, excluirPedidoAction, reagendarPedidoAction } from "../actions";
 
 const FLUXO_OP: PedidoStatusOp[] = [
   "aguardando_separacao",
@@ -20,15 +21,20 @@ const FLUXO_OP: PedidoStatusOp[] = [
 
 export default async function PedidoDetalhePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ erro?: string; ok?: string }>;
 }) {
   const { id } = await params;
+  const { erro, ok } = await searchParams;
   const p = await getPedido(id);
   if (!p) notFound();
 
   const pagar = registrarPagamentoAction.bind(null, id);
   const quitar = registrarPagamentoAction.bind(null, id);
+  const excluir = excluirPedidoAction.bind(null, id);
+  const remarcar = reagendarPedidoAction.bind(null, id);
 
   return (
     <div className="space-y-5">
@@ -44,15 +50,35 @@ export default async function PedidoDetalhePage({
           </div>
           <p className="text-sm text-muted">{p.clienteNome} · {p.cidade}</p>
         </div>
-        <a
-          href={`/pedidos/${p.id}/contrato`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 bg-primary text-primary-fg hover:bg-primary/90"
-        >
-          <FileSignature size={16} /> Gerar contrato (PDF)
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/pedidos/${p.id}/contrato`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 bg-primary text-primary-fg hover:bg-primary/90"
+          >
+            <FileSignature size={16} /> Gerar contrato (PDF)
+          </a>
+          <ConfirmButton
+            action={excluir}
+            confirm={`Excluir a locação #${p.numero}? Isso remove as reservas da agenda e não pode ser desfeito.`}
+            className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50"
+          >
+            <Trash2 size={16} /> Excluir
+          </ConfirmButton>
+        </div>
       </div>
+
+      {erro && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 flex items-center gap-2">
+          <AlertCircle size={16} /> {erro}
+        </div>
+      )}
+      {ok && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 flex items-center gap-2">
+          <CheckCircle2 size={16} /> Locação remarcada com sucesso.
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Itens */}
@@ -146,6 +172,32 @@ export default async function PedidoDetalhePage({
             <Link href={`/orcamentos/${p.orcamentoId}`} className="text-sm text-primary hover:underline mt-2 inline-block">
               Ver orçamento de origem
             </Link>
+
+            <details className="mt-4 border-t border-border pt-3 group">
+              <summary className="text-sm font-medium cursor-pointer text-foreground/80 hover:text-foreground select-none">
+                Editar / remarcar data e horário
+              </summary>
+              <form action={remarcar} className="mt-3 space-y-3">
+                <div>
+                  <label className="block text-xs text-muted mb-1">Data do evento</label>
+                  <input name="dataEvento" type="date" defaultValue={p.dataEvento} required className={inputClass} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs text-muted mb-1">Entrega</label>
+                    <input name="horaEntrega" type="time" defaultValue={p.horaEntrega} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-muted mb-1">Retirada</label>
+                    <input name="horaRetirada" type="time" defaultValue={p.horaRetirada} className={inputClass} />
+                  </div>
+                </div>
+                <button className="w-full h-9 rounded-lg text-sm font-medium bg-primary text-primary-fg hover:bg-primary/90">
+                  Salvar remarcação
+                </button>
+                <p className="text-xs text-muted">Reagenda as reservas na agenda e checa conflito no novo horário.</p>
+              </form>
+            </details>
           </div>
         </div>
       </div>

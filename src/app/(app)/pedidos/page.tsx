@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmButton } from "@/components/confirm-button";
 import { listPedidos, pedidoStats, PEDIDO_FIN, PEDIDO_OP } from "@/lib/data/pedidos";
 import { formatBRL } from "@/lib/utils";
+import { excluirPedidoAction } from "./actions";
 
 export default async function PedidosPage() {
   const [pedidos, stats] = await Promise.all([listPedidos(), pedidoStats()]);
@@ -45,6 +47,7 @@ export default async function PedidosPage() {
                   <th className="font-medium px-4 py-3 text-right">Restante</th>
                   <th className="font-medium px-4 py-3">Financeiro</th>
                   <th className="font-medium px-4 py-3">Operação</th>
+                  <th className="font-medium px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -61,6 +64,15 @@ export default async function PedidosPage() {
                     <td className="px-4 py-3 text-right tabular-nums">{formatBRL(p.valorRestante)}</td>
                     <td className="px-4 py-3"><Badge className={PEDIDO_FIN[p.statusFinanceiro].badge}>{PEDIDO_FIN[p.statusFinanceiro].label}</Badge></td>
                     <td className="px-4 py-3"><Badge className={PEDIDO_OP[p.statusOperacional].badge}>{PEDIDO_OP[p.statusOperacional].label}</Badge></td>
+                    <td className="px-4 py-3 text-right">
+                      <ConfirmButton
+                        action={excluirPedidoAction.bind(null, p.id)}
+                        confirm={`Excluir a locação #${p.numero}? Remove as reservas da agenda e não pode ser desfeito.`}
+                        className="text-rose-500 hover:text-rose-700"
+                      >
+                        <Trash2 size={16} />
+                      </ConfirmButton>
+                    </td>
                   </tr>
                 ))}
               </tbody>

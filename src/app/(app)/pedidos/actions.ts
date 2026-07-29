@@ -1,9 +1,12 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   registrarPagamento,
   avancarStatusOperacional,
+  deletePedido,
+  reagendarPedido,
   type PedidoStatusOp,
 } from "@/lib/data/pedidos";
 
@@ -19,4 +22,24 @@ export async function registrarPagamentoAction(id: string, fd: FormData) {
 export async function avancarStatusAction(id: string, status: PedidoStatusOp) {
   await avancarStatusOperacional(id, status);
   revalidatePath(`/pedidos/${id}`);
+}
+
+export async function excluirPedidoAction(id: string) {
+  await deletePedido(id);
+  revalidatePath("/pedidos");
+  revalidatePath("/agenda");
+  revalidatePath("/dashboard");
+  redirect("/pedidos");
+}
+
+export async function reagendarPedidoAction(id: string, fd: FormData) {
+  const dataEvento = String(fd.get("dataEvento") ?? "");
+  const horaEntrega = String(fd.get("horaEntrega") ?? "");
+  const horaRetirada = String(fd.get("horaRetirada") ?? "");
+  const r = await reagendarPedido(id, dataEvento, horaEntrega, horaRetirada);
+  revalidatePath(`/pedidos/${id}`);
+  revalidatePath("/pedidos");
+  revalidatePath("/agenda");
+  if (!r.ok) redirect(`/pedidos/${id}?erro=${encodeURIComponent(r.erro ?? "Falha ao remarcar")}`);
+  redirect(`/pedidos/${id}?ok=1`);
 }

@@ -52,8 +52,8 @@ export function VerificadorDisponibilidade({
   const resultado = useMemo(() => {
     const b = brinquedos.find((x) => x.id === brinquedoId);
     if (!b || !data || !horaIni || !horaFim) return null;
-    const inicio = new Date(`${data}T${horaIni}`);
-    const fim = new Date(`${data}T${horaFim}`);
+    const inicio = new Date(`${data}T${horaIni}:00Z`);
+    const fim = new Date(`${data}T${horaFim}:00Z`);
     if (isNaN(inicio.getTime()) || isNaN(fim.getTime()) || fim <= inicio) {
       return { erro: "Horário de término deve ser depois do início." };
     }
