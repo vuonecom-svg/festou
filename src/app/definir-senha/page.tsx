@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { inputClass } from "@/components/ui/form";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { concluirTrocaSenha } from "@/app/trocar-senha/actions";
 
 type Supa = ReturnType<typeof createSupabaseBrowserClient>;
 
@@ -58,6 +59,7 @@ export default function DefinirSenhaPage() {
     setStatus("salvando");
     const { error } = await supa.auth.updateUser({ password: senha });
     if (error) { setMsg(error.message); setStatus("erro"); return; }
+    await concluirTrocaSenha();
     setStatus("ok");
     setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
   }

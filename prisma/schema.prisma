@@ -252,6 +252,7 @@ model Usuario {
   telefone   String?
   papel      UserRole @default(atendente)
   ativo      Boolean  @default(true)
+  trocarSenha Boolean @default(false) @map("trocar_senha") // senha temporária: obriga troca no 1º acesso
   criadoEm   DateTime @default(now()) @map("criado_em")
 
   empresa           Empresa           @relation(fields: [empresaId], references: [id], onDelete: Cascade)

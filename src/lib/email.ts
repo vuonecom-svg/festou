@@ -32,37 +32,59 @@ export async function enviarEmail(to: string, subject: string, html: string): Pr
   }
 }
 
-// E-mail de boas-vindas com o link para o cliente criar a senha e entrar.
-export async function enviarEmailBoasVindas(to: string, nome: string, link: string): Promise<boolean> {
-  const saud = nome ? `Olá, ${nome}!` : "Olá!";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
+
+// E-mail de boas-vindas com a marca FesFlow + senha temporária.
+export async function enviarEmailBoasVindas(to: string, nome: string, senhaTemp: string): Promise<boolean> {
+  const saud = nome ? `Bem-vindo(a), ${nome}!` : "Bem-vindo(a) ao FesFlow!";
   const html = `
-  <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;color:#0f172a">
-    <div style="background:#0b1b33;border-radius:14px;padding:22px;text-align:center">
-      <span style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-.5px">FesFlow</span>
-    </div>
-    <div style="padding:24px 6px">
-      <h1 style="font-size:20px;margin:0 0 8px">${saud}</h1>
-      <p style="font-size:15px;line-height:1.6;color:#334155;margin:0 0 16px">
-        Seu acesso ao <strong>FesFlow</strong> está pronto. Clique no botão abaixo para
-        <strong>criar sua senha</strong> e entrar na plataforma.
-      </p>
-      <p style="text-align:center;margin:24px 0">
-        <a href="${link}" style="display:inline-block;background:#06b6b4;color:#052e2b;font-weight:800;
-           text-decoration:none;padding:13px 26px;border-radius:28px;font-size:16px">
-          Criar minha senha
-        </a>
-      </p>
-      <p style="font-size:13px;color:#64748b;line-height:1.6;margin:16px 0 0">
-        Se o botão não funcionar, copie e cole este link no navegador:<br>
-        <span style="word-break:break-all;color:#0ea5a4">${link}</span>
-      </p>
-      <p style="font-size:13px;color:#64748b;margin:22px 0 0">
-        Precisa de ajuda? Fale com a gente no WhatsApp (19) 98376-0954.
-      </p>
-    </div>
-    <div style="text-align:center;color:#94a3b8;font-size:12px;padding:8px 0 0">
-      FesFlow — gestão para locadoras de brinquedos.
+  <div style="background:#eef2f7;padding:24px 12px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+    <div style="max-width:540px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(11,27,51,.08)">
+      <!-- Cabeçalho com a marca -->
+      <div style="background:linear-gradient(120deg,#0b1b33 0%,#1e1b4b 55%,#2b1b4e 100%);padding:30px 28px;text-align:center">
+        <div style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:#ffffff">Fes<span style="color:#22d3ee">Flow</span></div>
+        <div style="font-size:12px;color:#a9b6d6;margin-top:4px;letter-spacing:2px;text-transform:uppercase">Gestão para locadoras de festa</div>
+      </div>
+
+      <div style="padding:30px 28px">
+        <h1 style="font-size:22px;margin:0 0 10px;color:#0b1b33">${saud} 🎉</h1>
+        <p style="font-size:15px;line-height:1.65;color:#475569;margin:0 0 20px">
+          Sua assinatura foi confirmada e sua conta já está ativa. Preparamos tudo para você
+          organizar sua agenda, orçamentos, contratos e financeiro — sem overbooking.
+        </p>
+
+        <!-- Senha temporária -->
+        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin:6px 0 22px">
+          <p style="margin:0 0 6px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Sua senha temporária</p>
+          <p style="margin:0;font-size:26px;font-weight:800;letter-spacing:2px;color:#0b1b33;font-family:'Courier New',monospace">${senhaTemp}</p>
+        </div>
+
+        <p style="font-size:15px;line-height:1.65;color:#475569;margin:0 0 22px">
+          Entre com seu e-mail e essa senha. No primeiro acesso, o sistema pede para você
+          <strong>criar a sua própria senha</strong>. Rapidinho. 🚀
+        </p>
+
+        <div style="text-align:center;margin:6px 0 8px">
+          <a href="${APP_URL}/entrar" style="display:inline-block;background:#06b6b4;color:#052e2b;font-weight:800;text-decoration:none;padding:14px 30px;border-radius:30px;font-size:16px">
+            Entrar no FesFlow
+          </a>
+        </div>
+        <p style="text-align:center;font-size:13px;color:#94a3b8;margin:10px 0 0">
+          Seu login: <strong style="color:#475569">${to}</strong>
+        </p>
+
+        <div style="border-top:1px solid #eef2f7;margin-top:26px;padding-top:16px">
+          <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0">
+            Precisa de ajuda? Fale com a gente no WhatsApp
+            <a href="https://wa.me/5519983760954" style="color:#0ea5a4;text-decoration:none">(19) 98376-0954</a>.
+          </p>
+        </div>
+      </div>
+
+      <div style="background:#0b1b33;padding:16px;text-align:center">
+        <span style="font-size:12px;color:#8ea0bf">FesFlow — do pedido à devolução, tudo flui. 🎈</span>
+      </div>
     </div>
   </div>`;
-  return enviarEmail(to, "Seu acesso ao FesFlow — crie sua senha", html);
+  return enviarEmail(to, "🎉 Bem-vindo ao FesFlow — seu acesso está pronto", html);
 }

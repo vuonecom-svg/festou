@@ -39,6 +39,8 @@ export const getCurrentEmpresaId = cache(async (): Promise<string> => {
     if (!u.ativo || status === "cancelada" || status === "inadimplente") {
       redirect("/acesso-bloqueado");
     }
+    // Senha temporária: obriga a troca antes de usar o sistema.
+    if (u.trocarSenha) redirect("/trocar-senha");
     return u.empresaId;
   }
 

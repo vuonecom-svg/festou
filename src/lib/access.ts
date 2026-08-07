@@ -2,6 +2,7 @@
 // Pagou → cria empresa + usuário + convite por e-mail (define senha).
 // Cancelou/atrasou → bloqueia o acesso.
 
+import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -10,32 +11,42 @@ import { enviarEmailBoasVindas } from "@/lib/email";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
 
-// Garante o login no Supabase Auth e envia o e-mail de acesso de forma RESILIENTE:
-// 1) cria o usuário via admin (sem e-mail/redirect — não falha por allowlist/SMTP);
-// 2) envia o link pelo SendGrid DIRETO (se houver SENDGRID_API_KEY);
-// 3) se não houver, faz fallback pelo SMTP do Supabase (já configurado com SendGrid).
+// Senha temporária legível (sem caracteres ambíguos: 0/O/1/l/I).
+function gerarSenhaTemp(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const bytes = crypto.randomBytes(10);
+  let s = "";
+  for (let i = 0; i < 10; i++) s += chars[bytes[i] % chars.length];
+  return s;
+}
+
+// Provisiona o login com SENHA TEMPORÁRIA e envia o e-mail bonito de boas-vindas
+// (SendGrid direto), marcando trocarSenha=true (força a troca no 1º acesso).
+// Fallback: se o SendGrid falhar (sem SENDGRID_API_KEY), envia link de definição
+// de senha pelo SMTP do Supabase — assim o cliente nunca fica sem acesso.
 async function garantirAuthEEmail(
   usuarioId: string, empresaId: string, email: string, nome: string
 ): Promise<void> {
   const admin = supabaseAdmin();
-  const redirectTo = `${APP_URL}/definir-senha`;
+  const senhaTemp = gerarSenhaTemp();
 
-  // 1) Cria o usuário (email_confirm evita depender do e-mail de confirmação).
+  // Cria o usuário com a senha temporária (e-mail já confirmado).
   let authUserId: string | null = null;
-  const criado = await admin.auth.admin.createUser({ email, email_confirm: true });
+  const criado = await admin.auth.admin.createUser({ email, password: senhaTemp, email_confirm: true });
   if (criado.data?.user) {
     authUserId = criado.data.user.id;
   } else {
-    // Já existe: recupera o id.
+    // Já existe no Auth: recupera o id e redefine a senha temporária.
     const rec = await admin.auth.admin.generateLink({ type: "recovery", email });
     authUserId = rec.data?.user?.id ?? null;
+    if (authUserId) await admin.auth.admin.updateUserById(authUserId, { password: senhaTemp });
   }
   if (!authUserId) {
     console.error("Não foi possível criar/achar o usuário Auth:", criado.error?.message);
     return;
   }
 
-  await prisma.usuario.update({ where: { id: usuarioId }, data: { authUserId } });
+  await prisma.usuario.update({ where: { id: usuarioId }, data: { authUserId, trocarSenha: true } });
   try {
     // empresa_id em app_metadata: claim que o RLS usa (usuário não edita).
     await admin.auth.admin.updateUserById(authUserId, { app_metadata: { empresa_id: empresaId } });
@@ -43,25 +54,17 @@ async function garantirAuthEEmail(
     console.error("updateUserById falhou:", (e as Error).message);
   }
 
-  // 2) Link de definição de senha — usa token_hash apontando pra NOSSA página
-  // (à prova de pré-clique: o token só é consumido quando o navegador roda o JS).
-  const g = await admin.auth.admin.generateLink({ type: "recovery", email, options: { redirectTo } });
-  const hashed = g.data?.properties?.hashed_token ?? null;
-  const link = hashed
-    ? `${APP_URL}/definir-senha?token_hash=${hashed}&type=recovery`
-    : (g.data?.properties?.action_link ?? null);
-
-  // 3) Envio: SendGrid direto; senão, SMTP do Supabase (resetPasswordForEmail).
-  let enviado = false;
-  if (link) enviado = await enviarEmailBoasVindas(email, nome, link);
+  // E-mail bonito com a senha temporária (SendGrid direto).
+  const enviado = await enviarEmailBoasVindas(email, nome, senhaTemp);
   if (!enviado) {
+    // Sem SendGrid: cai para o link de definição de senha (SMTP do Supabase).
+    console.error("Boas-vindas via SendGrid falhou (SENDGRID_API_KEY?) — fallback de link para", email);
     try {
       const anon = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
-      const { error } = await anon.auth.resetPasswordForEmail(email, { redirectTo });
-      if (error) console.error("Fallback resetPasswordForEmail falhou:", error.message);
+      await anon.auth.resetPasswordForEmail(email, { redirectTo: `${APP_URL}/definir-senha` });
     } catch (e) {
       console.error("Fallback de e-mail falhou:", (e as Error).message);
     }
