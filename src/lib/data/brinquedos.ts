@@ -5,6 +5,8 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
+import { auditar } from "@/lib/audit";
+import { usuarioAtualId } from "@/lib/rbac";
 
 export type BrinquedoStatus =
   | "disponivel"
@@ -227,6 +229,7 @@ export async function deleteBrinquedo(id: string): Promise<{ ok: boolean; erro?:
   }
   try {
     await prisma.brinquedo.deleteMany({ where: { id, empresaId } });
+    await auditar({ empresaId, usuarioId: await usuarioAtualId(), entidade: "brinquedo", entidadeId: id, acao: "excluir_brinquedo" });
     return { ok: true };
   } catch (e) {
     if (ehFkViolation(e)) {

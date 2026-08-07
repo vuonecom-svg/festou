@@ -1,25 +1,16 @@
-import crypto from "crypto";
 import { provisionarAcesso, bloquearAcesso } from "@/lib/access";
+import { verificarAssinaturaKiwify, classificarEvento } from "@/lib/kiwify";
 
 export const runtime = "nodejs";
-
-// Status que LIBERAM acesso e que BLOQUEIAM (Kiwify usa nomes variados).
-const LIBERAM = ["paid", "approved", "active", "authorized", "trialing", "completed"];
-const BLOQUEIAM = ["refunded", "chargedback", "chargeback", "canceled", "cancelled", "late", "overdue", "expired", "suspended"];
 
 export async function GET() {
   return Response.json({ ok: true, service: "kiwify-webhook" });
 }
 
-// Assinatura da Kiwify: HMAC-SHA1 do corpo com o token do webhook. Comparação
-// em tempo constante para não vazar o segredo por timing.
 function assinaturaValida(raw: string, req: Request, token: string): boolean {
   const url = new URL(req.url);
   const signature = url.searchParams.get("signature") ?? req.headers.get("x-kiwify-signature") ?? "";
-  const expected = crypto.createHmac("sha1", token).update(raw).digest("hex");
-  const a = Buffer.from(signature, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+  return verificarAssinaturaKiwify(raw, signature, token);
 }
 
 export async function POST(req: Request) {
@@ -68,11 +59,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    if (LIBERAM.some((s) => status.includes(s))) {
+    const evento = classificarEvento(status);
+    if (evento === "liberar") {
       const r = await provisionarAcesso({ email, nome, ciclo, gatewayRef });
       return Response.json({ ok: true, acao: "liberado", novo: r.novo });
     }
-    if (BLOQUEIAM.some((s) => status.includes(s))) {
+    if (evento === "bloquear") {
       await bloquearAcesso(email);
       return Response.json({ ok: true, acao: "bloqueado" });
     }

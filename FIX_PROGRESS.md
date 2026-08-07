@@ -34,7 +34,8 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 ### P3 — futuro (documentado, não bloqueante)
 - [~] Guarda de invariantes (`npm run db:check`) protege constraint+RLS de sumir; `prisma migrate` versionado completo ainda pendente
 - [x] RBAC mínimo: ações destrutivas (excluir pedido/orçamento/brinquedo) exigem admin/gerente; backfill garante 1 admin/empresa
-- [ ] billing/limites de plano aplicados; `AuditLog` gravado
+- [x] `AuditLog` gravado (eventos de dinheiro + exclusões)
+- [~] billing/limites de plano: **N/A** — produto é tier único (3 cobranças = mesmo "FesFlow Completo"); enforcar limites mudaria o escopo do produto
 - [ ] Paginação nas listas
 - [ ] Upgrade de deps (npm audit)
 - [ ] Módulo Rotas; onboarding pós-pagamento
@@ -75,3 +76,11 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 - `src/lib/__tests__/pagamento.test.ts` (7) — parcial, quitação, overpay limitado, já-quitado, valor<=0, arredondamento, dados sujos.
 - `scripts/check-db-invariants.mjs` + `npm run db:check`: falha se constraint anti-overbooking, RLS (7 tabelas) ou colunas de estoque sumirem. Passou contra prod.
 - RBAC mínimo: `src/lib/rbac.ts` (`papelAtual`/`podeGerir`); excluir pedido/orçamento/brinquedo exigem admin/gerente. Backfill em prod garantiu 1 admin por empresa (ninguém trancado).
+
+### Ciclo 6 — Endurecimento do webhook (dinheiro) + auditoria ✅ (44 testes)
+- `src/lib/kiwify.ts` (novo, puro): `verificarAssinaturaKiwify` (HMAC-SHA1 constant-time, fail-closed) + `classificarEvento` (liberar/bloquear/ignorar, **bloqueio tem prioridade**). Webhook `route.ts` refatorado para usá-lo.
+- **Correção**: `subscription_renewed` não reativava (não estava na lista) — adicionado a LIBERAM.
+- `src/lib/__tests__/kiwify.test.ts` (+22): assinatura válida/inválida/adulterada/token errado/vazio; classificação de paid/approved/renewed/refunded/chargeback/canceled/late/waiting; prioridade do bloqueio.
+- **AuditLog**: `src/lib/audit.ts` (`auditar`, best-effort) + `usuarioAtualId()` em rbac. Grava: provisionar/reativar/bloquear acesso (webhook), registrar_pagamento, excluir pedido/orçamento/brinquedo (com usuarioId). Nota: falta UI para VER os logs (follow-up).
+
+## Estado final: 6 ciclos, 44 testes, build/typecheck/db:check verdes. Todos P0/P1 resolvidos; P2/P3 restantes documentados acima.

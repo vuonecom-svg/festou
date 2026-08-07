@@ -9,6 +9,8 @@ import { getBrinquedo } from "./brinquedos";
 import { verificarBrinquedo, buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
 import { janelaBloqueio } from "../disponibilidade";
 import { precoUnitario, type OrcModo } from "../preco";
+import { auditar } from "../audit";
+import { usuarioAtualId } from "../rbac";
 
 export type OrcStatus =
   | "novo" | "enviado" | "aprovado" | "recusado" | "convertido" | "cancelado";
@@ -192,7 +194,10 @@ export async function setOrcamentoStatus(id: string, status: OrcStatus): Promise
 
 export async function deleteOrcamento(id: string): Promise<void> {
   const empresaId = await getCurrentEmpresaId();
-  await prisma.orcamento.deleteMany({ where: { id, empresaId, pedido: { is: null } } });
+  const del = await prisma.orcamento.deleteMany({ where: { id, empresaId, pedido: { is: null } } });
+  if (del.count > 0) {
+    await auditar({ empresaId, usuarioId: await usuarioAtualId(), entidade: "orcamento", entidadeId: id, acao: "excluir_orcamento" });
+  }
 }
 
 function ehConflito(e: unknown): boolean {

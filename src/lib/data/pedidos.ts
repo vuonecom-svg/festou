@@ -9,6 +9,8 @@ import { janelaBloqueio } from "../disponibilidade";
 import { buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
 import { getBrinquedo } from "./brinquedos";
 import { aplicarPagamento } from "../pagamento";
+import { auditar } from "../audit";
+import { usuarioAtualId } from "../rbac";
 
 export type PedidoStatusFin = "aguardando_sinal" | "sinal_pago" | "quitado";
 export type PedidoStatusOp =
@@ -154,6 +156,10 @@ export async function registrarPagamento(
       },
     }),
   ]);
+  await auditar({
+    empresaId, usuarioId: await usuarioAtualId(), entidade: "pedido", entidadeId: id,
+    acao: "registrar_pagamento", dados: { valor: r.recebido, forma: formaOk, tipo: r.tipo },
+  });
   return getPedido(id);
 }
 
@@ -166,7 +172,10 @@ export async function avancarStatusOperacional(id: string, status: PedidoStatusO
  *  liberando a agenda. O orçamento de origem volta a ficar sem pedido. */
 export async function deletePedido(id: string): Promise<void> {
   const empresaId = await getCurrentEmpresaId();
-  await prisma.pedido.deleteMany({ where: { id, empresaId } });
+  const del = await prisma.pedido.deleteMany({ where: { id, empresaId } });
+  if (del.count > 0) {
+    await auditar({ empresaId, usuarioId: await usuarioAtualId(), entidade: "pedido", entidadeId: id, acao: "excluir_pedido" });
+  }
 }
 
 /** Remarca a locação (data + horários), recalculando as janelas de bloqueio de

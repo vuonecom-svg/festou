@@ -4,6 +4,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { auditar } from "@/lib/audit";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
 
@@ -76,6 +77,13 @@ export async function provisionarAcesso(input: {
     }
   }
 
+  await auditar({
+    empresaId: res.empresaId,
+    entidade: "empresa",
+    entidadeId: res.empresaId,
+    acao: res.novo ? "provisionar_acesso" : "reativar_acesso",
+    dados: { email, ciclo: input.ciclo ?? "" },
+  });
   return { empresaId: res.empresaId, novo: res.novo };
 }
 
@@ -87,5 +95,13 @@ export async function bloquearAcesso(email: string): Promise<void> {
   await prisma.empresa.update({
     where: { id: u.empresaId },
     data: { statusAssinatura: "cancelada" },
+  });
+  await auditar({
+    empresaId: u.empresaId,
+    usuarioId: u.id,
+    entidade: "usuario",
+    entidadeId: u.id,
+    acao: "bloquear_acesso",
+    dados: { email: e },
   });
 }
