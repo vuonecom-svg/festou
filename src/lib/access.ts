@@ -43,9 +43,13 @@ async function garantirAuthEEmail(
     console.error("updateUserById falhou:", (e as Error).message);
   }
 
-  // 2) Link de definição de senha.
+  // 2) Link de definição de senha — usa token_hash apontando pra NOSSA página
+  // (à prova de pré-clique: o token só é consumido quando o navegador roda o JS).
   const g = await admin.auth.admin.generateLink({ type: "recovery", email, options: { redirectTo } });
-  const link = g.data?.properties?.action_link ?? null;
+  const hashed = g.data?.properties?.hashed_token ?? null;
+  const link = hashed
+    ? `${APP_URL}/definir-senha?token_hash=${hashed}&type=recovery`
+    : (g.data?.properties?.action_link ?? null);
 
   // 3) Envio: SendGrid direto; senão, SMTP do Supabase (resetPasswordForEmail).
   let enviado = false;

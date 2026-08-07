@@ -15,17 +15,38 @@ export default function DefinirSenhaPage() {
   const [msg, setMsg] = useState("");
   const supaRef = useRef<Supa | null>(null);
 
-  // Cria o cliente Supabase só no navegador (nunca no build/SSR).
+  // Cria o cliente Supabase só no navegador (nunca no build/SSR) e estabelece a
+  // sessão a partir do link do e-mail. Duas formas:
+  // 1) token_hash na query (?token_hash=..&type=recovery): verificamos AQUI, no
+  //    navegador (verifyOtp). Como o scanner do e-mail só faz GET e não roda
+  //    nosso JS, ele NÃO consome o token — resolve o "otp_expired" por pré-clique.
+  // 2) fluxo implícito (token no #hash): o cliente já cria a sessão sozinho.
   useEffect(() => {
+    let supa: Supa;
     try {
-      const supa = createSupabaseBrowserClient();
-      supaRef.current = supa;
-      supa.auth.getSession().then(({ data }) => {
-        if (!data.session) setStatus("semsessao");
-      });
+      supa = createSupabaseBrowserClient();
     } catch {
       setStatus("semsessao");
+      return;
     }
+    supaRef.current = supa;
+
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get("token_hash");
+      const type = params.get("type") ?? "recovery";
+      if (tokenHash) {
+        const { error } = await supa.auth.verifyOtp({
+          type: type as "recovery" | "invite" | "signup" | "email",
+          token_hash: tokenHash,
+        });
+        if (error) { setStatus("semsessao"); return; }
+        window.history.replaceState({}, "", "/definir-senha");
+        return;
+      }
+      const { data } = await supa.auth.getSession();
+      if (!data.session) setStatus("semsessao");
+    })();
   }, []);
 
   async function salvar(e: React.FormEvent) {
