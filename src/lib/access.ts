@@ -5,8 +5,39 @@
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { auditar } from "@/lib/audit";
+import { enviarEmailBoasVindas } from "@/lib/email";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
+
+// Garante o usuário no Supabase Auth e envia o e-mail de acesso PELO SENDGRID
+// (não pelo e-mail do Supabase, que é frágil). generateLink cria o usuário e
+// devolve o link SEM disparar e-mail; nós enviamos direto.
+async function garantirAuthEEmail(
+  usuarioId: string, empresaId: string, email: string, nome: string
+): Promise<void> {
+  const admin = supabaseAdmin();
+  const opts = { redirectTo: `${APP_URL}/definir-senha` };
+  // 1) invite (cria o usuário). Se já existir no Auth, cai para recovery.
+  let g = await admin.auth.admin.generateLink({ type: "invite", email, options: opts });
+  if (g.error && /register|exist/i.test(g.error.message)) {
+    g = await admin.auth.admin.generateLink({ type: "recovery", email, options: opts });
+  }
+  if (g.error || !g.data?.user) {
+    console.error("generateLink falhou:", g.error?.message);
+    return;
+  }
+  const authUserId = g.data.user.id;
+  const link = g.data.properties?.action_link ?? null;
+  await prisma.usuario.update({ where: { id: usuarioId }, data: { authUserId } });
+  try {
+    // empresa_id em app_metadata: claim que o RLS usa (usuário não edita).
+    await admin.auth.admin.updateUserById(authUserId, { app_metadata: { empresa_id: empresaId } });
+  } catch (e) {
+    console.error("updateUserById falhou:", (e as Error).message);
+  }
+  if (link) await enviarEmailBoasVindas(email, nome, link);
+  else console.error("action_link ausente — e-mail de acesso não enviado.");
+}
 
 export async function provisionarAcesso(input: {
   email: string;
@@ -25,13 +56,16 @@ export async function provisionarAcesso(input: {
 
     const existente = await tx.usuario.findFirst({ where: { email } });
     if (existente) {
-      // Já existe (renovação / reenvio) — apenas reativa.
+      // Já existe (renovação / reenvio) — reativa.
       await tx.usuario.updateMany({ where: { email }, data: { ativo: true } });
       await tx.empresa.update({
         where: { id: existente.empresaId },
         data: { statusAssinatura: "ativa" },
       });
-      return { empresaId: existente.empresaId, novo: false, usuarioId: null as string | null };
+      return {
+        empresaId: existente.empresaId, novo: false,
+        usuarioId: existente.id, temAuth: existente.authUserId != null,
+      };
     }
 
     // Novo cliente: cria a empresa isolada dele + o usuário admin.
@@ -52,28 +86,17 @@ export async function provisionarAcesso(input: {
         ativo: true,
       },
     });
-    return { empresaId: empresa.id, novo: true, usuarioId: usuario.id };
+    return { empresaId: empresa.id, novo: true, usuarioId: usuario.id, temAuth: false };
   });
 
-  // Convite por e-mail só para cliente NOVO — fora da transação (é chamada HTTP).
-  if (res.novo && res.usuarioId) {
+  // Cria o Auth + envia o e-mail (via SendGrid) sempre que o usuário ainda não
+  // tem login — cobre cliente novo E o que ficou sem auth por falha anterior
+  // (ex.: reenviar o webhook cura o cadastro).
+  if (res.usuarioId && !res.temAuth) {
     try {
-      const admin = supabaseAdmin();
-      const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-        redirectTo: `${APP_URL}/definir-senha`,
-        data: { empresaId: res.empresaId, nome: input.nome ?? "", ciclo: input.ciclo ?? "" },
-      });
-      if (error) console.error("Supabase invite error:", error.message);
-      const authUserId = data?.user?.id ?? null;
-      if (authUserId) {
-        await prisma.usuario.update({ where: { id: res.usuarioId }, data: { authUserId } });
-        // empresa_id em app_metadata: é o claim que o RLS usa (usuário não edita).
-        await admin.auth.admin.updateUserById(authUserId, {
-          app_metadata: { empresa_id: res.empresaId },
-        });
-      }
+      await garantirAuthEEmail(res.usuarioId, res.empresaId, email, input.nome?.trim() ?? "");
     } catch (e) {
-      console.error("Falha ao convidar usuário:", (e as Error).message);
+      console.error("Falha ao gerar acesso/enviar e-mail:", (e as Error).message);
     }
   }
 
