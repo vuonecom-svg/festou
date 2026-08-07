@@ -2,6 +2,7 @@
 // Pagou → cria empresa + usuário + convite por e-mail (define senha).
 // Cancelou/atrasou → bloqueia o acesso.
 
+import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { auditar } from "@/lib/audit";
@@ -9,25 +10,31 @@ import { enviarEmailBoasVindas } from "@/lib/email";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fesflow.com.br";
 
-// Garante o usuário no Supabase Auth e envia o e-mail de acesso PELO SENDGRID
-// (não pelo e-mail do Supabase, que é frágil). generateLink cria o usuário e
-// devolve o link SEM disparar e-mail; nós enviamos direto.
+// Garante o login no Supabase Auth e envia o e-mail de acesso de forma RESILIENTE:
+// 1) cria o usuário via admin (sem e-mail/redirect — não falha por allowlist/SMTP);
+// 2) envia o link pelo SendGrid DIRETO (se houver SENDGRID_API_KEY);
+// 3) se não houver, faz fallback pelo SMTP do Supabase (já configurado com SendGrid).
 async function garantirAuthEEmail(
   usuarioId: string, empresaId: string, email: string, nome: string
 ): Promise<void> {
   const admin = supabaseAdmin();
-  const opts = { redirectTo: `${APP_URL}/definir-senha` };
-  // 1) invite (cria o usuário). Se já existir no Auth, cai para recovery.
-  let g = await admin.auth.admin.generateLink({ type: "invite", email, options: opts });
-  if (g.error && /register|exist/i.test(g.error.message)) {
-    g = await admin.auth.admin.generateLink({ type: "recovery", email, options: opts });
+  const redirectTo = `${APP_URL}/definir-senha`;
+
+  // 1) Cria o usuário (email_confirm evita depender do e-mail de confirmação).
+  let authUserId: string | null = null;
+  const criado = await admin.auth.admin.createUser({ email, email_confirm: true });
+  if (criado.data?.user) {
+    authUserId = criado.data.user.id;
+  } else {
+    // Já existe: recupera o id.
+    const rec = await admin.auth.admin.generateLink({ type: "recovery", email });
+    authUserId = rec.data?.user?.id ?? null;
   }
-  if (g.error || !g.data?.user) {
-    console.error("generateLink falhou:", g.error?.message);
+  if (!authUserId) {
+    console.error("Não foi possível criar/achar o usuário Auth:", criado.error?.message);
     return;
   }
-  const authUserId = g.data.user.id;
-  const link = g.data.properties?.action_link ?? null;
+
   await prisma.usuario.update({ where: { id: usuarioId }, data: { authUserId } });
   try {
     // empresa_id em app_metadata: claim que o RLS usa (usuário não edita).
@@ -35,8 +42,26 @@ async function garantirAuthEEmail(
   } catch (e) {
     console.error("updateUserById falhou:", (e as Error).message);
   }
-  if (link) await enviarEmailBoasVindas(email, nome, link);
-  else console.error("action_link ausente — e-mail de acesso não enviado.");
+
+  // 2) Link de definição de senha.
+  const g = await admin.auth.admin.generateLink({ type: "recovery", email, options: { redirectTo } });
+  const link = g.data?.properties?.action_link ?? null;
+
+  // 3) Envio: SendGrid direto; senão, SMTP do Supabase (resetPasswordForEmail).
+  let enviado = false;
+  if (link) enviado = await enviarEmailBoasVindas(email, nome, link);
+  if (!enviado) {
+    try {
+      const anon = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { error } = await anon.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) console.error("Fallback resetPasswordForEmail falhou:", error.message);
+    } catch (e) {
+      console.error("Fallback de e-mail falhou:", (e as Error).message);
+    }
+  }
 }
 
 export async function provisionarAcesso(input: {
