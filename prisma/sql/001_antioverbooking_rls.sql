@@ -75,6 +75,22 @@ begin
   end loop;
 end $$;
 
+-- ── (2b) RLS EM TODAS AS TABELAS (fecha as filhas sem empresa_id) ──
+-- As tabelas-filhas (orcamento_item, combo_item, brinquedo_foto,
+-- pedido_historico, checklist_resposta, cliente_endereco, cliente_tag,
+-- equipe_membro, rota_parada) NÃO têm empresa_id e ficavam FORA do loop acima
+-- -> RLS OFF + grants do anon = vazamento/DELETE entre tenants via PostgREST.
+-- Habilita RLS em TODAS as tabelas public. Sem policy = deny-all para
+-- anon/authenticated; o backend (Prisma, role dona) ignora RLS e não quebra.
+do $$
+declare t text;
+begin
+  for t in select tablename from pg_tables where schemaname = 'public'
+  loop
+    execute format('alter table public.%I enable row level security;', t);
+  end loop;
+end $$;
+
 -- Observação: o backend do FesFlow acessa o banco via Prisma com a
 -- connection string do Postgres (role privilegiada), então aplica o
 -- escopo de empresa na aplicação. As policies RLS acima protegem os
