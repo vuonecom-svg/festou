@@ -8,6 +8,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getBrinquedo } from "./brinquedos";
 import { verificarBrinquedo, buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
 import { janelaBloqueio } from "../disponibilidade";
+import { precoUnitario, type OrcModo } from "../preco";
 
 export type OrcStatus =
   | "novo" | "enviado" | "aprovado" | "recusado" | "convertido" | "cancelado";
@@ -43,7 +44,7 @@ export type Orcamento = {
   status: OrcStatus; pedidoId?: string; criadoEm: string;
 };
 
-export type OrcModo = "diaria" | "periodo";
+export type { OrcModo };
 
 export type OrcamentoInput = {
   clienteId: string; dataEvento: string; horaEntrega: string; horaRetirada: string;
@@ -53,24 +54,6 @@ export type OrcamentoInput = {
   valorSinal: number; formaPagamento: string; obs: string;
 };
 
-// Preço unitário de um item conforme a base de cobrança escolhida.
-// Recalculado no SERVIDOR a partir dos valores reais do brinquedo (não confia
-// em preço vindo da tela). Base diária respeita o preço promocional.
-export function precoUnitario(
-  b: { valorDiaria: number; valorPeriodo: number | null; valorHoraExtra: number | null; valorPromocional: number | null },
-  modo: OrcModo,
-  horasExtras: number
-): { valorUnit: number; sufixo: string } {
-  const base = modo === "periodo" && b.valorPeriodo != null
-    ? b.valorPeriodo
-    : (b.valorPromocional ?? b.valorDiaria);
-  const horas = Math.max(0, Math.trunc(horasExtras) || 0);
-  const extra = horas * (b.valorHoraExtra ?? 0);
-  const partes: string[] = [];
-  if (modo === "periodo" && b.valorPeriodo != null) partes.push("período");
-  if (horas > 0) partes.push(`+${horas}h`);
-  return { valorUnit: base + extra, sufixo: partes.length ? ` (${partes.join(", ")})` : "" };
-}
 
 const include = {
   itens: true,
@@ -304,13 +287,13 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
 
 export async function orcamentoStats() {
   const empresaId = await getCurrentEmpresaId();
-  const rows = await prisma.orcamento.findMany({
-    where: { empresaId },
-    select: { status: true, pedido: { select: { id: true } } },
-  });
-  return {
-    total: rows.length,
-    abertos: rows.filter((o) => !o.pedido && ["novo", "enviado", "aprovado"].includes(o.status)).length,
-    convertidos: rows.filter((o) => o.pedido).length,
-  };
+  // Contagens no banco (não carrega a tabela inteira em memória).
+  const [total, convertidos, abertos] = await Promise.all([
+    prisma.orcamento.count({ where: { empresaId } }),
+    prisma.orcamento.count({ where: { empresaId, pedido: { isNot: null } } }),
+    prisma.orcamento.count({
+      where: { empresaId, pedido: { is: null }, status: { in: ["novo", "enviado", "aprovado"] } },
+    }),
+  ]);
+  return { total, abertos, convertidos };
 }

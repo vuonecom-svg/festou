@@ -407,6 +407,7 @@ model ComboItem {
   item      ItemAdicional? @relation(fields: [itemId], references: [id])
 
   @@index([comboId])
+  @@index([brinquedoId])
   @@map("combo_item")
 }
 
@@ -489,6 +490,7 @@ model Lead {
   orcamentos Orcamento[]
 
   @@index([empresaId, etapa])
+  @@index([clienteId])
   @@map("lead")
 }
 
@@ -560,6 +562,8 @@ model Orcamento {
 
   @@unique([empresaId, numero])
   @@index([empresaId, status])
+  @@index([clienteId])
+  @@index([enderecoEventoId])
   @@map("orcamento")
 }
 
@@ -580,6 +584,7 @@ model OrcamentoItem {
   combo     Combo?         @relation(fields: [comboId], references: [id])
 
   @@index([orcamentoId])
+  @@index([brinquedoId])
   @@map("orcamento_item")
 }
 
@@ -720,6 +725,7 @@ model Despesa {
   pedido  Pedido? @relation(fields: [pedidoId], references: [id])
 
   @@index([empresaId, categoria])
+  @@index([pedidoId])
   @@map("despesa")
 }
 
@@ -883,5 +889,6 @@ model Manutencao {
   brinquedo Brinquedo @relation(fields: [brinquedoId], references: [id], onDelete: Cascade)
 
   @@index([empresaId, status])
+  @@index([brinquedoId])
   @@map("manutencao")
 }

@@ -37,7 +37,7 @@ export default async function EquipePage() {
                   <label className="block text-xs text-muted mb-1">Telefone</label>
                   <input name="telefone" className={inputClass} />
                 </div>
-                <button className="rounded-lg h-10 px-3 bg-primary text-primary-fg font-medium hover:bg-primary/90 self-end"><Plus size={16} /></button>
+                <button aria-label="Adicionar funcionário" className="rounded-lg h-10 px-3 bg-primary text-primary-fg font-medium hover:bg-primary/90 self-end"><Plus size={16} /></button>
               </div>
             </form>
           </div>

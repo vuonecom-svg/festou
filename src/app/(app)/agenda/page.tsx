@@ -50,6 +50,12 @@ export default async function AgendaPage() {
 
         {/* Lista por dia */}
         <div className="lg:col-span-2 space-y-5">
+          {reservas.length === 0 && (
+            <div className="card p-10 text-center text-muted">
+              <p className="font-medium text-foreground">Nenhum evento na agenda ainda</p>
+              <p className="text-sm mt-1">Converta um orçamento em pedido para a reserva aparecer aqui.</p>
+            </div>
+          )}
           {[...porDia.entries()].map(([dia, itens]) => (
             <div key={dia}>
               <div className="flex items-center gap-2 mb-2">

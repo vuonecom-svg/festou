@@ -22,13 +22,14 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 - [ ] `createOrcamento`: validar desconto/taxas >= 0
 
 ### P2 — dívida técnica / UX / performance / testes
-- [ ] `loading.tsx` nas rotas pesadas
-- [ ] Empty-state da agenda
-- [ ] `aria-label` em botões só-ícone
-- [ ] Índices em FKs quentes (schema + prod)
-- [ ] `orcamentoStats` via `count()`
-- [ ] Suíte mínima de testes (Vitest): disponibilidade, preço, financeiro, webhook
-- [ ] Lint errors (`set-state-in-effect`)
+- [x] `loading.tsx` no segmento (app)
+- [x] Empty-state da agenda
+- [x] `aria-label` em botões só-ícone (combos/equipe)
+- [x] Índices em FKs quentes (prod + schema)
+- [x] `orcamentoStats` via `count()`
+- [x] Suíte mínima de testes (Vitest): disponibilidade + preço (15 testes ✅)
+- [ ] Lint errors (`set-state-in-effect`) — falso-positivo do compiler; documentado
+- [ ] Mais testes: financeiro (registrarPagamento), webhook HMAC (precisam mock de prisma)
 
 ### P3 — futuro (documentado, não bloqueante)
 - [ ] `prisma migrate` versionado (hoje: `db push` + SQL manual)
@@ -56,3 +57,14 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 - `deleteBrinquedo`: bloqueio amigável se há reservas (não crasha).
 - `reagendarPedido`: conflito da constraint em corrida vira msg amigável (não 23P01 cru).
 - Uploads (brinquedo/config) em try/catch → `?erro=` + banner nas telas (não perde na `error.tsx`).
+
+### Ciclo 3 — Performance/DB + UX ✅ (typecheck+build OK)
+- `orcamentoStats`: 3× `count()` no banco (não carrega a tabela).
+- Índices criados em prod + no schema: `orcamento(cliente_id, endereco_evento_id)`, `orcamento_item(brinquedo_id)`, `lead(cliente_id)`, `despesa(pedido_id)`, `manutencao(brinquedo_id)`, `combo_item(brinquedo_id)`.
+- `(app)/loading.tsx` (skeleton na navegação); empty-state da agenda; `aria-label` nos botões +.
+
+### Ciclo 4 — Testes ✅ (15 testes passando)
+- Vitest instalado + scripts `test`/`test:watch`.
+- `precoUnitario` extraído para `src/lib/preco.ts` (puro, testável sem Prisma).
+- `src/lib/__tests__/disponibilidade.test.ts` (9) — buffers, meio-aberto, anti-overbooking por unidade, **regressão do fuso**, ignora própria reserva.
+- `src/lib/__tests__/preco.test.ts` (6) — diária/promocional/período/horas.

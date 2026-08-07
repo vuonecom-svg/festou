@@ -30,7 +30,7 @@ export default async function CombosPage() {
               <label className="block text-xs text-muted mb-1">Valor (R$)</label>
               <input name="valor" type="number" step="0.01" min="0" className={inputClass} />
             </div>
-            <button className="inline-flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-primary-fg font-medium hover:bg-primary/90 self-end">
+            <button aria-label="Adicionar combo" className="inline-flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-primary-fg font-medium hover:bg-primary/90 self-end">
               <Plus size={16} />
             </button>
           </div>
