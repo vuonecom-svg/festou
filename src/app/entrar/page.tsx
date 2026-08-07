@@ -39,6 +39,12 @@ export default async function EntrarPage({
             </Field>
             <SubmitButton className="w-full">Entrar</SubmitButton>
           </form>
+
+          <p className="text-center text-sm mt-4">
+            <Link href="/recuperar" className="text-muted hover:text-primary hover:underline">
+              Esqueci minha senha
+            </Link>
+          </p>
         </div>
 
         <p className="text-center text-sm text-muted mt-5">
