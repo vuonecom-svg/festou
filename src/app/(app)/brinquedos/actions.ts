@@ -11,6 +11,7 @@ import {
   type BrinquedoStatus,
 } from "@/lib/data/brinquedos";
 import { uploadImagem } from "@/lib/upload";
+import { podeGerir } from "@/lib/rbac";
 
 // ── helpers de parsing do FormData ──────────────────────────
 function str(fd: FormData, key: string) {
@@ -98,6 +99,9 @@ export async function updateBrinquedoAction(id: string, fd: FormData) {
 }
 
 export async function deleteBrinquedoAction(id: string) {
+  if (!(await podeGerir())) {
+    redirect(`/brinquedos/${id}?erro=${encodeURIComponent("Sem permissão para excluir (apenas admin/gerente).")}`);
+  }
   const r = await deleteBrinquedo(id);
   if (!r.ok) {
     redirect(`/brinquedos/${id}?erro=${encodeURIComponent(r.erro ?? "Não foi possível excluir.")}`);

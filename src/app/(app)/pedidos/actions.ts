@@ -9,6 +9,7 @@ import {
   reagendarPedido,
   type PedidoStatusOp,
 } from "@/lib/data/pedidos";
+import { podeGerir } from "@/lib/rbac";
 
 export async function registrarPagamentoAction(id: string, fd: FormData) {
   const valor = Number(String(fd.get("valor") ?? "").replace(",", "."));
@@ -27,6 +28,9 @@ export async function avancarStatusAction(id: string, status: PedidoStatusOp) {
 }
 
 export async function excluirPedidoAction(id: string) {
+  if (!(await podeGerir())) {
+    redirect(`/pedidos/${id}?erro=${encodeURIComponent("Sem permissão para excluir (apenas admin/gerente).")}`);
+  }
   await deletePedido(id);
   revalidatePath("/pedidos");
   revalidatePath("/agenda");

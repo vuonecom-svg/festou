@@ -10,6 +10,7 @@ import {
   type OrcamentoInput,
   type OrcStatus,
 } from "@/lib/data/orcamentos";
+import { podeGerir } from "@/lib/rbac";
 
 function n(v: unknown): number {
   const x = Number(v);
@@ -68,6 +69,9 @@ export async function setOrcamentoStatusAction(id: string, status: OrcStatus) {
 }
 
 export async function deleteOrcamentoAction(id: string) {
+  if (!(await podeGerir())) {
+    redirect(`/orcamentos/${id}?erro=${encodeURIComponent("Sem permissão para excluir (apenas admin/gerente).")}`);
+  }
   await deleteOrcamento(id);
   revalidatePath("/orcamentos");
   redirect("/orcamentos");

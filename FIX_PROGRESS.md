@@ -32,8 +32,9 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 - [ ] Mais testes: financeiro (registrarPagamento), webhook HMAC (precisam mock de prisma)
 
 ### P3 — futuro (documentado, não bloqueante)
-- [ ] `prisma migrate` versionado (hoje: `db push` + SQL manual)
-- [ ] RBAC por `papel`; billing/limites aplicados; `AuditLog`
+- [~] Guarda de invariantes (`npm run db:check`) protege constraint+RLS de sumir; `prisma migrate` versionado completo ainda pendente
+- [x] RBAC mínimo: ações destrutivas (excluir pedido/orçamento/brinquedo) exigem admin/gerente; backfill garante 1 admin/empresa
+- [ ] billing/limites de plano aplicados; `AuditLog` gravado
 - [ ] Paginação nas listas
 - [ ] Upgrade de deps (npm audit)
 - [ ] Módulo Rotas; onboarding pós-pagamento
@@ -68,3 +69,9 @@ Base: relatórios de auditoria (segurança, backend/DB, frontend) de 10/07/2026.
 - `precoUnitario` extraído para `src/lib/preco.ts` (puro, testável sem Prisma).
 - `src/lib/__tests__/disponibilidade.test.ts` (9) — buffers, meio-aberto, anti-overbooking por unidade, **regressão do fuso**, ignora própria reserva.
 - `src/lib/__tests__/preco.test.ts` (6) — diária/promocional/período/horas.
+
+### Ciclo 5 — Fluxo de dinheiro + invariantes + RBAC ✅ (22 testes, db:check OK)
+- `src/lib/pagamento.ts` (novo, puro): `aplicarPagamento` (limita ao total, arredonda, tipo sinal/restante). `registrarPagamento` refatorado para usá-la.
+- `src/lib/__tests__/pagamento.test.ts` (7) — parcial, quitação, overpay limitado, já-quitado, valor<=0, arredondamento, dados sujos.
+- `scripts/check-db-invariants.mjs` + `npm run db:check`: falha se constraint anti-overbooking, RLS (7 tabelas) ou colunas de estoque sumirem. Passou contra prod.
+- RBAC mínimo: `src/lib/rbac.ts` (`papelAtual`/`podeGerir`); excluir pedido/orçamento/brinquedo exigem admin/gerente. Backfill em prod garantiu 1 admin por empresa (ninguém trancado).

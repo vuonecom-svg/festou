@@ -8,6 +8,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { janelaBloqueio } from "../disponibilidade";
 import { buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
 import { getBrinquedo } from "./brinquedos";
+import { aplicarPagamento } from "../pagamento";
 
 export type PedidoStatusFin = "aguardando_sinal" | "sinal_pago" | "quitado";
 export type PedidoStatusOp =
@@ -115,9 +116,6 @@ export async function getPedido(id: string): Promise<Pedido | null> {
   return row ? toDTO(row) : null;
 }
 
-// Arredonda para centavos (evita 0.01 residual / falha no "quitado" por float).
-const round2 = (n: number) => Math.round(n * 100) / 100;
-
 const FORMAS_PAGAMENTO = ["pix", "dinheiro", "cartao", "boleto", "transferencia"] as const;
 export type PagamentoForma = (typeof FORMAS_PAGAMENTO)[number];
 
@@ -131,32 +129,28 @@ export async function registrarPagamento(
   const p = await prisma.pedido.findFirst({ where: { id, empresaId } });
   if (!p) return null;
 
-  const total = round2(Number(p.total));
-  const anterior = round2(Number(p.sinalPago));
-  // Nunca registra além do que falta (evita "sinalPago" > total e valor fantasma).
-  const recebido = round2(Math.min(total - anterior, valor));
-  if (!(recebido > 0)) return getPedido(id); // já quitado
+  // Toda a matemática (limite ao total, arredondamento, tipo) na função pura.
+  const r = aplicarPagamento(Number(p.total), Number(p.sinalPago), valor);
+  if (!r.aplicar) return getPedido(id); // já quitado / nada a receber
 
-  const sinalPago = round2(anterior + recebido);
   const formaOk: PagamentoForma = (FORMAS_PAGAMENTO as readonly string[]).includes(forma)
     ? (forma as PagamentoForma)
     : "dinheiro";
-  const tipo = anterior <= 0 ? "sinal" : "restante";
 
   // Transação: grava o histórico em Pagamento + atualiza o agregado do pedido.
   await prisma.$transaction([
     prisma.pagamento.create({
       data: {
-        empresaId, pedidoId: id, tipo, forma: formaOk,
-        valor: recebido, status: "pago", pagoEm: new Date(),
+        empresaId, pedidoId: id, tipo: r.tipo, forma: formaOk,
+        valor: r.recebido, status: "pago", pagoEm: new Date(),
       },
     }),
     prisma.pedido.update({
       where: { id },
       data: {
-        sinalPago,
-        valorRestante: round2(Math.max(0, total - sinalPago)),
-        statusFinanceiro: statusFin(total, sinalPago),
+        sinalPago: r.sinalPago,
+        valorRestante: r.valorRestante,
+        statusFinanceiro: statusFin(Number(p.total), r.sinalPago),
       },
     }),
   ]);
