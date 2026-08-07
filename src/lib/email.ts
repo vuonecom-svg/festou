@@ -1,13 +1,29 @@
-// Envio de e-mail DIRETO pela API do SendGrid (não depende do e-mail do Supabase).
-// SERVER-ONLY. Usa SENDGRID_API_KEY; remetente já autenticado (acesso@fesflow.com.br).
+// Envio de e-mail DIRETO pela API do SendGrid (não depende do e-mail do Supabase,
+// que tem limite de envio). SERVER-ONLY. Remetente já autenticado (acesso@fesflow.com.br).
+//
+// A chave vem de SENDGRID_API_KEY (env) OU, se ausente, da tabela app_config no
+// banco (linha chave='sendgrid_api_key') — assim o app envia via SendGrid sem
+// precisar de env var no host (o dono cadastra a chave uma vez pelo SQL editor).
 import "server-only";
+import { prisma } from "@/lib/prisma";
 
 const FROM = { email: "acesso@fesflow.com.br", name: "FesFlow" };
 
+async function getSendgridKey(): Promise<string | null> {
+  if (process.env.SENDGRID_API_KEY) return process.env.SENDGRID_API_KEY;
+  try {
+    const rows = await prisma.$queryRaw<{ valor: string }[]>`
+      select valor from app_config where chave = 'sendgrid_api_key' limit 1`;
+    return rows[0]?.valor ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function enviarEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const key = process.env.SENDGRID_API_KEY;
+  const key = await getSendgridKey();
   if (!key) {
-    console.error("SENDGRID_API_KEY ausente — e-mail não enviado para", to);
+    console.error("SendGrid: chave ausente (env e app_config) — e-mail não enviado para", to);
     return false;
   }
   try {
@@ -41,7 +57,8 @@ export async function enviarEmailBoasVindas(to: string, nome: string, senhaTemp:
   <div style="background:#eef2f7;padding:24px 12px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
     <div style="max-width:540px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(11,27,51,.08)">
       <!-- Cabeçalho com a marca -->
-      <div style="background:linear-gradient(120deg,#0b1b33 0%,#1e1b4b 55%,#2b1b4e 100%);padding:30px 28px;text-align:center">
+      <div style="background:linear-gradient(120deg,#0b1b33 0%,#1e1b4b 55%,#2b1b4e 100%);padding:28px 28px 24px;text-align:center">
+        <img src="${APP_URL}/apple-icon.png" width="58" height="58" alt="FesFlow" style="display:inline-block;background:#ffffff;border-radius:16px;padding:7px;margin-bottom:12px" />
         <div style="font-size:26px;font-weight:800;letter-spacing:-.5px;color:#ffffff">Fes<span style="color:#22d3ee">Flow</span></div>
         <div style="font-size:12px;color:#a9b6d6;margin-top:4px;letter-spacing:2px;text-transform:uppercase">Gestão para locadoras de festa</div>
       </div>
