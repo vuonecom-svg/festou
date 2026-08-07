@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { updateEmpresa } from "@/lib/data/empresa";
 import { uploadImagem } from "@/lib/upload";
@@ -9,7 +10,14 @@ export async function updateEmpresaAction(fd: FormData) {
 
   // Logo: upload de arquivo tem prioridade; senão usa o link colado.
   const arquivo = fd.get("logoFile");
-  const enviado = arquivo instanceof File ? await uploadImagem(arquivo, "logos") : null;
+  let enviado: string | null = null;
+  if (arquivo instanceof File && arquivo.size > 0) {
+    try {
+      enviado = await uploadImagem(arquivo, "logos");
+    } catch (e) {
+      redirect(`/configuracoes?erro=${encodeURIComponent(e instanceof Error ? e.message : "Falha no upload do logo.")}`);
+    }
+  }
   const logoUrl = enviado ?? s("logoUrl");
 
   await updateEmpresa({

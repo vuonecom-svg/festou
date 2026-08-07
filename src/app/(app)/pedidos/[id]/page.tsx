@@ -145,12 +145,22 @@ export default async function PedidoDetalhePage({
 
             {p.valorRestante > 0 ? (
               <div className="mt-4 space-y-2">
-                <form action={pagar} className="flex gap-2">
-                  <input name="valor" type="number" step="0.01" min="0" placeholder="Valor recebido" className={inputClass} />
-                  <button className="h-10 px-3 rounded-lg text-sm font-medium bg-primary text-primary-fg hover:bg-primary/90 shrink-0">Registrar</button>
+                <form action={pagar} className="space-y-2">
+                  <div className="flex gap-2">
+                    <input name="valor" type="number" step="0.01" min="0.01" placeholder="Valor recebido" className={inputClass} />
+                    <select name="forma" defaultValue="dinheiro" className={inputClass + " max-w-[9rem]"} aria-label="Forma de pagamento">
+                      <option value="dinheiro">Dinheiro</option>
+                      <option value="pix">Pix</option>
+                      <option value="cartao">Cartão</option>
+                      <option value="boleto">Boleto</option>
+                      <option value="transferencia">Transferência</option>
+                    </select>
+                  </div>
+                  <button className="w-full h-10 px-3 rounded-lg text-sm font-medium bg-primary text-primary-fg hover:bg-primary/90">Registrar pagamento</button>
                 </form>
                 <form action={quitar}>
                   <input type="hidden" name="valor" value={p.valorRestante} />
+                  <input type="hidden" name="forma" value="dinheiro" />
                   <button className="w-full h-9 rounded-lg text-sm border border-emerald-200 text-emerald-700 hover:bg-emerald-50">
                     Quitar restante ({formatBRL(p.valorRestante)})
                   </button>

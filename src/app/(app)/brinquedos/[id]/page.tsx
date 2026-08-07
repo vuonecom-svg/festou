@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { ChevronLeft, Trash2, AlertCircle } from "lucide-react";
 import { BrinquedoForm } from "@/components/brinquedo-form";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmButton } from "@/components/confirm-button";
 import { BRINQUEDO_STATUS } from "@/lib/status";
 import { getBrinquedo, type BrinquedoStatus } from "@/lib/data/brinquedos";
 import { updateBrinquedoAction, deleteBrinquedoAction, setStatusAction } from "../actions";
@@ -17,10 +18,13 @@ const QUICK_STATUS: BrinquedoStatus[] = [
 
 export default async function EditarBrinquedoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ erro?: string }>;
 }) {
   const { id } = await params;
+  const { erro } = await searchParams;
   const brinquedo = await getBrinquedo(id);
   if (!brinquedo) notFound();
 
@@ -42,12 +46,20 @@ export default async function EditarBrinquedoPage({
           <p className="text-sm text-muted">{brinquedo.codigoInterno}</p>
         </div>
 
-        <form action={remove}>
-          <button className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50">
-            <Trash2 size={16} /> Excluir
-          </button>
-        </form>
+        <ConfirmButton
+          action={remove}
+          confirm={`Excluir "${brinquedo.nome}"? Não é possível se houver reservas na agenda.`}
+          className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50"
+        >
+          <Trash2 size={16} /> Excluir
+        </ConfirmButton>
       </div>
+
+      {erro && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 flex items-center gap-2">
+          <AlertCircle size={16} /> {erro}
+        </div>
+      )}
 
       {/* Troca rápida de status */}
       <div className="card p-4">

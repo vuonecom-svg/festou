@@ -151,9 +151,13 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
       brinquedo: { connect: { id: b.id } }, descricao: b.nome + sufixo, qtd, valorUnit, valorTotal,
     });
   }
-  const total = Math.max(0, subtotal - input.desconto + input.taxaEntrega + input.taxaMontagem);
-  const valorRestante = Math.max(0, total - input.valorSinal);
-  const numero = await proximoNumero("orcamento", empresaId, 2000);
+  // Sanitiza valores: sem desconto/taxas negativos e desconto não passa do subtotal.
+  const desconto = Math.min(Math.max(0, input.desconto), subtotal);
+  const taxaEntrega = Math.max(0, input.taxaEntrega);
+  const taxaMontagem = Math.max(0, input.taxaMontagem);
+  const valorSinal = Math.max(0, input.valorSinal);
+  const total = Math.max(0, subtotal - desconto + taxaEntrega + taxaMontagem);
+  const valorRestante = Math.max(0, total - valorSinal);
 
   const e = input.endereco;
   const endereco = await prisma.enderecoEvento.create({
@@ -164,20 +168,35 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
     },
   });
 
-  const created = await prisma.orcamento.create({
-    data: {
-      empresaId, numero, clienteId: input.clienteId, enderecoEventoId: endereco.id,
-      dataEvento: new Date(input.dataEvento || new Date().toISOString().slice(0, 10)),
-      horaEntrega: input.horaEntrega || null, horaRetirada: input.horaRetirada || null,
-      subtotal, desconto: input.desconto, motivoDesconto: input.motivoDesconto || null,
-      taxaEntrega: input.taxaEntrega, taxaMontagem: input.taxaMontagem, total,
-      valorSinal: input.valorSinal, valorRestante, formaPagamento: input.formaPagamento || null,
-      obs: input.obs || null, status: "novo",
-      itens: { create: itensData },
-    },
-    include,
-  });
+  // Retry em colisão de número (geração concorrente): recomputa e tenta de novo.
+  let created;
+  for (let tentativa = 0; ; tentativa++) {
+    const numero = await proximoNumero("orcamento", empresaId, 2000);
+    try {
+      created = await prisma.orcamento.create({
+        data: {
+          empresaId, numero, clienteId: input.clienteId, enderecoEventoId: endereco.id,
+          dataEvento: new Date(input.dataEvento || new Date().toISOString().slice(0, 10)),
+          horaEntrega: input.horaEntrega || null, horaRetirada: input.horaRetirada || null,
+          subtotal, desconto, motivoDesconto: input.motivoDesconto || null,
+          taxaEntrega, taxaMontagem, total,
+          valorSinal, valorRestante, formaPagamento: input.formaPagamento || null,
+          obs: input.obs || null, status: "novo",
+          itens: { create: itensData },
+        },
+        include,
+      });
+      break;
+    } catch (err) {
+      if (ehUniqueViolation(err) && tentativa < 4) continue;
+      throw err;
+    }
+  }
   return toDTO(created);
+}
+
+function ehUniqueViolation(e: unknown): boolean {
+  return !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002";
 }
 
 export async function setOrcamentoStatus(id: string, status: OrcStatus): Promise<void> {
@@ -240,42 +259,46 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
     usadas[it.brinquedoId] = jaUsadas;
   }
 
-  const numero = await proximoNumero("pedido", empresaId, 1000);
   const total = Number(o.total);
 
-  try {
-    const pedido = await prisma.$transaction(async (tx) => {
-      // O "sinal" do orçamento é o valor ESPERADO — ainda não foi recebido.
-      // O pedido nasce aguardando sinal; o dinheiro real entra só via
-      // registrarPagamento (que cria o registro e ajusta o status).
-      const ped = await tx.pedido.create({
-        data: {
-          empresaId, numero, orcamentoId: o.id, clienteId: o.clienteId,
-          enderecoEventoId: o.enderecoEventoId, dataEvento: o.dataEvento,
-          horaEntrega: o.horaEntrega, horaRetirada: o.horaRetirada,
-          total, sinalPago: 0, valorRestante: total,
-          statusFinanceiro: "aguardando_sinal",
-          statusOperacional: "aguardando_separacao",
-        },
-      });
-      for (const r of reservas) {
-        // Insere reserva_item — a exclusion constraint dispara aqui se houver conflito.
-        await tx.reservaItem.create({
+  // Retry em colisão de número (P2002); overbooking (23P01) NÃO é retry.
+  for (let tentativa = 0; ; tentativa++) {
+    const numero = await proximoNumero("pedido", empresaId, 1000);
+    try {
+      const pedido = await prisma.$transaction(async (tx) => {
+        // O "sinal" do orçamento é o valor ESPERADO — ainda não foi recebido.
+        // O pedido nasce aguardando sinal; o dinheiro real entra só via
+        // registrarPagamento (que cria o registro e ajusta o status).
+        const ped = await tx.pedido.create({
           data: {
-            empresaId, pedidoId: ped.id, brinquedoId: r.brinquedoId,
-            qtd: 1, unidade: r.unidade, janelaInicio: r.janelaInicio, janelaFim: r.janelaFim,
+            empresaId, numero, orcamentoId: o.id, clienteId: o.clienteId,
+            enderecoEventoId: o.enderecoEventoId, dataEvento: o.dataEvento,
+            horaEntrega: o.horaEntrega, horaRetirada: o.horaRetirada,
+            total, sinalPago: 0, valorRestante: total,
+            statusFinanceiro: "aguardando_sinal",
+            statusOperacional: "aguardando_separacao",
           },
         });
+        for (const r of reservas) {
+          // Insere reserva_item — a exclusion constraint dispara aqui se houver conflito.
+          await tx.reservaItem.create({
+            data: {
+              empresaId, pedidoId: ped.id, brinquedoId: r.brinquedoId,
+              qtd: 1, unidade: r.unidade, janelaInicio: r.janelaInicio, janelaFim: r.janelaFim,
+            },
+          });
+        }
+        await tx.orcamento.update({ where: { id: o.id }, data: { status: "aprovado" } });
+        return ped;
+      });
+      return { id: pedido.id };
+    } catch (e) {
+      if (ehConflito(e)) {
+        throw new Error("Conflito de reserva: algum brinquedo foi reservado nesse período enquanto convertia. Revise a agenda.");
       }
-      await tx.orcamento.update({ where: { id: o.id }, data: { status: "aprovado" } });
-      return ped;
-    });
-    return { id: pedido.id };
-  } catch (e) {
-    if (ehConflito(e)) {
-      throw new Error("Conflito de reserva: algum brinquedo foi reservado nesse período enquanto convertia. Revise a agenda.");
+      if (ehUniqueViolation(e) && tentativa < 4) continue;
+      throw e;
     }
-    throw e;
   }
 }
 

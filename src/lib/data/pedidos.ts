@@ -118,20 +118,48 @@ export async function getPedido(id: string): Promise<Pedido | null> {
 // Arredonda para centavos (evita 0.01 residual / falha no "quitado" por float).
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export async function registrarPagamento(id: string, valor: number): Promise<Pedido | null> {
+const FORMAS_PAGAMENTO = ["pix", "dinheiro", "cartao", "boleto", "transferencia"] as const;
+export type PagamentoForma = (typeof FORMAS_PAGAMENTO)[number];
+
+export async function registrarPagamento(
+  id: string,
+  valor: number,
+  forma: string = "dinheiro"
+): Promise<Pedido | null> {
   const empresaId = await getCurrentEmpresaId();
+  if (!(valor > 0)) return null; // valor deve ser positivo (defesa em profundidade)
   const p = await prisma.pedido.findFirst({ where: { id, empresaId } });
   if (!p) return null;
+
   const total = round2(Number(p.total));
-  const sinalPago = round2(Math.min(total, Number(p.sinalPago) + valor));
-  await prisma.pedido.update({
-    where: { id },
-    data: {
-      sinalPago,
-      valorRestante: round2(Math.max(0, total - sinalPago)),
-      statusFinanceiro: statusFin(total, sinalPago),
-    },
-  });
+  const anterior = round2(Number(p.sinalPago));
+  // Nunca registra além do que falta (evita "sinalPago" > total e valor fantasma).
+  const recebido = round2(Math.min(total - anterior, valor));
+  if (!(recebido > 0)) return getPedido(id); // já quitado
+
+  const sinalPago = round2(anterior + recebido);
+  const formaOk: PagamentoForma = (FORMAS_PAGAMENTO as readonly string[]).includes(forma)
+    ? (forma as PagamentoForma)
+    : "dinheiro";
+  const tipo = anterior <= 0 ? "sinal" : "restante";
+
+  // Transação: grava o histórico em Pagamento + atualiza o agregado do pedido.
+  await prisma.$transaction([
+    prisma.pagamento.create({
+      data: {
+        empresaId, pedidoId: id, tipo, forma: formaOk,
+        valor: recebido, status: "pago", pagoEm: new Date(),
+      },
+    }),
+    prisma.pedido.update({
+      where: { id },
+      data: {
+        sinalPago,
+        valorRestante: round2(Math.max(0, total - sinalPago)),
+        statusFinanceiro: statusFin(total, sinalPago),
+      },
+    }),
+  ]);
   return getPedido(id);
 }
 
@@ -184,19 +212,27 @@ export async function reagendarPedido(
     updates.push({ id: ri.id, janelaInicio: jan.inicio, janelaFim: jan.fim });
   }
 
-  await prisma.$transaction([
-    prisma.pedido.update({
-      where: { id },
-      data: {
-        dataEvento: new Date(`${dataEvento}T00:00:00Z`),
-        horaEntrega: horaEntrega || null,
-        horaRetirada: horaRetirada || null,
-      },
-    }),
-    ...updates.map((u) =>
-      prisma.reservaItem.update({ where: { id: u.id }, data: { janelaInicio: u.janelaInicio, janelaFim: u.janelaFim } })
-    ),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.pedido.update({
+        where: { id },
+        data: {
+          dataEvento: new Date(`${dataEvento}T00:00:00Z`),
+          horaEntrega: horaEntrega || null,
+          horaRetirada: horaRetirada || null,
+        },
+      }),
+      ...updates.map((u) =>
+        prisma.reservaItem.update({ where: { id: u.id }, data: { janelaInicio: u.janelaInicio, janelaFim: u.janelaFim } })
+      ),
+    ]);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("reserva_item_sem_overbooking") || msg.includes("23P01") || msg.toLowerCase().includes("exclusion")) {
+      return { ok: false, erro: "Conflito de horário: outro pedido reservou esse brinquedo nesse intervalo. Revise a agenda." };
+    }
+    throw e;
+  }
   return { ok: true };
 }
 

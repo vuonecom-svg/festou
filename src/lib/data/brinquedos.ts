@@ -160,18 +160,32 @@ export async function getBrinquedo(id: string): Promise<Brinquedo | null> {
   return row ? toDTO(row) : null;
 }
 
+const ehUniqueViolation = (e: unknown) =>
+  !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002";
+const ehFkViolation = (e: unknown) =>
+  !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2003";
+
 export async function createBrinquedo(input: BrinquedoInput): Promise<Brinquedo> {
   const empresaId = await getCurrentEmpresaId();
   const categoriaId = await resolveCategoriaId(empresaId, input.categoriaNome);
-  const codigoInterno = input.codigoInterno.trim() || (await proximoCodigo(empresaId));
+  const autoGerar = !input.codigoInterno.trim();
 
-  const criado = await prisma.brinquedo.create({
-    data: { ...dadosBrinquedo(input), empresaId, categoriaId, codigoInterno },
-  });
-  await sincronizaFoto(criado.id, input.fotoUrl);
-
-  const row = await prisma.brinquedo.findUniqueOrThrow({ where: { id: criado.id }, include });
-  return toDTO(row);
+  // Retry só quando o código é auto-gerado (colisão de count()+1 sob concorrência).
+  for (let tentativa = 0; ; tentativa++) {
+    const codigoInterno = input.codigoInterno.trim() || (await proximoCodigo(empresaId));
+    try {
+      const criado = await prisma.brinquedo.create({
+        data: { ...dadosBrinquedo(input), empresaId, categoriaId, codigoInterno },
+      });
+      await sincronizaFoto(criado.id, input.fotoUrl);
+      const row = await prisma.brinquedo.findUniqueOrThrow({ where: { id: criado.id }, include });
+      return toDTO(row);
+    } catch (e) {
+      if (autoGerar && ehUniqueViolation(e) && tentativa < 4) continue;
+      if (ehUniqueViolation(e)) throw new Error("Já existe um brinquedo com esse código interno.");
+      throw e;
+    }
+  }
 }
 
 export async function updateBrinquedo(
@@ -204,9 +218,22 @@ export async function setBrinquedoStatus(id: string, status: BrinquedoStatus): P
   await prisma.brinquedo.updateMany({ where: { id, empresaId }, data: { status } });
 }
 
-export async function deleteBrinquedo(id: string): Promise<void> {
+export async function deleteBrinquedo(id: string): Promise<{ ok: boolean; erro?: string }> {
   const empresaId = await getCurrentEmpresaId();
-  await prisma.brinquedo.deleteMany({ where: { id, empresaId } });
+  // Bloqueio amigável: brinquedo com reservas na agenda não pode ser excluído.
+  const emUso = await prisma.reservaItem.count({ where: { empresaId, brinquedoId: id } });
+  if (emUso > 0) {
+    return { ok: false, erro: "Este brinquedo tem reservas na agenda e não pode ser excluído. Marque como inativo." };
+  }
+  try {
+    await prisma.brinquedo.deleteMany({ where: { id, empresaId } });
+    return { ok: true };
+  } catch (e) {
+    if (ehFkViolation(e)) {
+      return { ok: false, erro: "Brinquedo vinculado a orçamentos/manutenções — não pode ser excluído. Marque como inativo." };
+    }
+    throw e;
+  }
 }
 
 export async function brinquedoStats() {

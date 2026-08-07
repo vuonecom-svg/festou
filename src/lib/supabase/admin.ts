@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 // Cliente admin (service_role) — SERVER-ONLY. Usado pelo webhook para criar

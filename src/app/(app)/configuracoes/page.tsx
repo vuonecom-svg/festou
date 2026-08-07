@@ -1,11 +1,15 @@
-import { Building2, Info } from "lucide-react";
+import { Building2, Info, AlertCircle } from "lucide-react";
 import { Field, SectionTitle, inputClass } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getEmpresa } from "@/lib/data/empresa";
 import { updateEmpresaAction } from "./actions";
 
-export default async function ConfiguracoesPage() {
-  const empresa = await getEmpresa();
+export default async function ConfiguracoesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ erro?: string }>;
+}) {
+  const [empresa, { erro }] = await Promise.all([getEmpresa(), searchParams]);
 
   return (
     <div className="space-y-5 max-w-3xl">
@@ -13,6 +17,12 @@ export default async function ConfiguracoesPage() {
         <h1 className="text-xl font-semibold">Configurações</h1>
         <p className="text-sm text-muted">Dados da sua empresa — aparecem nos orçamentos e contratos.</p>
       </div>
+
+      {erro && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 flex items-center gap-2">
+          <AlertCircle size={16} /> {erro}
+        </div>
+      )}
 
       <form action={updateEmpresaAction} className="card p-5 space-y-4">
         <SectionTitle>

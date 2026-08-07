@@ -67,8 +67,14 @@ function parse(fd: FormData): BrinquedoInput {
 export async function createBrinquedoAction(fd: FormData) {
   const input = parse(fd);
   const arquivo = fd.get("fotoFile");
-  const enviado = arquivo instanceof File ? await uploadImagem(arquivo, "brinquedos") : null;
-  if (enviado) input.fotoUrl = enviado;
+  if (arquivo instanceof File && arquivo.size > 0) {
+    try {
+      const enviado = await uploadImagem(arquivo, "brinquedos");
+      if (enviado) input.fotoUrl = enviado;
+    } catch (e) {
+      redirect(`/brinquedos/novo?erro=${encodeURIComponent(e instanceof Error ? e.message : "Falha no upload da foto.")}`);
+    }
+  }
   await createBrinquedo(input);
   revalidatePath("/brinquedos");
   redirect("/brinquedos");
@@ -77,8 +83,14 @@ export async function createBrinquedoAction(fd: FormData) {
 export async function updateBrinquedoAction(id: string, fd: FormData) {
   const input = parse(fd);
   const arquivo = fd.get("fotoFile");
-  const enviado = arquivo instanceof File ? await uploadImagem(arquivo, "brinquedos") : null;
-  if (enviado) input.fotoUrl = enviado;
+  if (arquivo instanceof File && arquivo.size > 0) {
+    try {
+      const enviado = await uploadImagem(arquivo, "brinquedos");
+      if (enviado) input.fotoUrl = enviado;
+    } catch (e) {
+      redirect(`/brinquedos/${id}?erro=${encodeURIComponent(e instanceof Error ? e.message : "Falha no upload da foto.")}`);
+    }
+  }
   await updateBrinquedo(id, input);
   revalidatePath("/brinquedos");
   revalidatePath(`/brinquedos/${id}`);
@@ -86,7 +98,10 @@ export async function updateBrinquedoAction(id: string, fd: FormData) {
 }
 
 export async function deleteBrinquedoAction(id: string) {
-  await deleteBrinquedo(id);
+  const r = await deleteBrinquedo(id);
+  if (!r.ok) {
+    redirect(`/brinquedos/${id}?erro=${encodeURIComponent(r.erro ?? "Não foi possível excluir.")}`);
+  }
   revalidatePath("/brinquedos");
   redirect("/brinquedos");
 }

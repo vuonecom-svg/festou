@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { authAtivo } from "@/lib/auth-flag";
 
 // Rotas da plataforma que exigem login (quando AUTH_ENABLED=true).
 const PROTEGIDAS = [
@@ -9,8 +10,8 @@ const PROTEGIDAS = [
 ];
 
 export async function proxy(req: NextRequest) {
-  // Enquanto a flag estiver desligada, nada é bloqueado (site continua aberto).
-  if (process.env.AUTH_ENABLED !== "true") return NextResponse.next();
+  // Em produção o gating é sempre exigido; fora de produção depende da flag.
+  if (!authAtivo()) return NextResponse.next();
 
   const res = NextResponse.next();
   const supabase = createServerClient(

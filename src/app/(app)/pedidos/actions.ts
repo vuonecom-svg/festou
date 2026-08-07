@@ -12,11 +12,13 @@ import {
 
 export async function registrarPagamentoAction(id: string, fd: FormData) {
   const valor = Number(String(fd.get("valor") ?? "").replace(",", "."));
+  const forma = String(fd.get("forma") ?? "dinheiro");
   if (Number.isFinite(valor) && valor > 0) {
-    await registrarPagamento(id, valor);
+    await registrarPagamento(id, valor, forma);
   }
   revalidatePath(`/pedidos/${id}`);
   revalidatePath("/pedidos");
+  revalidatePath("/financeiro");
 }
 
 export async function avancarStatusAction(id: string, status: PedidoStatusOp) {
