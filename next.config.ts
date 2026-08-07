@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
           { key: "X-DNS-Prefetch-Control", value: "off" },
+          // CSP conservador: bloqueia framing, injeção de <base>/<object>/<embed> e
+          // sequestro de form-action, sem restringir scripts/estilos/imagens (que
+          // exigiriam nonce e um teste de regressão logado). Endurecer depois.
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" },
         ],
       },
     ];

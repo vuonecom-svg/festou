@@ -14,6 +14,7 @@ import {
   FileSignature,
   BarChart3,
   Settings,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react";
 
@@ -59,6 +60,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/relatorios", label: "Relatórios", icon: BarChart3, ready: true },
       { href: "/financeiro", label: "Financeiro", icon: Wallet, ready: true },
       { href: "/contratos", label: "Contratos", icon: FileSignature, ready: true },
+      { href: "/auditoria", label: "Auditoria", icon: ScrollText, ready: true },
       { href: "/configuracoes", label: "Configurações", icon: Settings, ready: true },
     ],
   },

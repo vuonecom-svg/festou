@@ -37,6 +37,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               <span className="font-semibold">FesFlow</span>
             </div>
             <p className="text-muted">Agenda inteligente para locações de festa. Do pedido à devolução, tudo flui.</p>
+            <p className="text-muted mt-3">
+              Suporte:{" "}
+              <a href="https://wa.me/5519983760954" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary">
+                WhatsApp (19) 98376-0954
+              </a>
+            </p>
           </div>
           <div>
             <p className="font-medium mb-2">Produto</p>
@@ -47,10 +53,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             </ul>
           </div>
           <div>
-            <p className="font-medium mb-2">Conteúdo</p>
+            <p className="font-medium mb-2">Conteúdo &amp; legal</p>
             <ul className="space-y-1.5 text-muted">
               <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
               <li><Link href="/faq" className="hover:text-foreground">Perguntas frequentes</Link></li>
+              <li><Link href="/privacidade" className="hover:text-foreground">Política de Privacidade</Link></li>
+              <li><Link href="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
             </ul>
           </div>
           <div>
