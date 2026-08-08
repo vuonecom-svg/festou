@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { KIWIFY } from "@/lib/site-content";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,9 +21,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Link href="/entrar" className="text-sm font-medium px-3 h-9 inline-flex items-center rounded-lg hover:bg-background">
               Entrar
             </Link>
-            <Link href="/#precos" className="text-sm font-medium px-4 h-9 inline-flex items-center rounded-lg bg-primary text-primary-fg hover:bg-primary/90">
+            <a href={KIWIFY.mensal} className="text-sm font-medium px-4 h-9 inline-flex items-center rounded-lg bg-primary text-primary-fg hover:bg-primary/90">
               Começar
-            </Link>
+            </a>
           </div>
         </div>
       </header>

@@ -4,7 +4,7 @@ import {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
   ShieldCheck, Check, ArrowRight, Sparkles, type LucideIcon,
 } from "lucide-react";
-import { FEATURES, BILLING, PLAN_FEATURES, FAQS } from "@/lib/site-content";
+import { FEATURES, BILLING, PLAN_FEATURES, FAQS, KIWIFY } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "FesFlow — Sistema de gestão para locadoras de brinquedos",
@@ -36,9 +36,9 @@ export default function LandingPage() {
             Do pedido à devolução, <span className="text-flow">tudo flui.</span>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/#precos" className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">
+            <a href={KIWIFY.mensal} className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-12 font-semibold hover:bg-primary/90">
               Começar — 1º mês por R$ 5 <ArrowRight size={18} />
-            </Link>
+            </a>
             <Link href="/#funcionalidades" className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-6 h-12 font-semibold hover:bg-background">
               Ver funcionalidades
             </Link>
