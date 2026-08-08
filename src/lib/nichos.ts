@@ -2,7 +2,7 @@
 // Uma única fonte de verdade — usada no site (cards), no onboarding (opções)
 // e no painel (personalização por ramo).
 
-export type NichoKey = "brinquedos" | "espacos" | "buffet" | "pegmonte" | "decoracao" | "outro";
+export type NichoKey = "brinquedos" | "espacos" | "buffet" | "pegmonte" | "decoracao" | "doces" | "outro";
 
 export type Nicho = {
   key: NichoKey;
@@ -48,23 +48,33 @@ export const NICHOS: Nicho[] = [
   },
   {
     key: "pegmonte",
-    label: "Peg-monte de doces & salgados",
-    titulo: "Peg-monte de doces & salgados",
-    desc: "Mesa de guloseimas, doces, salgados e tortas por encomenda para festas.",
-    icon: "Candy",
+    label: "Pegue e monte (decoração)",
+    titulo: "Pegue e monte",
+    desc: "Kits de decoração prontos para o cliente retirar, montar a própria festa e devolver.",
+    icon: "PackageOpen",
     cor: { bg: "bg-fuchsia-100", text: "text-fuchsia-600" },
     termoItem: "kits",
-    foco: "Pedidos por data de entrega, kits, agenda de produção e recebimentos.",
+    foco: "Kits por data de retirada e devolução, com contrato e controle de caução.",
   },
   {
     key: "decoracao",
     label: "Decoração de festas",
-    titulo: "Decoração de festas",
-    desc: "Painéis, balões, temas, mobiliário e cenografia para aluguel e montagem.",
+    titulo: "Decoração de festas (montagem)",
+    desc: "Painéis, balões, temas, mobiliário e cenografia — sua equipe monta e desmonta.",
     icon: "Sparkles",
     cor: { bg: "bg-cyan-100", text: "text-cyan-600" },
     termoItem: "kits",
     foco: "Agenda de montagem/retirada, orçamento por tema e contrato automático.",
+  },
+  {
+    key: "doces",
+    label: "Doces & salgados",
+    titulo: "Doces & salgados",
+    desc: "Mesa de doces, bolos, docinhos e salgados por encomenda para festas e eventos.",
+    icon: "Candy",
+    cor: { bg: "bg-rose-100", text: "text-rose-600" },
+    termoItem: "encomendas",
+    foco: "Pedidos por data de entrega, agenda de produção e recebimentos no controle.",
   },
 ];
 

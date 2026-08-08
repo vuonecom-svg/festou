@@ -3,7 +3,7 @@ import Link from "next/link";
 import {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
   ShieldCheck, Check, ArrowRight, Sparkles, Tent, Building2, UtensilsCrossed, Candy,
-  PartyPopper, type LucideIcon,
+  PartyPopper, PackageOpen, type LucideIcon,
 } from "lucide-react";
 import { FEATURES, BILLING, PLAN_FEATURES, FAQS, KIWIFY } from "@/lib/site-content";
 import { NICHOS } from "@/lib/nichos";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 const ICONS: Record<string, LucideIcon> = {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
-  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper,
+  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper, PackageOpen,
 };
 
 export default function LandingPage() {
@@ -33,7 +33,7 @@ export default function LandingPage() {
             Organize sua empresa de festas e <span className="text-accent">nunca mais perca uma data por desorganização</span>
           </h1>
           <p className="mt-5 text-lg text-muted max-w-2xl mx-auto">
-            Brinquedos, espaços, buffet, peg-monte, decoração — do orçamento no WhatsApp à entrega: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
+            Brinquedos, espaços, buffet, pegue e monte, decoração, doces e salgados — do orçamento no WhatsApp à entrega: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
           </p>
           <p className="mt-5 text-sm font-bold uppercase tracking-[0.2em] text-muted">
             Do pedido à devolução, <span className="text-flow">tudo flui.</span>

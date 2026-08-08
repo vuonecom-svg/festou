@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper, ArrowRight, Check,
+  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper, PackageOpen, ArrowRight, Check,
   type LucideIcon,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
@@ -11,7 +11,7 @@ import { NICHO_OPCOES } from "@/lib/nichos";
 import { salvarPerfilInicial } from "./actions";
 
 const ICONS: Record<string, LucideIcon> = {
-  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper,
+  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper, PackageOpen,
 };
 
 const EQUIPES = [
