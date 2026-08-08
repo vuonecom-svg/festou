@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
-  ShieldCheck, Check, ArrowRight, Sparkles, type LucideIcon,
+  ShieldCheck, Check, ArrowRight, Sparkles, Tent, Building2, UtensilsCrossed, Candy,
+  PartyPopper, type LucideIcon,
 } from "lucide-react";
 import { FEATURES, BILLING, PLAN_FEATURES, FAQS, KIWIFY } from "@/lib/site-content";
+import { NICHOS } from "@/lib/nichos";
 
 export const metadata: Metadata = {
   title: "FesFlow — Sistema de gestão para locadoras de brinquedos",
@@ -14,6 +16,7 @@ export const metadata: Metadata = {
 
 const ICONS: Record<string, LucideIcon> = {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
+  Tent, Building2, UtensilsCrossed, Candy, Sparkles, PartyPopper,
 };
 
 export default function LandingPage() {
@@ -24,13 +27,13 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary-soft/60 to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4 pt-16 pb-14 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft text-primary px-3 py-1 text-sm font-medium">
-            <Sparkles size={15} /> Agenda inteligente para locações de festa
+            <Sparkles size={15} /> Gestão para quem vive de festas e eventos
           </span>
           <h1 className="mt-5 text-4xl sm:text-5xl font-bold tracking-tight max-w-3xl mx-auto leading-tight">
-            Organize sua locadora e <span className="text-accent">nunca mais alugue o mesmo brinquedo duas vezes</span>
+            Organize sua empresa de festas e <span className="text-accent">nunca mais perca uma data por desorganização</span>
           </h1>
           <p className="mt-5 text-lg text-muted max-w-2xl mx-auto">
-            Do orçamento no WhatsApp ao brinquedo de volta na base: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
+            Brinquedos, espaços, buffet, peg-monte, decoração — do orçamento no WhatsApp à entrega: agenda inteligente, contratos, financeiro e relatórios num só lugar. Chega de caderno e planilha.
           </p>
           <p className="mt-5 text-sm font-bold uppercase tracking-[0.2em] text-muted">
             Do pedido à devolução, <span className="text-flow">tudo flui.</span>
@@ -45,6 +48,37 @@ export default function LandingPage() {
           </div>
           <p className="mt-3 text-sm text-muted">1º mês por R$ 5 · Acesso pelo celular ou computador</p>
         </div>
+      </section>
+
+      {/* Nichos */}
+      <section id="nichos" className="mx-auto max-w-6xl px-4 py-16">
+        <div className="text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold">Feito para o seu tipo de festa</h2>
+          <p className="mt-3 text-muted">
+            Não importa o que você aluga ou serve — o FesFlow se adapta ao seu ramo. Ao entrar, o sistema pergunta o seu negócio e monta o painel ideal pra você.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {NICHOS.map((n) => {
+            const Icon = ICONS[n.icon] ?? Package;
+            return (
+              <div key={n.key} className="card p-6">
+                <span className={`grid place-items-center h-12 w-12 rounded-xl mb-3 ${n.cor.bg} ${n.cor.text}`}>
+                  <Icon size={24} />
+                </span>
+                <h3 className="font-semibold text-lg">{n.titulo}</h3>
+                <p className="mt-1.5 text-sm text-muted">{n.desc}</p>
+                <p className="mt-3 text-sm font-medium text-foreground/80 flex items-start gap-1.5">
+                  <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> {n.foco}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-center text-sm text-muted mt-8">
+          É de outro ramo de festas? O FesFlow atende você também.{" "}
+          <a href={KIWIFY.mensal} className="text-primary font-medium hover:underline">Comece por R$ 5 →</a>
+        </p>
       </section>
 
       {/* Dores */}

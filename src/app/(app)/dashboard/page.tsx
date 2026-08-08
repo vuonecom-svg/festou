@@ -11,16 +11,32 @@ import { brinquedoStats } from "@/lib/data/brinquedos";
 import { dashboardEventos, RESERVA_STATUS } from "@/lib/data/reservas";
 import { pedidoStats, dashboardFinanceiro } from "@/lib/data/pedidos";
 import { orcamentoStats } from "@/lib/data/orcamentos";
+import { getCurrentEmpresaId } from "@/lib/tenant";
+import { prisma } from "@/lib/prisma";
+import { getNicho } from "@/lib/nichos";
+
+const FOCO_ATALHO: Record<string, { href: string; label: string }> = {
+  agenda: { href: "/agenda", label: "Ver sua agenda" },
+  orcamentos: { href: "/orcamentos/novo", label: "Criar um orçamento" },
+  financeiro: { href: "/financeiro", label: "Ver o financeiro" },
+  clientes: { href: "/clientes", label: "Cadastrar clientes" },
+};
 
 export default async function DashboardPage() {
   const agora = new Date();
-  const [brinq, eventos, fin, pStats, oStats] = await Promise.all([
+  const empresaId = await getCurrentEmpresaId();
+  const [empresa, brinq, eventos, fin, pStats, oStats] = await Promise.all([
+    prisma.empresa.findUnique({ where: { id: empresaId }, select: { nicho: true, perfilNegocio: true } }),
     brinquedoStats(),
     dashboardEventos(agora),
     dashboardFinanceiro(agora),
     pedidoStats(),
     orcamentoStats(),
   ]);
+
+  const nicho = getNicho(empresa?.nicho);
+  const perfil = (empresa?.perfilNegocio ?? null) as { foco?: string } | null;
+  const atalho = perfil?.foco ? FOCO_ATALHO[perfil.foco] : undefined;
 
   const { hoje, semana, proximas } = eventos;
   const { faturamentoMes, pagamentosPendentes } = fin;
@@ -45,6 +61,23 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {nicho && (
+        <section className="card p-5 bg-primary-soft/40 border border-primary/20">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-primary font-semibold">Seu painel — {nicho.label}</p>
+              <h2 className="mt-1 font-semibold text-lg">Bem-vindo! Organizamos tudo para o seu ramo. 🎉</h2>
+              <p className="text-sm text-muted mt-1">{nicho.foco}</p>
+            </div>
+            {atalho && (
+              <Link href={atalho.href} className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-4 h-10 text-sm font-medium hover:bg-primary/90">
+                {atalho.label} <Sparkles size={16} />
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
+
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatCard label="Eventos hoje" value={hoje} icon={CalendarDays} />
         <StatCard label="Eventos na semana" value={semana} icon={CalendarRange} tone="info" />

@@ -195,6 +195,9 @@ model Empresa {
   planoId           String?          @map("plano_id")
   statusAssinatura  AssinaturaStatus @default(trial) @map("status_assinatura")
   trialAte          DateTime?        @map("trial_ate")
+  nicho             String?          // ramo do negócio (brinquedos, espacos, buffet, pegmonte, decoracao, outro)
+  perfilNegocio     Json?            @map("perfil_negocio") // respostas do onboarding (oferece, equipe, foco)
+  onboardingEm      DateTime?        @map("onboarding_em")
   criadoEm          DateTime         @default(now()) @map("criado_em")
 
   plano Plano? @relation(fields: [planoId], references: [id])

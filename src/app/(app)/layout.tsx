@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { verificarAcesso } from "@/lib/access-check";
+import { getCurrentEmpresaId } from "@/lib/tenant";
+import { prisma } from "@/lib/prisma";
 
 // Páginas da plataforma são renderizadas por requisição (leem o banco).
 // Evita tentar pré-renderizar no build (que exigiria o banco no build-time).
@@ -14,6 +16,11 @@ export default async function AppLayout({
   if (!acesso.ok) {
     redirect(acesso.motivo === "bloqueado" ? "/acesso-bloqueado" : "/entrar");
   }
+
+  // Onboarding: se a empresa ainda não escolheu o ramo, configura antes de usar.
+  const empresaId = await getCurrentEmpresaId();
+  const emp = await prisma.empresa.findUnique({ where: { id: empresaId }, select: { nicho: true } });
+  if (!emp?.nicho) redirect("/config-inicial");
 
   return (
     <div className="flex h-screen overflow-hidden">
