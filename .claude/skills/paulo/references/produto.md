@@ -118,10 +118,14 @@ rota privada, em `ROTAS_PRIVADAS`.
   Clarity. **Continua sendo o P0 absoluto** — sem isso não se mede aquisição.
 - **Não indexado no Google**: em 09/08/2026, `site:fesflow.com.br` retornou zero resultados,
   mesmo com o site no ar. Depende de Search Console (ação do dono).
-- **Sem página por segmento** (pula-pula, pegue e monte, buffet, mesas e cadeiras, espaços…) —
-  apesar de o produto já ter 6 nichos definidos em `src/lib/nichos.ts`.
-- **Sem prova social** e **sem screenshot do produto** em nenhum lugar do site.
-- **Sem comparativo contra concorrente nomeado** (só contra planilha).
+- **Sem prova social** e **sem screenshot do produto** em nenhum lugar do site. ← maior gargalo
+  de conversão hoje.
+- **Sem comparativo contra concorrente nomeado** (só contra planilha, em `/precos`).
+- **Sem teste grátis** — o mercado inteiro oferece; nosso equivalente é o 1º mês por R$ 5.
+
+✅ Páginas por segmento **resolvido em 09/08/2026**: `src/lib/segmentos.ts` + rota
+`(site)/[segmento]` geram 6 páginas comerciais (brinquedos, salão de festas, buffet, pegue e monte,
+decoração, doces), cada uma com dor, solução e FAQ próprias do ramo. Blog subiu de 3 → 6 artigos.
 
 **Consequência prática:** hoje não existe forma de medir aquisição. Qualquer investimento em mídia
 antes de resolver tracking é dinheiro cego. Isso deve ser **P0** em qualquer plano que você propuser.

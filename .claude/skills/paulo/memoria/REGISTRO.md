@@ -85,4 +85,47 @@ Regra: **só entra o que foi observado.** Hipótese entra rotulada como hipótes
     `paginaMetadata()` em `src/lib/seo.tsx`. **Toda página nova deve usar esse helper.**
   - ⚙️ O middleware (`src/proxy.ts`) rodava `supabase.auth.getUser()` até em `robots.txt` —
     excluído dos arquivos de SEO.
-  - ⚠️ **Não deployado.** Está tudo em `main` local, build verde. Deploy depende do dono.
+  - ✅ **DEPLOYADO EM PRODUÇÃO em 09/08/2026** — ver o registro de deploy no fim deste arquivo.
+
+- **09/08/2026 — Segunda rodada: páginas comerciais e conteúdo.**
+  - **6 páginas por segmento** criadas em `src/lib/segmentos.ts` + rota `(site)/[segmento]`
+    (`dynamicParams = false`, então só os 6 slugs existem e o resto é 404):
+    `/sistema-para-locadora-de-brinquedos`, `/sistema-para-aluguel-de-salao-de-festas`,
+    `/sistema-para-buffet`, `/sistema-para-pegue-e-monte`, `/sistema-para-decoracao-de-festas`,
+    `/sistema-para-doces-e-salgados`. Cada uma com dor, solução e FAQ **próprias** do ramo —
+    nada de template com a palavra trocada. Os 6 nichos já existiam em `src/lib/nichos.ts` e
+    nenhum tinha página.
+  - Cards de nicho da home viraram links para as páginas de segmento (passa autoridade da home).
+  - **3 artigos novos** mirando as pautas que o Cortex Agenda já ocupa: precificação de pula-pula,
+    "do WhatsApp ao contrato assinado" e organização da agenda. Blog foi de 3 → 6 artigos.
+  - Sitemap: de **0 URLs (inexistente) → 18 URLs**.
+  - ⚠️ Lint do projeto tem 4 erros + 2 warnings **pré-existentes** (definir-senha, trocar-senha,
+    mobile-nav, verificador-disponibilidade, PDFs) — nenhum é do trabalho de SEO. Não mexidos.
+
+- **09/08/2026 — DEPLOY EM PRODUÇÃO (e a armadilha de branch que quase passou batido).**
+  ⛔ **Armadilha para a próxima vez:** o trabalho estava sendo feito na branch **`nichos-onboarding`**,
+  não em `main`. Produção sai de `main`. Mais grave: `src/lib/nichos.ts` **só existe na branch** —
+  ou seja, as 6 páginas por segmento dependiam de um recurso do dono ainda não lançado.
+  Mergear a branch para deployar o SEO teria empurrado junto o recurso multi-nicho + onboarding
+  dele, sem ele pedir. **Sempre confira `git status -sb` e de onde a produção sai antes de falar
+  em deploy.**
+
+  Solução aplicada — separar o que dá para separar:
+  1. Worktree limpo a partir de `origin/main` (não encostar na árvore de trabalho do dono, que tinha
+     `config-inicial/`, `launch.json` e 6 `scripts/*.mjs` não commitados).
+  2. Levados só os arquivos sem dependência de nichos; `sitemap.ts` reescrito sem `SEGMENTOS`; na
+     home antiga aplicados só metadata + JSON-LD + links `/precos`.
+  3. Build verde + 44 testes, push fast-forward `7585dc9..acedc80` para `main`.
+  4. Depois, `origin/main` mergeado de volta na `nichos-onboarding` (2 conflitos triviais em
+     `(site)/page.tsx` e `sitemap.ts`, resolvidos mantendo a branch, que é superconjunto) — commit
+     `8da7bb9`. **A branch do dono ficou limpa para mergear quando ele quiser.**
+
+  ✅ **Verificado ao vivo em produção:** `fesflow.com.br/sitemap.xml` responde com as 12 URLs,
+  `/precos` no ar com a tabela comparativa, e o artigo de precificação de pula-pula publicado.
+
+  **No ar agora:** fundação de SEO + `/precos` + 6 artigos de blog.
+  **Ainda na branch `nichos-onboarding`** (sobem quando o dono lançar o multi-nicho): as 6 páginas
+  por segmento e a home multi-nicho.
+
+  ➡️ **Próximo passo que só o dono faz:** Search Console (verificar domínio + submeter o sitemap).
+  Sem isso o site continua sem ser indexado, mesmo com tudo publicado.
