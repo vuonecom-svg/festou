@@ -31,7 +31,9 @@ export default function ConfigInicialPage() {
   const [nicho, setNicho] = useState<string>("");
   const [oferece, setOferece] = useState("");
   const [equipe, setEquipe] = useState("");
-  const [foco, setFoco] = useState("");
+  const [focos, setFocos] = useState<string[]>([]);
+  const toggleFoco = (v: string) =>
+    setFocos((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]));
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -39,7 +41,7 @@ export default function ConfigInicialPage() {
     setSalvando(true);
     setErro("");
     try {
-      const r = await salvarPerfilInicial({ nicho, oferece, equipe, foco });
+      const r = await salvarPerfilInicial({ nicho, oferece, equipe, focos });
       if (!r.ok) { setErro("Não foi possível salvar. Tente de novo."); setSalvando(false); return; }
       window.location.href = "/dashboard";
     } catch {
@@ -121,14 +123,20 @@ export default function ConfigInicialPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-foreground/80">Qual sua maior prioridade agora?</label>
+                <label className="block text-sm font-medium text-foreground/80">Quais suas prioridades agora? <span className="text-muted font-normal">(marque quantas quiser)</span></label>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {FOCOS.map((f) => (
-                    <button key={f.v} type="button" onClick={() => setFoco(f.v)}
-                      className={"rounded-lg border px-4 h-11 text-sm font-medium text-left " + (foco === f.v ? "border-primary bg-primary-soft text-primary" : "border-border hover:bg-surface")}>
-                      {f.label}
-                    </button>
-                  ))}
+                  {FOCOS.map((f) => {
+                    const on = focos.includes(f.v);
+                    return (
+                      <button key={f.v} type="button" onClick={() => toggleFoco(f.v)}
+                        className={"flex items-center gap-2 rounded-lg border px-4 h-11 text-sm font-medium text-left " + (on ? "border-primary bg-primary-soft text-primary" : "border-border hover:bg-surface")}>
+                        <span className={"grid place-items-center h-4 w-4 rounded border shrink-0 " + (on ? "bg-primary border-primary text-primary-fg" : "border-border")}>
+                          {on && <Check size={12} />}
+                        </span>
+                        {f.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

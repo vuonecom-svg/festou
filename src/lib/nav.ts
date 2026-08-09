@@ -17,6 +17,7 @@ import {
   ScrollText,
   type LucideIcon,
 } from "lucide-react";
+import { termosDo, type Nicho } from "./nichos";
 
 export type NavItem = {
   href: string;
@@ -76,3 +77,21 @@ export const NAV_GROUPS: NavGroup[] = [
 
 // Lista plana (usada, por ex., pela topbar para achar o título da rota atual).
 export const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.itens);
+
+// Menu adaptado ao ramo: renomeia o catálogo ("Brinquedos" -> "Espaços"/"Pacotes"/
+// "Kits"/"Cardápio"...) e "Locações" -> "Reservas"/"Eventos"/"Encomendas".
+export function navGroupsFor(nicho: Nicho | undefined): NavGroup[] {
+  const t = termosDo(nicho);
+  return NAV_GROUPS.map((g) => ({
+    ...g,
+    itens: g.itens.map((it) => {
+      if (it.href === "/brinquedos") return { ...it, label: t.itens };
+      if (it.href === "/pedidos") return { ...it, label: t.pedidos };
+      return it;
+    }),
+  }));
+}
+
+export function navItemsFor(nicho: Nicho | undefined): NavItem[] {
+  return navGroupsFor(nicho).flatMap((g) => g.itens);
+}

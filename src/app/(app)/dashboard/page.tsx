@@ -13,11 +13,11 @@ import { pedidoStats, dashboardFinanceiro } from "@/lib/data/pedidos";
 import { orcamentoStats } from "@/lib/data/orcamentos";
 import { getCurrentEmpresaId } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
-import { getNicho } from "@/lib/nichos";
+import { getNicho, termosDo } from "@/lib/nichos";
 
 const FOCO_ATALHO: Record<string, { href: string; label: string }> = {
-  agenda: { href: "/agenda", label: "Ver sua agenda" },
-  orcamentos: { href: "/orcamentos/novo", label: "Criar um orçamento" },
+  agenda: { href: "/agenda", label: "Ver a agenda" },
+  orcamentos: { href: "/orcamentos/novo", label: "Criar orçamento" },
   financeiro: { href: "/financeiro", label: "Ver o financeiro" },
   clientes: { href: "/clientes", label: "Cadastrar clientes" },
 };
@@ -35,8 +35,9 @@ export default async function DashboardPage() {
   ]);
 
   const nicho = getNicho(empresa?.nicho);
-  const perfil = (empresa?.perfilNegocio ?? null) as { foco?: string } | null;
-  const atalho = perfil?.foco ? FOCO_ATALHO[perfil.foco] : undefined;
+  const termos = termosDo(nicho);
+  const perfil = (empresa?.perfilNegocio ?? null) as { focos?: string[] } | null;
+  const atalhos = (perfil?.focos ?? []).map((f) => FOCO_ATALHO[f]).filter(Boolean);
 
   const { hoje, semana, proximas } = eventos;
   const { faturamentoMes, pagamentosPendentes } = fin;
@@ -63,17 +64,31 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {nicho && (
         <section className="card p-5 bg-primary-soft/40 border border-primary/20">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-wide text-primary font-semibold">Seu painel — {nicho.label}</p>
-              <h2 className="mt-1 font-semibold text-lg">Bem-vindo! Organizamos tudo para o seu ramo. 🎉</h2>
+              <h2 className="mt-1 font-semibold text-lg">Organizamos o FesFlow para o seu ramo. 🎉</h2>
               <p className="text-sm text-muted mt-1">{nicho.foco}</p>
             </div>
-            {atalho && (
-              <Link href={atalho.href} className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-4 h-10 text-sm font-medium hover:bg-primary/90">
-                {atalho.label} <Sparkles size={16} />
-              </Link>
+            {atalhos.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {atalhos.map((a) => (
+                  <Link key={a.href} href={a.href} className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-4 h-10 text-sm font-medium hover:bg-primary/90">
+                    {a.label}
+                  </Link>
+                ))}
+              </div>
             )}
+          </div>
+          <div className="mt-4 border-t border-primary/10 pt-4">
+            <p className="text-xs uppercase tracking-wide text-muted font-semibold mb-2">O que o FesFlow resolve para {nicho.label.toLowerCase()}</p>
+            <ul className="grid gap-2 sm:grid-cols-3">
+              {nicho.dores.map((d) => (
+                <li key={d} className="flex items-start gap-2 text-sm text-foreground/80">
+                  <Sparkles size={15} className="text-primary shrink-0 mt-0.5" /> {d}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
@@ -86,7 +101,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Brinquedos disponíveis" value={brinq.disponivel} icon={Package} tone="success" />
+        <StatCard label={`${termos.itens} disponíveis`} value={brinq.disponivel} icon={Package} tone="success" />
         <StatCard label="Alugados" value={brinq.alugado} icon={PackageCheck} tone="info" />
         <StatCard label="Em manutenção" value={brinq.manutencao} icon={Wrench} tone="warning" />
         <StatCard label="Em limpeza" value={brinq.limpeza} icon={Sparkles} />

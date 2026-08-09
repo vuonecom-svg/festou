@@ -1,8 +1,18 @@
 // Nichos de negócio atendidos pelo FesFlow (locação e serviços de festa).
 // Uma única fonte de verdade — usada no site (cards), no onboarding (opções)
-// e no painel (personalização por ramo).
+// e no painel (linguagem + dores por ramo).
 
 export type NichoKey = "brinquedos" | "espacos" | "buffet" | "pegmonte" | "decoracao" | "doces" | "outro";
+
+// Vocabulário que adapta o painel ao ramo (menu, títulos, botões, stats).
+export type Termos = {
+  itens: string;        // rótulo do catálogo no menu (plural) ex.: "Espaços"
+  item: string;         // singular minúsculo ex.: "espaço"
+  novo: string;         // botão de cadastro ex.: "Novo espaço"
+  pedidos: string;      // rótulo de "Locações/Pedidos" no menu ex.: "Reservas"
+  disponiveis: string;  // stat de disponíveis no dashboard
+  subtitulo: string;    // subtítulo do menu lateral
+};
 
 export type Nicho = {
   key: NichoKey;
@@ -11,8 +21,16 @@ export type Nicho = {
   desc: string;         // descrição do card
   icon: string;         // nome do ícone lucide-react
   cor: { bg: string; text: string }; // classes tailwind
-  termoItem: string;    // como chamar o "item do catálogo" nesse ramo (plural)
+  termoItem: string;    // (legado) como chamar o item do catálogo
   foco: string;         // frase de valor para esse ramo
+  termos: Termos;       // vocabulário do painel
+  dores: string[];      // 3 dores específicas do ramo (diferencial)
+};
+
+// Vocabulário padrão (ramo "outro" ou não definido).
+export const TERMOS_PADRAO: Termos = {
+  itens: "Itens", item: "item", novo: "Novo item",
+  pedidos: "Pedidos", disponiveis: "Itens disponíveis", subtitulo: "Locações de festa",
 };
 
 export const NICHOS: Nicho[] = [
@@ -25,6 +43,12 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-teal-100", text: "text-teal-600" },
     termoItem: "brinquedos",
     foco: "Agenda anti-overbooking por unidade, com transporte e limpeza no cálculo.",
+    termos: { itens: "Brinquedos", item: "brinquedo", novo: "Novo brinquedo", pedidos: "Locações", disponiveis: "Brinquedos disponíveis", subtitulo: "Locação de brinquedos" },
+    dores: [
+      "Alugar o mesmo brinquedo para duas festas no mesmo dia",
+      "Esquecer o tempo de transporte e limpeza entre um evento e outro",
+      "Não saber qual brinquedo realmente dá lucro",
+    ],
   },
   {
     key: "espacos",
@@ -35,6 +59,12 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-indigo-100", text: "text-indigo-600" },
     termoItem: "espaços",
     foco: "Agenda por data e turno, contrato e controle de sinal — sem reserva dupla.",
+    termos: { itens: "Espaços", item: "espaço", novo: "Novo espaço", pedidos: "Reservas", disponiveis: "Espaços disponíveis", subtitulo: "Espaços & salões" },
+    dores: [
+      "Reservar o mesmo salão para dois eventos na mesma data",
+      "Perder o controle do sinal e do saldo de cada reserva",
+      "Agenda de datas e turnos bagunçada no caderno",
+    ],
   },
   {
     key: "buffet",
@@ -45,6 +75,12 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-amber-100", text: "text-amber-600" },
     termoItem: "pacotes",
     foco: "Orçamento por convidado, pacotes, contrato e financeiro do evento.",
+    termos: { itens: "Pacotes", item: "pacote", novo: "Novo pacote", pedidos: "Eventos", disponiveis: "Pacotes ativos", subtitulo: "Buffet & gastronomia" },
+    dores: [
+      "Orçamento por convidado feito na mão, com erro de conta",
+      "Não saber quantos eventos cabem na mesma data e equipe",
+      "Recebimentos e saldo de cada evento sem controle",
+    ],
   },
   {
     key: "pegmonte",
@@ -55,6 +91,12 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-fuchsia-100", text: "text-fuchsia-600" },
     termoItem: "kits",
     foco: "Kits por data de retirada e devolução, com contrato e controle de caução.",
+    termos: { itens: "Kits", item: "kit", novo: "Novo kit", pedidos: "Locações", disponiveis: "Kits disponíveis", subtitulo: "Pegue e monte" },
+    dores: [
+      "Locar o mesmo kit de decoração para duas festas no mesmo dia",
+      "Perder o controle da caução e do que saiu e voltou",
+      "Datas de retirada e devolução se atropelando",
+    ],
   },
   {
     key: "decoracao",
@@ -65,6 +107,12 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-cyan-100", text: "text-cyan-600" },
     termoItem: "kits",
     foco: "Agenda de montagem/retirada, orçamento por tema e contrato automático.",
+    termos: { itens: "Kits de decoração", item: "kit", novo: "Novo kit", pedidos: "Eventos", disponiveis: "Kits disponíveis", subtitulo: "Decoração de festas" },
+    dores: [
+      "Montagem e retirada da equipe sem uma agenda clara",
+      "Orçar o tema na mão e esquecer itens no fechamento",
+      "Contrato e responsabilidade por danos sem padrão",
+    ],
   },
   {
     key: "doces",
@@ -75,12 +123,23 @@ export const NICHOS: Nicho[] = [
     cor: { bg: "bg-rose-100", text: "text-rose-600" },
     termoItem: "encomendas",
     foco: "Pedidos por data de entrega, agenda de produção e recebimentos no controle.",
+    termos: { itens: "Cardápio", item: "item", novo: "Novo item", pedidos: "Encomendas", disponiveis: "Itens no cardápio", subtitulo: "Doces & salgados" },
+    dores: [
+      "Encomendas se acumulando na mesma data de entrega",
+      "Produção sem agenda — vira correria e atraso",
+      "Sinal e recebimento das encomendas sem controle",
+    ],
   },
 ];
 
 export function getNicho(key: string | null | undefined): Nicho | undefined {
   if (!key) return undefined;
   return NICHOS.find((n) => n.key === key);
+}
+
+// Vocabulário do ramo (com fallback padrão para "outro"/não definido).
+export function termosDo(nicho: Nicho | undefined): Termos {
+  return nicho?.termos ?? TERMOS_PADRAO;
 }
 
 // Opções do onboarding (nichos + "Outro").

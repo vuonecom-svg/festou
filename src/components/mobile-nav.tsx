@@ -5,14 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LogOut } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
-import { NAV_GROUPS } from "@/lib/nav";
+import { navGroupsFor } from "@/lib/nav";
+import { getNicho } from "@/lib/nichos";
 import { cn } from "@/lib/utils";
 import { sairAction } from "@/app/entrar/actions";
 
 // Navegação mobile: hambúrguer + drawer lateral (a sidebar fixa é hidden md:flex).
-export function MobileNav() {
+export function MobileNav({ nichoKey }: { nichoKey?: string | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const grupos = navGroupsFor(getNicho(nichoKey));
 
   // Fecha ao trocar de rota.
   useEffect(() => {
@@ -44,7 +46,7 @@ export function MobileNav() {
             </div>
 
             <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
-              {NAV_GROUPS.map((grupo, gi) => (
+              {grupos.map((grupo, gi) => (
                 <div key={gi} className="space-y-0.5">
                   {grupo.titulo && (
                     <p className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-fg/40">

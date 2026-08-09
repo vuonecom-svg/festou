@@ -4,12 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
-import { NAV_GROUPS } from "@/lib/nav";
+import { navGroupsFor } from "@/lib/nav";
+import { getNicho, termosDo } from "@/lib/nichos";
 import { cn } from "@/lib/utils";
 import { sairAction } from "@/app/entrar/actions";
 
-export function Sidebar() {
+export function Sidebar({ nichoKey }: { nichoKey?: string | null }) {
   const pathname = usePathname();
+  const nicho = getNicho(nichoKey);
+  const grupos = navGroupsFor(nicho);
+  const subtitulo = termosDo(nicho).subtitulo;
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col bg-sidebar text-sidebar-fg">
@@ -17,12 +21,12 @@ export function Sidebar() {
         <BrandMark size={34} />
         <div className="leading-tight">
           <p className="font-semibold text-white text-lg tracking-wide">FesFlow</p>
-          <p className="text-[10px] text-sidebar-fg/60 uppercase tracking-wider">Locações de festa</p>
+          <p className="text-[10px] text-sidebar-fg/60 uppercase tracking-wider">{subtitulo}</p>
         </div>
       </Link>
 
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
-        {NAV_GROUPS.map((grupo, gi) => (
+        {grupos.map((grupo, gi) => (
           <div key={gi} className="space-y-0.5">
             {grupo.titulo && (
               <p className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-fg/40">

@@ -7,7 +7,7 @@ export type PerfilInicial = {
   nicho: string;
   oferece?: string;
   equipe?: string;
-  foco?: string;
+  focos?: string[];
 };
 
 // Salva o nicho + respostas do onboarding na empresa do usuário logado.
@@ -22,7 +22,7 @@ export async function salvarPerfilInicial(input: PerfilInicial): Promise<{ ok: b
       perfilNegocio: {
         oferece: input.oferece?.trim() ?? "",
         equipe: input.equipe ?? "",
-        foco: input.foco ?? "",
+        focos: input.focos ?? [],
       },
       onboardingEm: new Date(),
     },
