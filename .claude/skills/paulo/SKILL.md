@@ -106,6 +106,7 @@ MENSAGEM · CTA · MÉTRICA. Só então execute.
 | Meta Ads, Google Ads, criativos, ângulos, retargeting, orçamento e CAC máximo | `references/trafego-pago.md` |
 | Funil de marketing e funil SaaS, product marketing, landing page, ativação/time-to-value, onboarding, CRM, e-mail, WhatsApp, retenção, indicação, parcerias, influência, lead magnet, lançamento | `references/funil-lifecycle.md` |
 | Analytics, tracking/eventos, north star, economia SaaS (CAC/LTV/MRR/churn), CRO, testes A/B, priorização, relatório semanal | `references/dados-cro-testes.md` |
+| **Depoimento, case, prova social, "inventa um depoimento"** — o que é permitido, quem são os clientes reais e como conseguir prova de verdade | `references/prova-social.md` |
 | **"Paulo, cuide do marketing"** — auditoria completa de 23 pontos + planos de 30/90 dias e 6 meses | `references/auditoria-completa.md` |
 | Registrar/consultar aprendizado: teste feito, criativo vencedor/perdedor, keyword, objeção, CAC | `memoria/REGISTRO.md` |
 
