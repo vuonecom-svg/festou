@@ -127,5 +127,23 @@ Regra: **só entra o que foi observado.** Hipótese entra rotulada como hipótes
   **Ainda na branch `nichos-onboarding`** (sobem quando o dono lançar o multi-nicho): as 6 páginas
   por segmento e a home multi-nicho.
 
-  ➡️ **Próximo passo que só o dono faz:** Search Console (verificar domínio + submeter o sitemap).
-  Sem isso o site continua sem ser indexado, mesmo com tudo publicado.
+- **09/08/2026 — SEARCH CONSOLE CONFIGURADO (o site saiu da invisibilidade).**
+  Feito pelo Chrome do dono, com autorização dele.
+  - Propriedade **`https://fesflow.com.br/` criada e VERIFICADA** — tipo **Prefixo do URL**,
+    método **Tag HTML**. Escolhido em vez de "Domínio" porque a verificação por DNS exigiria o
+    Registro.br (e o dono teria que digitar senha).
+  - ⛔ **A meta tag NÃO PODE SER REMOVIDA.** Fica em `src/app/layout.tsx`, campo
+    `verification.google` = `8cDkdOXSen3Toee4mVWoY3wjurx95nSgzezFZEGrLG8`. O Google revalida de
+    tempos em tempos; se a tag sumir, a propriedade cai e o histórico de dados vai junto.
+    Publicada em produção pelo commit `fc3ae75`.
+  - **Sitemap `sitemap.xml` enviado** → status **Processado**, **12 páginas encontradas**.
+  - **Indexação prioritária solicitada** para `/` e `/precos` (as duas mais importantes).
+    O resto entra pelo sitemap. O Google limita pedidos manuais por dia — não adianta insistir.
+  - Estado no momento: ambas "Detectada, mas não indexada" — normal para site novo. O importante é
+    que o Google **já leu o sitemap** (aparece como fonte de detecção nas duas URLs).
+
+  ➡️ **Próximo passo do Paulo:** em ~3 a 7 dias, abrir Search Console → Desempenho e Páginas, ver
+  o que indexou e quais consultas trouxeram impressão. **A partir daí, priorizar pauta por dado
+  real** (impressão/posição), não por chute contra o Cortex Agenda.
+  ➡️ **Ainda pendente com o dono:** GA4/GTM (nenhum tracking existe), screenshots do produto e
+  o primeiro depoimento de cliente.
