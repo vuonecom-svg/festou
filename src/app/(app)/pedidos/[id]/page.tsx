@@ -9,6 +9,8 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { getPedido, PEDIDO_FIN, PEDIDO_OP, type PedidoStatusOp } from "@/lib/data/pedidos";
 import { formatBRL } from "@/lib/utils";
 import { registrarPagamentoAction, avancarStatusAction, excluirPedidoAction, reagendarPedidoAction } from "../actions";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 const FLUXO_OP: PedidoStatusOp[] = [
   "aguardando_separacao",
@@ -30,6 +32,7 @@ export default async function PedidoDetalhePage({
   const { erro, ok } = await searchParams;
   const p = await getPedido(id);
   if (!p) notFound();
+  const termos = termosDo(await getNichoAtual());
 
   const pagar = registrarPagamentoAction.bind(null, id);
   const quitar = registrarPagamentoAction.bind(null, id);
@@ -84,7 +87,7 @@ export default async function PedidoDetalhePage({
         {/* Itens */}
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-5">
-            <h2 className="font-semibold mb-3">Brinquedos e itens</h2>
+            <h2 className="font-semibold mb-3">{termos.itens}</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

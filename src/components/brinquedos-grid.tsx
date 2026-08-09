@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { BRINQUEDO_STATUS } from "@/lib/status";
 import { formatBRL } from "@/lib/utils";
 import type { Brinquedo, BrinquedoStatus } from "@/lib/data/brinquedos";
+import { useTermos } from "@/components/nicho-context";
 
 const FILTROS: { value: BrinquedoStatus | "todos"; label: string }[] = [
   { value: "todos", label: "Todos" },
@@ -18,6 +19,7 @@ const FILTROS: { value: BrinquedoStatus | "todos"; label: string }[] = [
 ];
 
 export function BrinquedosGrid({ brinquedos }: { brinquedos: Brinquedo[] }) {
+  const termos = useTermos();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<BrinquedoStatus | "todos">("todos");
 
@@ -66,7 +68,7 @@ export function BrinquedosGrid({ brinquedos }: { brinquedos: Brinquedo[] }) {
 
       {filtrados.length === 0 ? (
         <div className="card p-10 text-center text-muted">
-          Nenhum brinquedo encontrado com esses filtros.
+          Nenhum {termos.item} encontrado com esses filtros.
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

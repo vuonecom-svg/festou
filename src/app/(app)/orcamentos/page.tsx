@@ -5,9 +5,12 @@ import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { listOrcamentos, orcamentoStats, ORC_STATUS } from "@/lib/data/orcamentos";
 import { formatBRL } from "@/lib/utils";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 export default async function OrcamentosPage() {
-  const [orcamentos, stats] = await Promise.all([listOrcamentos(), orcamentoStats()]);
+  const [orcamentos, stats, nicho] = await Promise.all([listOrcamentos(), orcamentoStats(), getNichoAtual()]);
+  const termos = termosDo(nicho);
 
   return (
     <div className="space-y-5">
@@ -29,7 +32,7 @@ export default async function OrcamentosPage() {
             <FileText size={26} />
           </span>
           <p className="font-medium">Nenhum orçamento ainda</p>
-          <p className="text-sm text-muted mt-1">Crie o primeiro e veja a disponibilidade dos brinquedos ao vivo.</p>
+          <p className="text-sm text-muted mt-1">Crie o primeiro e veja a disponibilidade dos {termos.itens.toLowerCase()} ao vivo.</p>
           <div className="mt-4">
             <ButtonLink href="/orcamentos/novo"><Plus size={18} /> Novo orçamento</ButtonLink>
           </div>

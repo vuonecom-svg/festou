@@ -6,9 +6,12 @@ import { formatBRL } from "@/lib/utils";
 import { listBrinquedos } from "@/lib/data/brinquedos";
 import { listManutencoes, MANUT_TIPO, MANUT_STATUS } from "@/lib/data/manutencoes";
 import { abrirManutencaoAction, concluirManutencaoAction, deleteManutencaoAction } from "./actions";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo, cap } from "@/lib/nichos";
 
 export default async function ManutencaoPage() {
-  const [manutencoes, brinquedos] = await Promise.all([listManutencoes(), listBrinquedos()]);
+  const [manutencoes, brinquedos, nicho] = await Promise.all([listManutencoes(), listBrinquedos(), getNichoAtual()]);
+  const termos = termosDo(nicho);
   const abertas = manutencoes.filter((m) => m.status !== "concluida");
   const historico = manutencoes.filter((m) => m.status === "concluida");
 
@@ -17,7 +20,7 @@ export default async function ManutencaoPage() {
       <div>
         <h1 className="text-xl font-semibold">Manutenção e limpeza</h1>
         <p className="text-sm text-muted">
-          Ao abrir, o brinquedo é bloqueado automaticamente na agenda. Ao concluir, ele volta a ficar disponível.
+          Ao abrir, o {termos.item} é bloqueado automaticamente na agenda. Ao concluir, ele volta a ficar disponível.
         </p>
       </div>
 
@@ -26,7 +29,7 @@ export default async function ManutencaoPage() {
         <h2 className="font-semibold mb-3">Abrir manutenção / limpeza</h2>
         <form action={abrirManutencaoAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
           <div className="lg:col-span-2">
-            <label className="block text-xs text-muted mb-1">Brinquedo</label>
+            <label className="block text-xs text-muted mb-1">{cap(termos.item)}</label>
             <select name="brinquedoId" required className={inputClass} defaultValue="">
               <option value="" disabled>Selecione…</option>
               {brinquedos.map((b) => <option key={b.id} value={b.id}>{b.nome}</option>)}
@@ -109,7 +112,7 @@ export default async function ManutencaoPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-muted border-b border-border">
-                  <th className="font-medium px-4 py-2">Brinquedo</th>
+                  <th className="font-medium px-4 py-2">{cap(termos.item)}</th>
                   <th className="font-medium px-4 py-2">Tipo</th>
                   <th className="font-medium px-4 py-2">Concluída</th>
                   <th className="font-medium px-4 py-2 text-right">Custo</th>

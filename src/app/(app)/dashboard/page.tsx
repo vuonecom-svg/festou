@@ -46,9 +46,9 @@ export default async function DashboardPage() {
   if (pagamentosPendentes > 0)
     alertas.push({ icon: Wallet, tone: "warning", texto: `${pagamentosPendentes} pedido(s) com pagamento pendente (${formatBRL(pStats.aReceber)})` });
   if (brinq.manutencao > 0)
-    alertas.push({ icon: Wrench, tone: "warning", texto: `${brinq.manutencao} brinquedo(s) em manutenção — indisponíveis para locação` });
+    alertas.push({ icon: Wrench, tone: "warning", texto: `${brinq.manutencao} ${termos.item}(s) em manutenção — indisponíveis` });
   if (brinq.limpeza > 0)
-    alertas.push({ icon: Sparkles, tone: "info", texto: `${brinq.limpeza} brinquedo(s) em limpeza aguardando liberação` });
+    alertas.push({ icon: Sparkles, tone: "info", texto: `${brinq.limpeza} ${termos.item}(s) em limpeza aguardando liberação` });
   if (oStats.abertos > 0)
     alertas.push({ icon: Clock, tone: "info", texto: `${oStats.abertos} orçamento(s) aberto(s) aguardando resposta` });
   if (alertas.length === 0)

@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { getOrcamento, ORC_STATUS, type OrcStatus } from "@/lib/data/orcamentos";
 import { formatBRL } from "@/lib/utils";
 import { setOrcamentoStatusAction, deleteOrcamentoAction, converterAction } from "../actions";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 const STATUS_ACOES: OrcStatus[] = ["enviado", "aprovado", "recusado"];
 
@@ -21,6 +23,7 @@ export default async function OrcamentoDetalhePage({
   const { erro } = await searchParams;
   const o = await getOrcamento(id);
   if (!o) notFound();
+  const termos = termosDo(await getNichoAtual());
 
   const remove = deleteOrcamentoAction.bind(null, id);
   const converter = converterAction.bind(null, id);
@@ -107,7 +110,7 @@ export default async function OrcamentoDetalhePage({
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Itens + totais */}
         <div className="lg:col-span-2 card p-5">
-          <h2 className="font-semibold mb-3">Brinquedos e itens</h2>
+          <h2 className="font-semibold mb-3">{termos.itens}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

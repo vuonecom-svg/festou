@@ -137,6 +137,11 @@ export function getNicho(key: string | null | undefined): Nicho | undefined {
   return NICHOS.find((n) => n.key === key);
 }
 
+// Capitaliza a primeira letra (para rótulos no singular: "espaço" -> "Espaço").
+export function cap(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 // Vocabulário do ramo (com fallback padrão para "outro"/não definido).
 export function termosDo(nicho: Nicho | undefined): Termos {
   return nicho?.termos ?? TERMOS_PADRAO;

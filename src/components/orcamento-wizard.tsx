@@ -7,6 +7,7 @@ import { verificarDisponibilidade, type ReservaLike } from "@/lib/disponibilidad
 import { Field, SectionTitle, inputClass, textareaClass } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatBRL } from "@/lib/utils";
+import { useTermos } from "@/components/nicho-context";
 
 const TRANSPORTE = 45;
 
@@ -41,6 +42,7 @@ export function OrcamentoWizard({
   brinquedos: BrinquedoW[];
   reservas: (ReservaLike & { clienteNome: string; cidade: string })[];
 }) {
+  const termos = useTermos();
   const [clienteId, setClienteId] = useState("");
   const [dataEvento, setDataEvento] = useState("");
   const [horaEntrega, setHoraEntrega] = useState("");
@@ -205,10 +207,10 @@ export function OrcamentoWizard({
 
         {/* Brinquedos com disponibilidade */}
         <div className="card p-5">
-          <SectionTitle>Brinquedos</SectionTitle>
+          <SectionTitle>{termos.itens}</SectionTitle>
           {!janela && (
             <p className="text-sm text-amber-600 mb-3">
-              Informe data, entrega e retirada para checar a disponibilidade de cada brinquedo.
+              Informe data, entrega e retirada para checar a disponibilidade de cada {termos.item}.
             </p>
           )}
           <div className="space-y-2">
@@ -361,7 +363,7 @@ export function OrcamentoWizard({
           <div className="mt-4 space-y-2">
             <SubmitButton className="w-full" disabled={!podeEnviar}>Criar orçamento</SubmitButton>
             {!podeEnviar && (
-              <p className="text-xs text-muted text-center">Selecione cliente, data e ao menos um brinquedo.</p>
+              <p className="text-xs text-muted text-center">Selecione cliente, data e ao menos um {termos.item}.</p>
             )}
             <Link href="/orcamentos" className="block text-center text-sm text-muted hover:text-foreground">Cancelar</Link>
           </div>

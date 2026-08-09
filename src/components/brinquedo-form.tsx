@@ -3,8 +3,10 @@ import { Field, Toggle, SectionTitle, inputClass, textareaClass } from "@/compon
 import { SubmitButton } from "@/components/ui/submit-button";
 import { BRINQUEDO_STATUS } from "@/lib/status";
 import type { Brinquedo } from "@/lib/data/brinquedos";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
-export function BrinquedoForm({
+export async function BrinquedoForm({
   action,
   brinquedo,
   submitLabel,
@@ -14,6 +16,7 @@ export function BrinquedoForm({
   submitLabel: string;
 }) {
   const b = brinquedo;
+  const termos = termosDo(await getNichoAtual());
 
   return (
     <form action={action} className="space-y-6 max-w-4xl">
@@ -21,7 +24,7 @@ export function BrinquedoForm({
       <div className="card p-5">
         <SectionTitle>Identificação</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Nome do brinquedo" htmlFor="nome" className="sm:col-span-2">
+          <Field label={`Nome do ${termos.item}`} htmlFor="nome" className="sm:col-span-2">
             <input id="nome" name="nome" required defaultValue={b?.nome} className={inputClass} placeholder="Ex.: Pula-pula Castelo 3x3" />
           </Field>
           <Field label="Código interno" htmlFor="codigoInterno" hint="Deixe em branco para gerar automático">
@@ -37,7 +40,7 @@ export function BrinquedoForm({
             <textarea id="descricao" name="descricao" defaultValue={b?.descricao} className={textareaClass} placeholder="Detalhes para o cliente…" />
           </Field>
           <div className="sm:col-span-2">
-            <span className="block text-sm font-medium mb-1.5">Foto do brinquedo</span>
+            <span className="block text-sm font-medium mb-1.5">Foto do {termos.item}</span>
             <div className="flex items-start gap-4">
               <div className="h-20 w-20 shrink-0 rounded-lg border border-border bg-background grid place-items-center overflow-hidden">
                 {b?.fotoUrl ? (

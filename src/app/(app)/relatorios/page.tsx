@@ -2,16 +2,19 @@ import { TrendingUp, Receipt, Wallet, Ticket, Package, Users, MapPin, Percent } 
 import { StatCard } from "@/components/ui/stat-card";
 import { gerarRelatorios, type LinhaRanking } from "@/lib/data/relatorios";
 import { formatBRL } from "@/lib/utils";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 export default async function RelatoriosPage() {
-  const r = await gerarRelatorios();
+  const [r, nicho] = await Promise.all([gerarRelatorios(), getNichoAtual()]);
+  const termos = termosDo(nicho);
   const maxMes = Math.max(1, ...r.porMes.map((m) => m.total));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold">Relatórios</h1>
-        <p className="text-sm text-muted">Visão de faturamento e desempenho da locadora</p>
+        <p className="text-sm text-muted">Visão de faturamento e desempenho do seu negócio</p>
       </div>
 
       {/* KPIs */}
@@ -45,7 +48,7 @@ export default async function RelatoriosPage() {
 
       {/* Rankings */}
       <section className="grid gap-4 lg:grid-cols-2">
-        <Ranking titulo="Brinquedos mais lucrativos" icon={Package} linhas={r.brinquedos} unidade="locações" />
+        <Ranking titulo={`${termos.itens} mais lucrativos`} icon={Package} linhas={r.brinquedos} unidade={termos.pedidos.toLowerCase()} />
         <Ranking titulo="Clientes que mais alugam" icon={Users} linhas={r.clientes} unidade="eventos" />
         <Ranking titulo="Cidades com mais eventos" icon={MapPin} linhas={r.cidades} unidade="eventos" />
 

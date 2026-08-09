@@ -5,16 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { VerificadorDisponibilidade } from "@/components/verificador-disponibilidade";
 import { listBrinquedos } from "@/lib/data/brinquedos";
 import { listReservas, reservasParaEngine, RESERVA_STATUS } from "@/lib/data/reservas";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo, cap } from "@/lib/nichos";
 
 const hora = (iso: string) => format(parseISO(iso), "HH:mm");
 const janelaFmt = (iso: string) => format(parseISO(iso), "dd/MM HH:mm");
 
 export default async function AgendaPage() {
-  const [reservas, brinquedos, engineReservas] = await Promise.all([
+  const [reservas, brinquedos, engineReservas, nicho] = await Promise.all([
     listReservas(),
     listBrinquedos(),
     reservasParaEngine(),
+    getNichoAtual(),
   ]);
+  const termos = termosDo(nicho);
 
   // Agrupa por dia
   const porDia = new Map<string, typeof reservas>();
@@ -89,7 +93,7 @@ export default async function AgendaPage() {
                           </span>
                         </div>
                         <p className="text-xs text-muted/80 mt-1.5">
-                          Brinquedo bloqueado: {janelaFmt(r.janelaInicio)} → {janelaFmt(r.janelaFim)}
+                          {cap(termos.item)} bloqueado: {janelaFmt(r.janelaInicio)} → {janelaFmt(r.janelaFim)}
                         </p>
                       </div>
                     </div>

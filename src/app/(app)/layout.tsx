@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { NichoProvider } from "@/components/nicho-context";
 import { verificarAcesso } from "@/lib/access-check";
 import { getCurrentEmpresaId } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
@@ -27,7 +28,9 @@ export default async function AppLayout({
       <Sidebar nichoKey={emp.nicho} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar nichoKey={emp.nicho} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <NichoProvider nichoKey={emp.nicho}>{children}</NichoProvider>
+        </main>
       </div>
     </div>
   );

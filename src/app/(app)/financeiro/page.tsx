@@ -107,7 +107,7 @@ export default async function FinanceiroPage() {
       <div className="card p-5">
         <h2 className="font-semibold">Lançar receita</h2>
         <p className="text-sm text-muted mb-3">
-          Dinheiro recebido fora de um pedido — ex.: montou o brinquedo no evento e recebeu na hora.
+          Dinheiro recebido fora de um pedido — ex.: recebeu na hora, direto no evento.
         </p>
         <form action={createReceitaAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">
           <div>

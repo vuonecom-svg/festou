@@ -7,6 +7,8 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { BRINQUEDO_STATUS } from "@/lib/status";
 import { getBrinquedo, type BrinquedoStatus } from "@/lib/data/brinquedos";
 import { updateBrinquedoAction, deleteBrinquedoAction, setStatusAction } from "../actions";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 const QUICK_STATUS: BrinquedoStatus[] = [
   "disponivel",
@@ -29,6 +31,7 @@ export default async function EditarBrinquedoPage({
   if (!brinquedo) notFound();
 
   const st = BRINQUEDO_STATUS[brinquedo.status];
+  const termos = termosDo(await getNichoAtual());
   const update = updateBrinquedoAction.bind(null, id);
   const remove = deleteBrinquedoAction.bind(null, id);
 
@@ -37,7 +40,7 @@ export default async function EditarBrinquedoPage({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href="/brinquedos" className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground">
-            <ChevronLeft size={16} /> Brinquedos
+            <ChevronLeft size={16} /> {termos.itens}
           </Link>
           <div className="flex items-center gap-2 mt-1">
             <h1 className="text-xl font-semibold">{brinquedo.nome}</h1>
