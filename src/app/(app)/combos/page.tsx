@@ -23,7 +23,7 @@ export default async function CombosPage() {
           </div>
           <div className="lg:col-span-2">
             <label className="block text-xs text-muted mb-1">Descrição</label>
-            <input name="descricao" className={inputClass} placeholder="Pula-pula + piscina de bolinha + cama elástica" />
+            <input name="descricao" className={inputClass} placeholder="O que está incluído neste combo" />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">

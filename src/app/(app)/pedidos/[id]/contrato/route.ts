@@ -5,6 +5,8 @@ import { getOrcamento } from "@/lib/data/orcamentos";
 import { getCliente } from "@/lib/data/clientes";
 import { getEmpresa } from "@/lib/data/empresa";
 import { ContratoDoc } from "@/lib/pdf/contrato-doc";
+import { getNichoAtual } from "@/lib/nicho-atual";
+import { termosDo } from "@/lib/nichos";
 
 export const runtime = "nodejs";
 
@@ -17,13 +19,15 @@ export async function GET(
   if (!pedido) return new Response("Pedido não encontrado", { status: 404 });
 
   const orcamento = pedido.orcamentoId ? await getOrcamento(pedido.orcamentoId) : null;
-  const [cliente, empresa] = await Promise.all([
+  const [cliente, empresa, nicho] = await Promise.all([
     orcamento ? getCliente(orcamento.clienteId) : Promise.resolve(null),
     getEmpresa(),
+    getNichoAtual(),
   ]);
+  const termos = termosDo(nicho);
 
   // Cast: tipos do @react-pdf x React 19 divergem nominalmente (elemento é válido).
-  const doc = createElement(ContratoDoc, { empresa, pedido, orcamento, cliente }) as Parameters<
+  const doc = createElement(ContratoDoc, { empresa, pedido, orcamento, cliente, termos }) as Parameters<
     typeof renderToBuffer
   >[0];
   const buffer = await renderToBuffer(doc);

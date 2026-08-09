@@ -10,7 +10,7 @@ export const SITE = {
   nome: "FesFlow",
   slogan: "Do pedido à devolução, tudo flui.",
   descricao:
-    "Sistema de gestão para locadoras de brinquedos e itens de festa: agenda anti-overbooking, orçamentos, contratos em PDF e financeiro num só lugar.",
+    "Sistema de gestão para empresas de festa e eventos: agenda anti-overbooking, orçamentos, contratos em PDF e financeiro num só lugar.",
   email: "contato@fesflow.com.br",
   whatsapp: "5519983760954",
   whatsappLabel: "(19) 98376-0954",
@@ -26,7 +26,7 @@ export const OG_IMAGE = {
   url: abs("/opengraph-image"),
   width: 1200,
   height: 630,
-  alt: "FesFlow — Sistema de gestão para locadoras de brinquedos e itens de festa",
+  alt: "FesFlow — Sistema de gestão para empresas de festa e eventos",
 };
 
 /**
@@ -143,7 +143,7 @@ export function ldSoftwareApplication() {
     "@type": "SoftwareApplication",
     name: SITE.nome,
     applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Sistema de gestão para locadoras de brinquedos e festas",
+    applicationSubCategory: "Sistema de gestão para empresas de festa e eventos",
     operatingSystem: "Web",
     url: abs("/"),
     description: SITE.descricao,
@@ -187,7 +187,7 @@ export function ldBlog() {
     "@id": abs("/blog#blog"),
     url: abs("/blog"),
     name: `Blog do ${SITE.nome}`,
-    description: "Ideias práticas para organizar e crescer sua locadora de brinquedos e itens de festa.",
+    description: "Ideias práticas para organizar e crescer o seu negócio de festas e eventos.",
     inLanguage: "pt-BR",
     publisher: { "@id": ORG_ID },
     blogPost: POSTS.map((p) => ({

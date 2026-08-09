@@ -25,13 +25,13 @@ export async function BrinquedoForm({
         <SectionTitle>Identificação</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={`Nome do ${termos.item}`} htmlFor="nome" className="sm:col-span-2">
-            <input id="nome" name="nome" required defaultValue={b?.nome} className={inputClass} placeholder="Ex.: Pula-pula Castelo 3x3" />
+            <input id="nome" name="nome" required defaultValue={b?.nome} className={inputClass} placeholder={termos.exemploNome} />
           </Field>
           <Field label="Código interno" htmlFor="codigoInterno" hint="Deixe em branco para gerar automático">
             <input id="codigoInterno" name="codigoInterno" defaultValue={b?.codigoInterno} className={inputClass} placeholder="BR-001" />
           </Field>
           <Field label="Categoria" htmlFor="categoriaNome">
-            <input id="categoriaNome" name="categoriaNome" defaultValue={b?.categoriaNome} className={inputClass} placeholder="Infláveis" />
+            <input id="categoriaNome" name="categoriaNome" defaultValue={b?.categoriaNome} className={inputClass} placeholder={termos.exemploCategoria} />
           </Field>
           <Field label="Quantidade em estoque" htmlFor="quantidade" hint="Quantas unidades iguais você tem (a agenda permite alugar todas ao mesmo tempo)" className="sm:col-span-2">
             <input id="quantidade" name="quantidade" type="number" min="1" step="1" defaultValue={b?.quantidade ?? 1} className={inputClass} placeholder="1" />

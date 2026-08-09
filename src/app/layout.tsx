@@ -7,9 +7,9 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "FesFlow — Gestão para locadoras de brinquedos",
+  title: "FesFlow — Gestão para empresas de festa",
   description:
-    "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+    "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para empresas de festa: brinquedos, espaços, buffet, decoração e mais.",
   applicationName: "FesFlow",
   alternates: { canonical: "/" },
   openGraph: {
@@ -17,16 +17,16 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     siteName: "FesFlow",
     url: abs("/"),
-    title: "FesFlow — Gestão para locadoras de brinquedos",
+    title: "FesFlow — Gestão para empresas de festa",
     description:
-      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para empresas de festa: brinquedos, espaços, buffet, decoração e mais.",
     images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FesFlow — Gestão para locadoras de brinquedos",
+    title: "FesFlow — Gestão para empresas de festa",
     description:
-      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para empresas de festa: brinquedos, espaços, buffet, decoração e mais.",
     images: [OG_IMAGE.url],
   },
   robots: {

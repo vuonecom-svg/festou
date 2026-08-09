@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 // Imagem de compartilhamento (WhatsApp, Facebook, LinkedIn, X e preview do
 // Google). Gerada em build — sem fonte externa, para não depender de rede.
-export const alt = "FesFlow — Sistema de gestão para locadoras de brinquedos e itens de festa";
+export const alt = "FesFlow — Sistema de gestão para empresas de festa e eventos";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -41,7 +41,7 @@ export default function OpenGraphImage() {
         </div>
 
         <div style={{ display: "flex", fontSize: 66, fontWeight: 800, lineHeight: 1.1, marginTop: 40, maxWidth: 940 }}>
-          O mesmo brinquedo nunca vai para duas festas no mesmo dia.
+          Organize sua empresa de festas e nunca perca uma data.
         </div>
 
         <div style={{ display: "flex", fontSize: 30, marginTop: 28, opacity: 0.9, maxWidth: 900 }}>

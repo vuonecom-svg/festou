@@ -4,6 +4,7 @@ import { ptBR } from "date-fns/locale";
 import type { Empresa } from "@/lib/data/empresa";
 import type { Orcamento } from "@/lib/data/orcamentos";
 import type { Cliente } from "@/lib/data/clientes";
+import { type Termos } from "@/lib/nichos";
 
 const PRIMARY = "#182a5c";
 const brl = (v: number) =>
@@ -41,10 +42,12 @@ export function OrcamentoDoc({
   empresa,
   orcamento: o,
   cliente,
+  termos,
 }: {
   empresa: Empresa;
   orcamento: Orcamento;
   cliente: Cliente | null;
+  termos: Termos;
 }) {
   return (
     <Document title={`Orçamento ${o.numero}`}>
@@ -98,7 +101,7 @@ export function OrcamentoDoc({
         <View style={s.section}>
           <Text style={s.sectionTitle}>Itens</Text>
           <View style={s.tHead}>
-            <Text style={s.cItem}>Brinquedo / item</Text>
+            <Text style={s.cItem}>{termos.itens}</Text>
             <Text style={s.cQtd}>Qtd</Text>
             <Text style={s.cUnit}>Unitário</Text>
             <Text style={s.cTot}>Total</Text>
@@ -132,8 +135,8 @@ export function OrcamentoDoc({
         ) : null}
 
         <Text style={s.footer}>
-          Este orçamento é uma proposta e não garante a reserva dos brinquedos até a confirmação do pagamento do sinal.
-          {"  "}Gerado por FesFlow — gestão para locadoras de brinquedos.
+          Este orçamento é uma proposta e não garante a reserva dos {termos.itens.toLowerCase()} até a confirmação do pagamento do sinal.
+          {"  "}Gerado por FesFlow — gestão para empresas de festa.
         </Text>
       </Page>
     </Document>
