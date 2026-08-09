@@ -62,6 +62,25 @@ Regra: **só entra o que foi observado.** Hipótese entra rotulada como hipótes
 
 ## Decisões e aprendizados
 
+- **09/08/2026 — Prova social: o dono pediu para "gerar" depoimento. RECUSADO e resolvido de outro
+  jeito.** Inventar depoimento é review falsa: engana o comprador, é violação explícita das
+  diretrizes do Google para `Review`/`AggregateRating` (penalização manual, justo no domínio que
+  acabamos de indexar) e não sobrevive ao primeiro prospect que pedir para falar com o cliente.
+  Detalhe e alternativas em `../references/prova-social.md`.
+  - 🔎 **Descoberta importante:** ele **já tem prova real e não sabia usar.** Medido com
+    `scripts/uso-por-empresa.mjs`: a **AQUARELA KIDS** é assinante ATIVA desde 10/07 e usa de
+    verdade — 17 brinquedos, 16 clientes, 16 orçamentos, 14 pedidos, 35 reservas, último pedido
+    07/08. É um case real esperando ser escrito, não um vazio a ser preenchido com ficção.
+  - ✅ **Construída a prova que não depende de ninguém:** `src/components/demo-anti-overbooking.tsx`
+    na home — demonstração ao vivo que importa `@/lib/disponibilidade`, **o mesmo módulo que o
+    sistema usa para aceitar ou recusar reserva**. O visitante muda o horário e vê a decisão real.
+    Nenhum concorrente do nicho tem equivalente. No ar (`f0d0e16`).
+  - 🐛 **Bug meu, encontrado ao verificar em produção:** a demo somava a duração na hora como número
+    (`inicioH + 4`), então 21h virava "25h" e `new Date("...T25:00:00")` era inválido → imprimia
+    **"NaN:NaN"** na janela. Corrigido somando minutos sobre o `Date` (`ab0a06d`) e reverificado no
+    ar: 21:00 → 01:00, janela 19:45 → 02:35. **Lição: só olhar o build não bastava — o estado
+    inicial (19h) renderizava certo e escondia o defeito; foi preciso clicar na página publicada.**
+
 - **07/08/2026** — Levantamento inicial do estado de marketing feito a partir do código. Confirmado:
   sem sitemap, robots, canonical/OG, manifest, JSON-LD ou qualquer tracking. Blog com 3 artigos,
   FAQ com 9 perguntas, sem página `/precos`. Oferta: plano único, 3 ciclos, 1º mês por R$ 5,00.
