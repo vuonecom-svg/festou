@@ -34,6 +34,9 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
+  // Verificação da propriedade no Google Search Console (fesflow.com.br).
+  // NÃO remova: o Google revalida periodicamente e a propriedade cai se sumir.
+  verification: { google: "8cDkdOXSen3Toee4mVWoY3wjurx95nSgzezFZEGrLG8" },
 };
 
 export const viewport: Viewport = {
