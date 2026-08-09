@@ -40,5 +40,9 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  // Arquivos de SEO e ícones são públicos por definição: rodar a checagem de
+  // sessão do Supabase neles só adiciona latência a cada visita de crawler.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/|robots.txt|sitemap.xml|manifest.webmanifest|opengraph-image|icon.svg|apple-icon.png).*)",
+  ],
 };

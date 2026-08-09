@@ -66,6 +66,180 @@ export type Post = {
 
 export const POSTS: Post[] = [
   {
+    slug: "quanto-cobrar-aluguel-de-pula-pula",
+    titulo: "Quanto cobrar pelo aluguel de um pula-pula",
+    data: "2026-08-09",
+    leituraMin: 6,
+    resumo:
+      "A conta que quase nenhuma locadora faz: quanto custa de verdade colocar um brinquedo na rua — e em quantas festas ele se paga.",
+    secoes: [
+      {
+        p: [
+          "A maioria das locadoras define o preço olhando o concorrente do bairro. O problema é que o concorrente também está olhando alguém — e ninguém sabe se a conta fecha. O resultado é uma agenda cheia com margem apertada.",
+          "A pergunta certa não é \"quanto os outros cobram\". É: quanto me custa colocar esse brinquedo na festa, e em quantas locações ele se paga?",
+        ],
+      },
+      {
+        h: "1. Comece pelo custo real de cada locação",
+        p: ["Some tudo que sai do seu bolso para aquele brinquedo sair e voltar:"],
+        ul: [
+          "Combustível e desgaste do veículo (ida e volta, duas vezes: entrega e retirada)",
+          "Mão de obra de montagem e desmontagem — inclusive a sua, se for você quem monta",
+          "Limpeza e higienização entre uma festa e outra",
+          "Energia e material de manutenção (remendo, cola, motor, tela)",
+          "Uma reserva mensal para manutenção corretiva — o brinquedo vai rasgar em algum momento",
+        ],
+      },
+      {
+        h: "2. Descubra em quantas festas o brinquedo se paga",
+        p: [
+          "Divida o valor que você pagou no brinquedo pela margem que sobra em cada locação. Um inflável de R$ 4.000 que deixa R$ 150 líquidos por festa se paga em cerca de 27 locações. Se ele sai 4 vezes por mês, são quase 7 meses só para empatar.",
+          "Esse número muda tudo. Ele diz se vale comprar a segunda unidade, se o preço está baixo demais e quanto tempo você fica exposto antes de começar a lucrar.",
+        ],
+      },
+      {
+        h: "3. Não venda a hora — venda o dia ocupado",
+        p: [
+          "Um erro comum é precificar por hora de festa. Só que o brinquedo não fica disponível por hora: entre transporte, montagem, desmontagem e limpeza, uma festa de quatro horas costuma consumir o dia inteiro daquele item.",
+          "Se você cobra como se coubesse outra festa no mesmo dia — mas na prática não cabe — está vendendo mais barato do que imagina.",
+        ],
+      },
+      {
+        h: "4. Diferencie o que realmente muda o custo",
+        ul: [
+          "Distância: festa a 40 km não pode custar o mesmo que a três quarteirões",
+          "Horário: montagem de madrugada ou retirada tarde da noite custa mais caro",
+          "Fim de semana e datas de pico: é quando a demanda existe e a capacidade é escassa",
+          "Complexidade: brinquedo que precisa de dois montadores não é igual a um que precisa de um",
+        ],
+      },
+      {
+        h: "5. Reajuste com dado, não com sensação",
+        p: [
+          "Sem registro, você não sabe qual brinquedo se paga e qual está sustentado pelos outros. Com o histórico de locações por item, a decisão fica simples: sobe o preço do que vive ocupado, descontinua o que não sai e compra a segunda unidade do que vive lotado.",
+        ],
+      },
+      {
+        h: "Onde o FesFlow entra",
+        p: [
+          "O FesFlow registra cada locação por item e mostra, nos relatórios, quanto cada brinquedo faturou no período e quantas vezes saiu. É a base para você precificar olhando a sua operação — não a do vizinho.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "do-whatsapp-ao-contrato-assinado-locadora-de-festas",
+    titulo: "Do orçamento no WhatsApp ao contrato assinado: organizando o atendimento da locadora",
+    data: "2026-08-09",
+    leituraMin: 5,
+    resumo:
+      "O caminho entre \"quanto fica?\" e a festa confirmada é onde a maioria das locadoras perde venda. Veja como fechar esse funil.",
+    secoes: [
+      {
+        p: [
+          "Toda locadora de festa vende pelo WhatsApp. O problema não é o canal — é que o WhatsApp não é um sistema. Ele não lembra quem pediu orçamento na terça, não avisa que o cliente não respondeu e não guarda qual versão da proposta foi combinada.",
+        ],
+      },
+      {
+        h: "Onde a venda escorre",
+        ul: [
+          "O orçamento é digitado na conversa e se perde 200 mensagens depois",
+          "O cliente pergunta, some, e ninguém faz follow-up",
+          "Duas pessoas da equipe respondem a mesma pessoa com valores diferentes",
+          "A data é \"segurada\" de boca e some quando alguém confirma outra festa",
+          "A festa é confirmada sem contrato e sem sinal",
+        ],
+      },
+      {
+        h: "O caminho que funciona",
+        p: [
+          "O atendimento não precisa sair do WhatsApp. Precisa de um lugar onde cada etapa fica registrada — e o WhatsApp vira só o canal de conversa, não o arquivo da empresa.",
+        ],
+        ul: [
+          "1. Pedido chega: registre o cliente e o endereço do evento (que é diferente do endereço dele)",
+          "2. Orçamento: monte olhando a disponibilidade real da data e envie um PDF, não um texto solto",
+          "3. Follow-up: acompanhe as propostas em aberto — proposta sem retorno é venda parada, não venda perdida",
+          "4. Confirmação: cobre o sinal e só então bloqueie a data",
+          "5. Contrato: gere o documento com as cláusulas de segurança, chuva, dano e cancelamento",
+          "6. Entrega e acerto: registre o valor restante recebido",
+        ],
+      },
+      {
+        h: "Por que o sinal vem antes do bloqueio",
+        p: [
+          "Segurar data sem sinal é o hábito que mais custa caro numa locadora. A data fica indisponível para quem pagaria, o cliente some, e você descobre na véspera. Cobrar sinal não é desconfiança — é o que separa a intenção da reserva.",
+        ],
+      },
+      {
+        h: "O contrato não é burocracia",
+        p: [
+          "Um termo simples protege os dois lados e passa profissionalismo. Ele responde o que acontece se chover, quem responde por dano, o que vale em caso de cancelamento e quais são as regras de segurança do uso. Quando está tudo escrito, a conversa difícil não acontece no dia da festa.",
+        ],
+      },
+      {
+        h: "Onde o FesFlow entra",
+        p: [
+          "No FesFlow, o orçamento é montado com a disponibilidade conferida ao vivo, vira PDF para enviar no WhatsApp, e — quando o cliente aprova — se transforma em pedido com a data bloqueada e o contrato gerado a partir dos mesmos dados. O canal continua sendo o WhatsApp; a memória da empresa passa a ser o sistema.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "como-organizar-agenda-locadora-de-festas",
+    titulo: "Como organizar a agenda de uma locadora de festas (sem depender da memória)",
+    data: "2026-08-09",
+    leituraMin: 5,
+    resumo:
+      "Agenda de locadora não é agenda de compromisso: um item ocupa muito mais tempo do que a festa dura. Veja como montar a sua.",
+    secoes: [
+      {
+        p: [
+          "Agenda de locadora tem uma diferença que quase nenhum aplicativo de agenda entende: o compromisso não é seu, é do item. E o item fica ocupado muito antes e muito depois da festa acontecer.",
+        ],
+      },
+      {
+        h: "O erro de agendar pelo horário da festa",
+        p: [
+          "Uma festa das 14h às 18h parece deixar a noite livre. Não deixa. O brinquedo precisa ser transportado, montado antes, desmontado depois, transportado de volta e limpo. Na prática, aquele item saiu por volta do meio-dia e só está pronto de novo à noite.",
+          "Quem agenda olhando só o horário da festa acaba prometendo o impossível — e descobre no sábado de manhã.",
+        ],
+      },
+      {
+        h: "Os quatro tempos que precisam estar na agenda",
+        ul: [
+          "Transporte de ida — quanto tempo até o endereço do evento",
+          "Montagem — quanto a sua equipe leva para deixar pronto",
+          "Desmontagem — o inverso, no fim da festa",
+          "Limpeza e conferência — antes de o item poder sair de novo",
+        ],
+      },
+      {
+        h: "Uma agenda por unidade, não por modelo",
+        p: [
+          "Se você tem três pula-pulas iguais, eles não são \"um brinquedo\". São três recursos distintos. Controlar por modelo faz você achar que tem disponibilidade quando não tem — ou recusar festa quando ainda havia unidade livre.",
+        ],
+      },
+      {
+        h: "A agenda só funciona se for uma só",
+        p: [
+          "Agenda do celular de um, planilha de outro e caderno no balcão é a receita da reserva duplicada. Não porque alguém é desatento, mas porque três fontes de verdade sempre divergem. Uma agenda única, que a equipe inteira enxerga, resolve mais do que qualquer combinado.",
+        ],
+      },
+      {
+        h: "Bloqueio que não depende de disciplina",
+        p: [
+          "O melhor processo do mundo falha num sábado corrido. Por isso o bloqueio precisa ser do sistema, não da lembrança de quem está atendendo. Se a reserva conflita, a resposta certa é o sistema não deixar concluir.",
+        ],
+      },
+      {
+        h: "Onde o FesFlow entra",
+        p: [
+          "No FesFlow, cada reserva bloqueia o item por uma janela que já inclui transporte, montagem, desmontagem e limpeza — por unidade. E a garantia é feita no banco de dados: mesmo que duas pessoas tentem reservar ao mesmo tempo, o conflito é recusado. Não é validação de tela; é trava física.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "como-evitar-overbooking-locadora-brinquedos",
     titulo: "Como evitar o overbooking na sua locadora de brinquedos",
     data: "2026-07-01",

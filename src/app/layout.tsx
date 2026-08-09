@@ -1,13 +1,43 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { SITE_URL, abs, OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "FesFlow — Gestão para locadoras de brinquedos",
   description:
     "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+  applicationName: "FesFlow",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "FesFlow",
+    url: abs("/"),
+    title: "FesFlow — Gestão para locadoras de brinquedos",
+    description:
+      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FesFlow — Gestão para locadoras de brinquedos",
+    description:
+      "Agenda inteligente sem overbooking, orçamentos, contratos e financeiro para locadoras de brinquedos e itens de festa.",
+    images: [OG_IMAGE.url],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4f46e5",
 };
 
 export default function RootLayout({

@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Termos de Uso — FesFlow",
   description: "Condições de uso da plataforma FesFlow: assinatura, responsabilidades, pagamento e cancelamento.",
+  alternates: { canonical: "/termos" },
 };
 
 const ATUALIZADO = "agosto de 2026";

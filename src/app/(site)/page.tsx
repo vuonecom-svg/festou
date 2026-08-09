@@ -5,12 +5,14 @@ import {
   ShieldCheck, Check, ArrowRight, Sparkles, type LucideIcon,
 } from "lucide-react";
 import { FEATURES, BILLING, PLAN_FEATURES, FAQS, KIWIFY } from "@/lib/site-content";
+import { JsonLd, ldSoftwareApplication, paginaMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "FesFlow — Sistema de gestão para locadoras de brinquedos",
-  description:
+export const metadata: Metadata = paginaMetadata({
+  titulo: "FesFlow — Sistema de gestão para locadoras de brinquedos",
+  descricao:
     "Agenda inteligente para locações de festa: anti-overbooking, orçamentos, contratos em PDF e financeiro. 1º mês por R$ 5.",
-};
+  path: "/",
+});
 
 const ICONS: Record<string, LucideIcon> = {
   CalendarClock, FileText, FileSignature, Wallet, Package, Users, Truck, BarChart3,
@@ -19,6 +21,10 @@ const ICONS: Record<string, LucideIcon> = {
 export default function LandingPage() {
   return (
     <>
+      {/* O FAQPage fica APENAS em /faq — schema de FAQ duplicado em duas URLs
+          é ignorado (ou penalizado) pelo Google. */}
+      <JsonLd data={ldSoftwareApplication()} />
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary-soft/60 to-transparent" />
@@ -214,7 +220,7 @@ export default function LandingPage() {
       <section className="mx-auto max-w-6xl px-4 py-20 text-center">
         <h2 className="text-3xl sm:text-4xl font-bold max-w-2xl mx-auto">Pronto para organizar sua locadora de vez?</h2>
         <p className="mt-4 text-muted">Comece hoje — 1º mês por R$ 5 — e veja a diferença já na primeira festa.</p>
-        <Link href="/#precos" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-8 h-13 py-3.5 font-semibold hover:bg-primary/90">
+        <Link href="/precos" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-8 h-13 py-3.5 font-semibold hover:bg-primary/90">
           Ver planos e começar <ArrowRight size={18} />
         </Link>
       </section>
