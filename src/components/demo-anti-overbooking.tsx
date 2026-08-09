@@ -20,7 +20,12 @@ const BUFFERS: Buffers = {
 };
 
 const DIA = "2026-09-12";
+const MIN = 60_000;
+const DURACAO_FESTA_MIN = 4 * 60;
+
 const hora = (h: number, m = 0) => new Date(`${DIA}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
+/** Soma minutos a uma data — vira o dia corretamente (21h + 4h = 01:00). */
+const mais = (d: Date, min: number) => new Date(d.getTime() + min * MIN);
 const hhmm = (d: Date) =>
   `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
@@ -43,10 +48,15 @@ const OPCOES = [10, 12, 16, 19, 20, 21, 22];
 export function DemoAntiOverbooking() {
   const [inicioH, setInicioH] = useState(19);
 
-  const resultado = useMemo(() => {
+  const { resultado, inicio, fim } = useMemo(() => {
     const ini = hora(inicioH);
-    const fim = hora(inicioH + 4);
-    return verificarDisponibilidade("pula-pula-1", ini, fim, BUFFERS, 1, RESERVAS);
+    // A festa dura 4h: somar em minutos, para virar o dia sem gerar hora 25.
+    const f = mais(ini, DURACAO_FESTA_MIN);
+    return {
+      resultado: verificarDisponibilidade("pula-pula-1", ini, f, BUFFERS, 1, RESERVAS),
+      inicio: ini,
+      fim: f,
+    };
   }, [inicioH]);
 
   const livre = resultado.disponivel;
@@ -91,8 +101,7 @@ export function DemoAntiOverbooking() {
       >
         <p className="flex items-center gap-2 font-semibold">
           {livre ? <Check size={18} /> : <X size={18} />}
-          Festa das {String(inicioH).padStart(2, "0")}h às {String(inicioH + 4).padStart(2, "0")}h —{" "}
-          {livre ? "liberado" : "bloqueado"}
+          Festa das {hhmm(inicio)} às {hhmm(fim)} — {livre ? "liberado" : "bloqueado"}
         </p>
         <p className="mt-2 text-sm opacity-90 flex items-start gap-2">
           <Clock size={15} className="shrink-0 mt-0.5" />
