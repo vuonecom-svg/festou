@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { KIWIFY } from "@/lib/site-content";
+import { JsonLd, ldOrganization, ldWebSite } from "@/lib/seo";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <JsonLd data={[ldOrganization(), ldWebSite()]} />
       <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-border">
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
@@ -13,7 +15,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-foreground/70">
             <Link href="/#funcionalidades" className="hover:text-foreground">Funcionalidades</Link>
-            <Link href="/#precos" className="hover:text-foreground">Preços</Link>
+            <Link href="/precos" className="hover:text-foreground">Preços</Link>
             <Link href="/blog" className="hover:text-foreground">Blog</Link>
             <Link href="/faq" className="hover:text-foreground">FAQ</Link>
           </nav>
@@ -49,7 +51,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <p className="font-medium mb-2">Produto</p>
             <ul className="space-y-1.5 text-muted">
               <li><Link href="/#funcionalidades" className="hover:text-foreground">Funcionalidades</Link></li>
-              <li><Link href="/#precos" className="hover:text-foreground">Preços</Link></li>
+              <li><Link href="/precos" className="hover:text-foreground">Preços</Link></li>
               <li><Link href="/dashboard" className="hover:text-foreground">Entrar na plataforma</Link></li>
             </ul>
           </div>
@@ -65,7 +67,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           <div>
             <p className="font-medium mb-2">Comece agora</p>
             <p className="text-muted mb-2">Comece por R$ 5 no primeiro mês.</p>
-            <Link href="/#precos" className="inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 font-medium hover:bg-primary/90">
+            <Link href="/precos" className="inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 font-medium hover:bg-primary/90">
               Ver planos
             </Link>
           </div>

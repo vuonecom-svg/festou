@@ -4,15 +4,26 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Clock, ArrowRight } from "lucide-react";
 import { POSTS } from "@/lib/site-content";
+import { JsonLd, ldBlog, ldBreadcrumb, paginaMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Blog — FesFlow",
-  description: "Dicas e ideias para organizar e crescer sua locadora de brinquedos e itens de festa.",
-};
+export const metadata: Metadata = paginaMetadata({
+  titulo: "Blog — FesFlow",
+  descricao: "Dicas e ideias para organizar e crescer sua locadora de brinquedos e itens de festa.",
+  path: "/blog",
+});
 
 export default function BlogPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-16">
+      <JsonLd
+        data={[
+          ldBlog(),
+          ldBreadcrumb([
+            { nome: "Início", url: "/" },
+            { nome: "Blog", url: "/blog" },
+          ]),
+        ]}
+      />
       <div className="text-center">
         <h1 className="text-4xl font-bold">Blog do FesFlow</h1>
         <p className="mt-3 text-muted">Ideias práticas para organizar e crescer sua locadora de brinquedos.</p>

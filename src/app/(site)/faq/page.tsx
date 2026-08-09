@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQS } from "@/lib/site-content";
+import { JsonLd, ldFaq, ldBreadcrumb, paginaMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Perguntas frequentes — FesFlow",
-  description: "Tire suas dúvidas sobre o FesFlow, o sistema de gestão para locadoras de brinquedos e itens de festa.",
-};
+export const metadata: Metadata = paginaMetadata({
+  titulo: "Perguntas frequentes — FesFlow",
+  descricao:
+    "Tire suas dúvidas sobre o FesFlow, o sistema de gestão para locadoras de brinquedos e itens de festa.",
+  path: "/faq",
+});
 
 export default function FaqPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">
+      <JsonLd
+        data={[
+          ldFaq(),
+          ldBreadcrumb([
+            { nome: "Início", url: "/" },
+            { nome: "Perguntas frequentes", url: "/faq" },
+          ]),
+        ]}
+      />
       <div className="text-center">
         <h1 className="text-4xl font-bold">Perguntas frequentes</h1>
         <p className="mt-3 text-muted">Tudo o que você precisa saber sobre o FesFlow.</p>
@@ -30,7 +42,7 @@ export default function FaqPage() {
       <div className="mt-12 card p-8 text-center bg-primary-soft/50">
         <h2 className="text-xl font-semibold">Ainda com dúvida?</h2>
         <p className="mt-2 text-muted">Comece por R$ 5 no primeiro mês e veja o FesFlow funcionando na sua locadora.</p>
-        <Link href="/#precos" className="mt-5 inline-flex items-center rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
+        <Link href="/precos" className="mt-5 inline-flex items-center rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
           Ver planos
         </Link>
       </div>

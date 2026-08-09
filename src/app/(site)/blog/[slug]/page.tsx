@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, Clock, ArrowRight } from "lucide-react";
 import { POSTS, getPost } from "@/lib/site-content";
+import { JsonLd, ldBlogPosting, ldBreadcrumb, paginaMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ slug: p.slug }));
@@ -18,7 +19,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Artigo não encontrado — FesFlow" };
-  return { title: `${post.titulo} — FesFlow`, description: post.resumo };
+  return paginaMetadata({
+    titulo: `${post.titulo} — FesFlow`,
+    descricao: post.resumo,
+    path: `/blog/${post.slug}`,
+    tipo: "article",
+    publicadoEm: post.data,
+  });
 }
 
 export default async function PostPage({
@@ -32,6 +39,16 @@ export default async function PostPage({
 
   return (
     <article className="mx-auto max-w-2xl px-4 py-14">
+      <JsonLd
+        data={[
+          ldBlogPosting(post),
+          ldBreadcrumb([
+            { nome: "Início", url: "/" },
+            { nome: "Blog", url: "/blog" },
+            { nome: post.titulo, url: `/blog/${post.slug}` },
+          ]),
+        ]}
+      />
       <Link href="/blog" className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground">
         <ChevronLeft size={16} /> Blog
       </Link>
@@ -66,7 +83,7 @@ export default async function PostPage({
       <div className="mt-12 card p-8 text-center bg-primary-soft/50">
         <h2 className="text-xl font-semibold">Coloque isso em prática com o FesFlow</h2>
         <p className="mt-2 text-muted">Agenda anti-overbooking, contratos e financeiro numa plataforma só.</p>
-        <Link href="/#precos" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
+        <Link href="/precos" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-6 h-11 font-semibold hover:bg-primary/90">
           Ver planos <ArrowRight size={16} />
         </Link>
       </div>

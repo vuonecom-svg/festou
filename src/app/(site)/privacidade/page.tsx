@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Política de Privacidade — FesFlow",
   description: "Como o FesFlow coleta, usa, armazena e protege dados pessoais, em conformidade com a LGPD.",
+  alternates: { canonical: "/privacidade" },
 };
 
 const ATUALIZADO = "agosto de 2026";
