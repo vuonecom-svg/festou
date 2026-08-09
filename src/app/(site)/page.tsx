@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { FEATURES, BILLING, PLAN_FEATURES, FAQS, KIWIFY } from "@/lib/site-content";
 import { JsonLd, ldSoftwareApplication, paginaMetadata } from "@/lib/seo";
+import { DemoAntiOverbooking } from "@/components/demo-anti-overbooking";
 
 export const metadata: Metadata = paginaMetadata({
   titulo: "FesFlow — Sistema de gestão para locadoras de brinquedos",
@@ -88,20 +89,7 @@ export default function LandingPage() {
               ))}
             </ul>
           </div>
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
-            <p className="text-xs uppercase tracking-wide text-sidebar-fg/60 mb-3">Exemplo real</p>
-            <div className="space-y-3 text-sm">
-              <div className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 p-3 text-emerald-200">
-                <strong>Festa 14h–18h</strong> — brinquedo bloqueado das 12:45 às 19:35 (com transporte + limpeza)
-              </div>
-              <div className="rounded-lg bg-rose-500/15 border border-rose-500/30 p-3 text-rose-200">
-                Tentar reservar às <strong>19h no mesmo dia</strong> → ❌ bloqueado (ainda em limpeza)
-              </div>
-              <div className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 p-3 text-emerald-200">
-                Reservar às <strong>21h</strong> → ✅ liberado
-              </div>
-            </div>
-          </div>
+          <DemoAntiOverbooking />
         </div>
       </section>
 
