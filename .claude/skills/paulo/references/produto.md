@@ -112,6 +112,24 @@ isolamento de dados/cobrança/pagamento/várias unidades do mesmo brinquedo).
 ⚠️ **Regra ao criar página nova:** use `paginaMetadata()`, adicione a rota em `sitemap.ts` e, se for
 rota privada, em `ROTAS_PRIVADAS`.
 
+### 🌐 Domínio e hospedagem (verificado 09/08/2026)
+
+- **Hospedagem: Vercel** (`Server: Vercel`, `X-Vercel-Id: gru1` — região São Paulo).
+- ⚠️ **A conta Vercel do FesFlow NÃO é a `kleitom`/`ecomclube-1840`.** Nessa conta estão
+  dashboard-scana, pilares-hub, jps, obraja, locaflow, finloca, scana-erp — **não** o festou.
+  O repositório é `vuonecom-svg/festou`, então o projeto está na conta **`vuonecom@gmail.com`**.
+  Para mexer em domínio do FesFlow, é preciso entrar com essa conta.
+- **DNS: Registro.br** (nameservers `e.sec.dns.br` / `f.sec.dns.br`) — não é Cloudflare.
+- `fesflow.com.br` (apex) → A `216.198.79.1` (Vercel) → ✅ responde 200.
+- ❌ **`www.fesflow.com.br` NÃO EXISTE no DNS** (`NXDOMAIN`, confirmado também no 8.8.8.8).
+  Quem digita "www." recebe "site não encontrado" do navegador. Não é problema de código —
+  a requisição nunca chega na aplicação.
+  **Correção (fora do repositório):** (1) adicionar `www.fesflow.com.br` no projeto da Vercel, que
+  informa o registro exato; (2) criar esse registro no painel do Registro.br. A Vercel passa então
+  a redirecionar www → apex com 308.
+  ✅ Do lado do SEO já estamos protegidos: **todo canonical aponta para o apex**
+  (`https://fesflow.com.br`), então quando o www subir não haverá conteúdo duplicado.
+
 ### ❌ AINDA ABERTO
 
 - **Nenhum tracking**: sem GA4, Google Tag Manager, Meta Pixel, Vercel Analytics, PostHog ou
