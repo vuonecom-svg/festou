@@ -18,7 +18,7 @@ export async function uploadImagem(file: File | null, prefixo: string): Promise<
   const caminho = `${prefixo}/${Date.now()}-${rand}.${ext}`;
 
   const buf = Buffer.from(await file.arrayBuffer());
-  const sb = supabaseAdmin();
+  const sb = await supabaseAdmin();
   const { error } = await sb.storage.from(BUCKET).upload(caminho, buf, {
     contentType: file.type,
     upsert: false,

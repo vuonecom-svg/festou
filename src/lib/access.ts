@@ -27,7 +27,7 @@ function gerarSenhaTemp(): string {
 async function garantirAuthEEmail(
   usuarioId: string, empresaId: string, email: string, nome: string
 ): Promise<void> {
-  const admin = supabaseAdmin();
+  const admin = await supabaseAdmin();
   const senhaTemp = gerarSenhaTemp();
 
   // Cria o usuário com a senha temporária (e-mail já confirmado).
