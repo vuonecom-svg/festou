@@ -4,6 +4,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO, dtISO, parseDataEntrada } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 import { getBrinquedo } from "./brinquedos";
 import { verificarBrinquedo, buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
@@ -73,7 +74,7 @@ function toDTO(o: OrcamentoRow): Orcamento {
     numero: o.numero,
     clienteId: o.clienteId,
     clienteNome: o.cliente?.nome ?? "",
-    dataEvento: o.dataEvento.toISOString().slice(0, 10),
+    dataEvento: diaISO(o.dataEvento),
     horaEntrega: o.horaEntrega ?? "",
     horaRetirada: o.horaRetirada ?? "",
     endereco: {
@@ -91,7 +92,7 @@ function toDTO(o: OrcamentoRow): Orcamento {
     formaPagamento: o.formaPagamento ?? "", obs: o.obs ?? "",
     status: o.pedido ? "convertido" : (o.status as OrcStatus),
     pedidoId: o.pedido?.id,
-    criadoEm: o.criadoEm.toISOString(),
+    criadoEm: dtISO(o.criadoEm),
   };
 }
 
@@ -161,7 +162,7 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
       created = await prisma.orcamento.create({
         data: {
           empresaId, numero, clienteId: input.clienteId, enderecoEventoId: endereco.id,
-          dataEvento: new Date(input.dataEvento || new Date().toISOString().slice(0, 10)),
+          dataEvento: parseDataEntrada(input.dataEvento),
           horaEntrega: input.horaEntrega || null, horaRetirada: input.horaRetirada || null,
           subtotal, desconto, motivoDesconto: input.motivoDesconto || null,
           taxaEntrega, taxaMontagem, total,
@@ -212,7 +213,7 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
   if (o.pedido) throw new Error("Este orçamento já virou pedido.");
   if (o.itens.length === 0) throw new Error("Orçamento sem brinquedos.");
 
-  const dia = o.dataEvento.toISOString().slice(0, 10);
+  const dia = diaISO(o.dataEvento);
   // Hora do evento em UTC (base única cliente/servidor) — evita conflito falso por fuso.
   const eventoInicio = new Date(`${dia}T${o.horaEntrega || "12:00"}:00Z`);
   const eventoFim = new Date(`${dia}T${o.horaRetirada || "18:00"}:00Z`);

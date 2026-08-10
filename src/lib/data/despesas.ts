@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO, dtISO, parseDataEntrada } from "@/lib/utils";
 
 export type DespesaCategoria =
   | "combustivel" | "funcionario" | "manutencao" | "limpeza" | "compra"
@@ -37,9 +38,9 @@ export async function listDespesas(): Promise<Despesa[]> {
     id: d.id,
     categoria: d.categoria as DespesaCategoria,
     valor: Number(d.valor),
-    data: d.data.toISOString().slice(0, 10),
+    data: diaISO(d.data),
     descricao: d.descricao ?? "",
-    criadoEm: (d as { criadoEm?: Date }).criadoEm?.toISOString?.() ?? d.data.toISOString(),
+    criadoEm: dtISO((d as { criadoEm?: Date }).criadoEm ?? d.data),
   }));
 }
 
@@ -51,13 +52,13 @@ export async function createDespesa(input: DespesaInput): Promise<Despesa | null
       empresaId,
       categoria: input.categoria,
       valor: input.valor,
-      data: input.data ? new Date(input.data) : new Date(),
+      data: parseDataEntrada(input.data),
       descricao: input.descricao || null,
     },
   });
   return {
     id: d.id, categoria: d.categoria as DespesaCategoria, valor: Number(d.valor),
-    data: d.data.toISOString().slice(0, 10), descricao: d.descricao ?? "", criadoEm: d.data.toISOString(),
+    data: diaISO(d.data), descricao: d.descricao ?? "", criadoEm: dtISO(d.data),
   };
 }
 

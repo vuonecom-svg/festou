@@ -4,6 +4,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO, dtISO } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 import { janelaBloqueio } from "../disponibilidade";
 import { buffersDe, TRANSPORTE_PADRAO_MIN } from "./reservas";
@@ -92,7 +93,7 @@ function toDTO(p: PedidoRow): Pedido {
     orcamentoId: p.orcamentoId ?? "",
     clienteNome: p.cliente?.nome ?? "",
     cidade: p.enderecoEvento?.cidade ?? "",
-    dataEvento: p.dataEvento.toISOString().slice(0, 10),
+    dataEvento: diaISO(p.dataEvento),
     horaEntrega: p.horaEntrega ?? "",
     horaRetirada: p.horaRetirada ?? "",
     itens,
@@ -102,7 +103,7 @@ function toDTO(p: PedidoRow): Pedido {
     statusFinanceiro: p.statusFinanceiro as PedidoStatusFin,
     statusOperacional: p.statusOperacional as PedidoStatusOp,
     reservaIds: p.reservaItens.map((r) => r.id),
-    criadoEm: p.criadoEm.toISOString(),
+    criadoEm: dtISO(p.criadoEm),
   };
 }
 

@@ -4,6 +4,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO, dtISO, parseDataEntrada } from "@/lib/utils";
 
 export type ReceitaCategoria =
   | "locacao_avulsa" | "venda" | "taxa_extra" | "outros";
@@ -44,10 +45,10 @@ export async function listReceitas(): Promise<Receita[]> {
     id: r.id,
     categoria: catOk(r.categoria),
     valor: Number(r.valor),
-    data: r.data.toISOString().slice(0, 10),
+    data: diaISO(r.data),
     forma: r.forma ?? "",
     descricao: r.descricao ?? "",
-    criadoEm: r.criadoEm.toISOString(),
+    criadoEm: dtISO(r.criadoEm),
   }));
 }
 
@@ -59,7 +60,7 @@ export async function createReceita(input: ReceitaInput): Promise<Receita | null
       empresaId,
       categoria: catOk(input.categoria),
       valor: input.valor,
-      data: input.data ? new Date(input.data) : new Date(),
+      data: parseDataEntrada(input.data),
       forma: input.forma || null,
       descricao: input.descricao || null,
     },
@@ -68,10 +69,10 @@ export async function createReceita(input: ReceitaInput): Promise<Receita | null
     id: r.id,
     categoria: catOk(r.categoria),
     valor: Number(r.valor),
-    data: r.data.toISOString().slice(0, 10),
+    data: diaISO(r.data),
     forma: r.forma ?? "",
     descricao: r.descricao ?? "",
-    criadoEm: r.criadoEm.toISOString(),
+    criadoEm: dtISO(r.criadoEm),
   };
 }
 
