@@ -96,7 +96,15 @@ export function ContratoDoc({
           </View>
         ))}
 
-        <Text style={[s.p, { marginTop: 8 }]}>
+        {o && (o.desconto > 0 || o.taxaEntrega > 0 || o.taxaMontagem > 0) ? (
+          <Text style={[s.p, { marginTop: 8 }]}>
+            <Text style={s.b}>Subtotal:</Text> {brl(o.subtotal)}
+            {o.desconto > 0 ? `  ·  Desconto: - ${brl(o.desconto)}${o.motivoDesconto ? ` (${o.motivoDesconto})` : ""}` : ""}
+            {o.taxaEntrega > 0 ? `  ·  Taxa de entrega: ${brl(o.taxaEntrega)}` : ""}
+            {o.taxaMontagem > 0 ? `  ·  Taxa de montagem: ${brl(o.taxaMontagem)}` : ""}.
+          </Text>
+        ) : null}
+        <Text style={[s.p, { marginTop: o && (o.desconto > 0 || o.taxaEntrega > 0 || o.taxaMontagem > 0) ? 4 : 8 }]}>
           <Text style={s.b}>Valor total:</Text> {brl(p.total)}  ·  <Text style={s.b}>Sinal pago:</Text> {brl(p.sinalPago)}  ·{" "}
           <Text style={s.b}>Restante:</Text> {brl(p.valorRestante)}
           {o?.formaPagamento ? `  ·  Forma: ${o.formaPagamento}` : ""}.
