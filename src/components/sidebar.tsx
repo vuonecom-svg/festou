@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { NAV_GROUPS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { sairAction } from "@/app/entrar/actions";
 
-export function Sidebar() {
+export function Sidebar({ superAdmin = false }: { superAdmin?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -22,6 +22,20 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
+        {superAdmin && (
+          <Link
+            href="/superadmin"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname.startsWith("/superadmin")
+                ? "bg-amber-500 text-amber-950 font-medium"
+                : "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
+            )}
+          >
+            <ShieldCheck size={18} className="shrink-0" />
+            <span className="flex-1">Super Admin</span>
+          </Link>
+        )}
         {NAV_GROUPS.map((grupo, gi) => (
           <div key={gi} className="space-y-0.5">
             {grupo.titulo && (
