@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, CalendarCheck, CheckCircle2, FileSignature, Trash2, AlertCircle } from "lucide-react";
+import { ChevronLeft, CalendarCheck, CheckCircle2, FileSignature, Receipt, Trash2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { inputClass } from "@/components/ui/form";
 import { ConfirmButton } from "@/components/confirm-button";
@@ -58,6 +58,14 @@ export default async function PedidoDetalhePage({
             className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 bg-primary text-primary-fg hover:bg-primary/90"
           >
             <FileSignature size={16} /> Gerar contrato (PDF)
+          </a>
+          <a
+            href={`/pedidos/${p.id}/recibo`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-border hover:bg-background"
+          >
+            <Receipt size={16} /> Recibo (PDF)
           </a>
           <ConfirmButton
             action={excluir}
