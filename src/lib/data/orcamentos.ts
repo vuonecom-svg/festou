@@ -39,7 +39,7 @@ export type EnderecoEvento = {
 
 export type Orcamento = {
   id: string; numero: number; clienteId: string; clienteNome: string;
-  dataEvento: string; horaEntrega: string; horaRetirada: string;
+  dataEvento: string; diarias: number; horaEntrega: string; horaRetirada: string;
   endereco: EnderecoEvento; itens: OrcItem[];
   subtotal: number; desconto: number; motivoDesconto: string;
   taxaEntrega: number; taxaMontagem: number; total: number;
@@ -50,7 +50,7 @@ export type Orcamento = {
 export type { OrcModo };
 
 export type OrcamentoInput = {
-  clienteId: string; dataEvento: string; horaEntrega: string; horaRetirada: string;
+  clienteId: string; dataEvento: string; dias?: number; horaEntrega: string; horaRetirada: string;
   endereco: EnderecoEvento;
   itens: { brinquedoId: string; qtd: number; modo?: OrcModo; horasExtras?: number }[];
   desconto: number; motivoDesconto: string; taxaEntrega: number; taxaMontagem: number;
@@ -75,6 +75,7 @@ function toDTO(o: OrcamentoRow): Orcamento {
     clienteId: o.clienteId,
     clienteNome: o.cliente?.nome ?? "",
     dataEvento: diaISO(o.dataEvento),
+    diarias: o.diarias ?? 1,
     horaEntrega: o.horaEntrega ?? "",
     horaRetirada: o.horaRetirada ?? "",
     endereco: {
@@ -123,18 +124,24 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
   const donoOk = await prisma.cliente.count({ where: { id: input.clienteId, empresaId } });
   if (!donoOk) throw new Error("Cliente inválido.");
 
+  // Locação por período: nº de diárias (1 = evento de 1 dia). Multiplica o valor.
+  const diarias = Math.max(1, Math.trunc(Number(input.dias ?? 1)) || 1);
+
   // Resolve itens (nome/valor a partir do brinquedo)
   const itensData: Prisma.OrcamentoItemCreateWithoutOrcamentoInput[] = [];
   let subtotal = 0;
   for (const it of input.itens) {
     const b = await getBrinquedo(it.brinquedoId);
     if (!b) continue;
-    const { valorUnit, sufixo } = precoUnitario(b, it.modo ?? "diaria", it.horasExtras ?? 0);
+    const { valorUnit: diaria, sufixo } = precoUnitario(b, it.modo ?? "diaria", it.horasExtras ?? 0);
     const qtd = Math.max(1, it.qtd);
+    const valorUnit = diaria * diarias; // valor do item pelo período todo
     const valorTotal = valorUnit * qtd;
     subtotal += valorTotal;
     itensData.push({
-      brinquedo: { connect: { id: b.id } }, descricao: b.nome + sufixo, qtd, valorUnit, valorTotal,
+      brinquedo: { connect: { id: b.id } },
+      descricao: b.nome + sufixo + (diarias > 1 ? ` (${diarias} diárias)` : ""),
+      qtd, valorUnit, valorTotal,
     });
   }
   // Sanitiza valores: sem desconto/taxas negativos e desconto não passa do subtotal.
@@ -162,7 +169,7 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
       created = await prisma.orcamento.create({
         data: {
           empresaId, numero, clienteId: input.clienteId, enderecoEventoId: endereco.id,
-          dataEvento: parseDataEntrada(input.dataEvento),
+          dataEvento: parseDataEntrada(input.dataEvento), diarias,
           horaEntrega: input.horaEntrega || null, horaRetirada: input.horaRetirada || null,
           subtotal, desconto, motivoDesconto: input.motivoDesconto || null,
           taxaEntrega, taxaMontagem, total,
@@ -213,10 +220,14 @@ export async function converterEmPedido(id: string): Promise<{ id: string }> {
   if (o.pedido) throw new Error("Este orçamento já virou pedido.");
   if (o.itens.length === 0) throw new Error("Orçamento sem brinquedos.");
 
+  const diarias = Math.max(1, o.diarias ?? 1);
   const dia = diaISO(o.dataEvento);
   // Hora do evento em UTC (base única cliente/servidor) — evita conflito falso por fuso.
+  // Locação por período: o fim é no ÚLTIMO dia (data + diarias-1) na hora de retirada,
+  // então o brinquedo fica bloqueado o período inteiro.
   const eventoInicio = new Date(`${dia}T${o.horaEntrega || "12:00"}:00Z`);
-  const eventoFim = new Date(`${dia}T${o.horaRetirada || "18:00"}:00Z`);
+  const retiradaBase = new Date(`${dia}T${o.horaRetirada || "18:00"}:00Z`);
+  const eventoFim = new Date(retiradaBase.getTime() + (diarias - 1) * 86_400_000);
   if (eventoFim <= eventoInicio) throw new Error("Horário do evento inválido (retirada deve ser após a entrega).");
 
   // Pré-checagem (mensagem amigável) + coleta das janelas de bloqueio.

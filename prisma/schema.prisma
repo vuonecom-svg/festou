@@ -537,6 +537,7 @@ model Orcamento {
   vendedorId       String?         @map("vendedor_id")
   enderecoEventoId String?         @map("endereco_evento_id")
   dataEvento       DateTime        @map("data_evento")
+  diarias          Int             @default(1) // nº de dias da locação (1 = evento de 1 dia)
   horaEntrega      String?         @map("hora_entrega")
   horaRetirada     String?         @map("hora_retirada")
   subtotal         Decimal         @default(0) @db.Decimal(10, 2)

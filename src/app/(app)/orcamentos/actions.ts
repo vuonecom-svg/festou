@@ -25,6 +25,7 @@ export async function criarOrcamentoAction(fd: FormData) {
   const input: OrcamentoInput = {
     clienteId: String(p.clienteId ?? ""),
     dataEvento: String(p.dataEvento ?? ""),
+    dias: Math.max(1, Math.trunc(n(p.dias)) || 1),
     horaEntrega: String(p.horaEntrega ?? ""),
     horaRetirada: String(p.horaRetirada ?? ""),
     endereco: {

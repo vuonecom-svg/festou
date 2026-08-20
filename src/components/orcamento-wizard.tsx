@@ -58,6 +58,8 @@ export function OrcamentoWizard({
   const [valorSinal, setValorSinal] = useState(0);
   const [formaPagamento, setFormaPagamento] = useState("Pix");
   const [obs, setObs] = useState("");
+  const [dias, setDias] = useState(1);
+  const diasN = Math.max(1, Math.trunc(dias) || 1);
 
   // Base de cobrança do item (respeita o preço promocional na diária).
   const modoDe = (b: BrinquedoW): Modo =>
@@ -73,11 +75,13 @@ export function OrcamentoWizard({
     if (!dataEvento || !horaEntrega || !horaRetirada) return null;
     // Interpreta a hora do evento como UTC (mesma base do servidor/janelas salvas)
     // para não somar o offset do fuso do navegador e gerar conflito falso.
+    // Locação por período: o fim é no ÚLTIMO dia (diárias-1 dias depois).
     const ini = new Date(`${dataEvento}T${horaEntrega}:00Z`);
-    const fim = new Date(`${dataEvento}T${horaRetirada}:00Z`);
+    const retBase = new Date(`${dataEvento}T${horaRetirada}:00Z`);
+    const fim = new Date(retBase.getTime() + (diasN - 1) * 86_400_000);
     if (isNaN(ini.getTime()) || isNaN(fim.getTime()) || fim <= ini) return null;
     return { ini, fim };
-  }, [dataEvento, horaEntrega, horaRetirada]);
+  }, [dataEvento, horaEntrega, horaRetirada, diasN]);
 
   // disponibilidade por brinquedo na janela
   const dispMap = useMemo(() => {
@@ -104,7 +108,7 @@ export function OrcamentoWizard({
   const itensSel = Object.entries(sel).filter(([, q]) => q > 0);
   const subtotal = itensSel.reduce((s, [id, q]) => {
     const b = brinquedos.find((x) => x.id === id);
-    return s + (b ? preco(b) * q : 0);
+    return s + (b ? preco(b) * q * diasN : 0);
   }, 0);
   const total = Math.max(0, subtotal - desconto + taxaEntrega + taxaMontagem);
   const restante = Math.max(0, total - valorSinal);
@@ -131,7 +135,7 @@ export function OrcamentoWizard({
   }
 
   const payload = JSON.stringify({
-    clienteId, dataEvento, horaEntrega, horaRetirada, endereco,
+    clienteId, dataEvento, dias: diasN, horaEntrega, horaRetirada, endereco,
     itens: itensSel.map(([brinquedoId, qtd]) => {
       const b = brinquedos.find((x) => x.id === brinquedoId)!;
       return { brinquedoId, qtd, modo: modoDe(b), horasExtras: horasDe(b) };
@@ -158,8 +162,20 @@ export function OrcamentoWizard({
                 ))}
               </select>
             </Field>
-            <Field label="Data do evento" htmlFor="data">
+            <Field label="Data de início" htmlFor="data">
               <input id="data" type="date" value={dataEvento} onChange={(e) => setDataEvento(e.target.value)} className={inputClass} required />
+            </Field>
+            <Field
+              label="Diárias (dias de locação)"
+              htmlFor="dias"
+              hint={
+                diasN > 1 && dataEvento
+                  ? `Fica reservado do dia ${dataEvento.split("-").reverse().join("/")} por ${diasN} dias — valor × ${diasN}.`
+                  : "1 = evento de um dia. Aumente para alugar por vários dias (o brinquedo fica bloqueado o período todo)."
+              }
+            >
+              <input id="dias" type="number" min={1} max={90} step={1} value={dias}
+                onChange={(e) => setDias(Math.max(1, Number(e.target.value) || 1))} className={inputClass} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Entrega" htmlFor="hEntrega">
