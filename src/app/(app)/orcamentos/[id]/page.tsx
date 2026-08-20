@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, Trash2, ArrowRight, AlertTriangle, MapPin, CheckCircle2, FileDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -156,6 +156,11 @@ export default async function OrcamentoDetalhePage({
             <p className="text-sm text-muted mt-1">
               Entrega {o.horaEntrega || "—"} · Retirada {o.horaRetirada || "—"}
             </p>
+            {o.diarias > 1 && o.dataEvento && (
+              <p className="text-sm mt-2 inline-flex items-center rounded-full bg-primary-soft text-primary px-2.5 py-0.5 font-medium">
+                {o.diarias} diárias — até {format(addDays(parseISO(o.dataEvento + "T00:00"), o.diarias - 1), "dd/MM/yyyy")}
+              </p>
+            )}
           </div>
           <div className="card p-5">
             <h2 className="font-semibold mb-2 flex items-center gap-1.5"><MapPin size={16} /> Local da festa</h2>

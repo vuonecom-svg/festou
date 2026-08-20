@@ -59,14 +59,16 @@ export default async function PedidoDetalhePage({
           >
             <FileSignature size={16} /> Gerar contrato (PDF)
           </a>
-          <a
-            href={`/pedidos/${p.id}/recibo`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-border hover:bg-background"
-          >
-            <Receipt size={16} /> Recibo (PDF)
-          </a>
+          {p.sinalPago > 0 && (
+            <a
+              href={`/pedidos/${p.id}/recibo`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg text-sm font-medium h-10 px-4 border border-border hover:bg-background"
+            >
+              <Receipt size={16} /> Recibo (PDF)
+            </a>
+          )}
           <ConfirmButton
             action={excluir}
             confirm={`Excluir a locação #${p.numero}? Isso remove as reservas da agenda e não pode ser desfeito.`}

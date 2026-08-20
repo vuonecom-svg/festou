@@ -34,6 +34,28 @@ export function BrinquedosGrid({ brinquedos }: { brinquedos: Brinquedo[] }) {
     });
   }, [brinquedos, q, status]);
 
+  // Catálogo ainda vazio (usuário novo): boas-vindas com o próximo passo claro,
+  // em vez de busca + filtros + "nada encontrado" (que confunde quem chegou agora).
+  if (brinquedos.length === 0) {
+    return (
+      <div className="card p-12 text-center">
+        <span className="mx-auto grid place-items-center h-14 w-14 rounded-2xl bg-primary-soft text-primary mb-4">
+          <Package size={28} />
+        </span>
+        <h2 className="font-semibold text-lg">Cadastre seu primeiro brinquedo</h2>
+        <p className="text-sm text-muted mt-1 max-w-md mx-auto">
+          Com o catálogo montado, você cria orçamentos vendo a disponibilidade ao vivo — e a agenda trava sozinha contra conflito de datas.
+        </p>
+        <Link
+          href="/brinquedos/novo"
+          className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-fg px-5 h-11 text-sm font-semibold hover:bg-primary/90"
+        >
+          Cadastrar brinquedo
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">

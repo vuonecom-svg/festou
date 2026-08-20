@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   CalendarDays, CalendarRange, Truck, PackageCheck, Package, Wrench, Sparkles,
-  Wallet, TrendingUp, AlertTriangle, Clock, User, MapPin,
+  Wallet, TrendingUp, AlertTriangle, Clock, User, MapPin, CheckCircle2, ArrowRight,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { StatCard } from "@/components/ui/stat-card";
@@ -43,8 +43,45 @@ export default async function DashboardPage() {
     info: "bg-sky-100 text-sky-700",
   };
 
+  // Guia de primeiros passos: aparece até o usuário fechar o 1º ciclo completo
+  // (catálogo → orçamento → locação). Depois some sozinho.
+  const passos = [
+    { feito: brinq.total > 0, titulo: "Cadastre seus brinquedos", href: "/brinquedos/novo" },
+    { feito: oStats.total > 0, titulo: "Monte o primeiro orçamento", href: "/orcamentos/novo" },
+    { feito: pStats.total > 0, titulo: "Converta em locação e gere o contrato", href: "/orcamentos" },
+  ];
+  const mostrarPassos = pStats.total === 0;
+
   return (
     <div className="space-y-6">
+      {mostrarPassos && (
+        <section className="card p-5 border border-primary/20 bg-primary-soft/30">
+          <h2 className="font-semibold">Bem-vindo ao FesFlow! Comece por aqui 👇</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {passos.map((p, i) => (
+              <Link
+                key={p.titulo}
+                href={p.href}
+                className={
+                  "flex items-center gap-2.5 rounded-lg border p-3 text-sm transition-colors " +
+                  (p.feito
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-border bg-surface hover:border-primary hover:text-primary")
+                }
+              >
+                {p.feito ? (
+                  <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />
+                ) : (
+                  <span className="grid place-items-center h-5 w-5 rounded-full bg-primary text-primary-fg text-[11px] font-bold shrink-0">{i + 1}</span>
+                )}
+                <span className="flex-1 font-medium">{p.titulo}</span>
+                {!p.feito && <ArrowRight size={15} className="shrink-0 text-muted" />}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatCard label="Eventos hoje" value={hoje} icon={CalendarDays} />
         <StatCard label="Eventos na semana" value={semana} icon={CalendarRange} tone="info" />

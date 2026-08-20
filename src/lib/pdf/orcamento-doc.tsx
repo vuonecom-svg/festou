@@ -10,6 +10,9 @@ const brl = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const dataExt = (d: string) =>
   d ? format(parseISO(d + "T00:00"), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "—";
+// Soma N dias a uma data yyyy-mm-dd (para o fim da locação por diárias).
+const diaMais = (d: string, n: number) =>
+  new Date(new Date(d + "T00:00:00Z").getTime() + n * 86_400_000).toISOString().slice(0, 10);
 
 const s = StyleSheet.create({
   page: { padding: 36, fontSize: 10, color: "#0f172a", fontFamily: "Helvetica" },
@@ -80,6 +83,9 @@ export function OrcamentoDoc({
             <Text style={s.sectionTitle}>Evento</Text>
             <Text style={s.value}>{dataExt(o.dataEvento)}</Text>
             <Text style={s.muted}>Entrega {o.horaEntrega || "—"} · Retirada {o.horaRetirada || "—"}</Text>
+            {o.diarias > 1 ? (
+              <Text style={s.muted}>Locação por {o.diarias} diárias — devolução em {dataExt(diaMais(o.dataEvento, o.diarias - 1))}</Text>
+            ) : null}
           </View>
         </View>
 

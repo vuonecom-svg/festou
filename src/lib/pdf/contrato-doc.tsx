@@ -11,6 +11,9 @@ const brl = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const dataExt = (d: string) =>
   d ? format(parseISO(d + "T00:00"), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "—";
+// Soma N dias a uma data yyyy-mm-dd (fim da locação por diárias).
+const diaMais = (d: string, n: number) =>
+  new Date(new Date(d + "T00:00:00Z").getTime() + n * 86_400_000).toISOString().slice(0, 10);
 
 const s = StyleSheet.create({
   page: { padding: 40, fontSize: 9.5, color: "#0f172a", fontFamily: "Helvetica", lineHeight: 1.4 },
@@ -75,7 +78,10 @@ export function ContratoDoc({
 
         <Text style={s.h}>Dados do evento</Text>
         <Text style={s.p}>
-          Data: <Text style={s.b}>{dataExt(p.dataEvento)}</Text> · Entrega: {p.horaEntrega || "—"} · Retirada: {p.horaRetirada || "—"}.
+          Data: <Text style={s.b}>{dataExt(p.dataEvento)}</Text> · Entrega: {p.horaEntrega || "—"} · Retirada: {p.horaRetirada || "—"}
+          {o && o.diarias > 1 ? (
+            <> · Locação por <Text style={s.b}>{o.diarias} diárias</Text>, com devolução em <Text style={s.b}>{dataExt(diaMais(p.dataEvento, o.diarias - 1))}</Text></>
+          ) : null}.
         </Text>
         {end ? (
           <Text style={s.p}>

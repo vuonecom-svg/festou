@@ -4,6 +4,15 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO } from "@/lib/utils";
+
+// Nascimento digitado: ano absurdo (ex.: 20206) vira null — não grava lixo
+// que depois derrubaria a listagem no toISOString.
+function nascimentoOuNull(s: string): Date | null {
+  const d = new Date(s);
+  const ano = d.getUTCFullYear();
+  return !isNaN(d.getTime()) && ano >= 1900 && ano <= 2100 ? d : null;
+}
 import type { Prisma } from "@/generated/prisma/client";
 import { TAGS_VALIDAS, type ClienteTag } from "@/lib/clientes-shared";
 
@@ -53,7 +62,7 @@ function toDTO(c: ClienteRow, totalGasto: number): Cliente {
     telefone: c.telefone ?? "",
     whatsapp: c.whatsapp ?? "",
     email: c.email ?? "",
-    nascimento: c.nascimento ? c.nascimento.toISOString().slice(0, 10) : "",
+    nascimento: c.nascimento ? diaISO(c.nascimento, "") : "",
     avaliacao: c.avaliacao,
     obs: c.obs ?? "",
     rua: end?.rua ?? "",
@@ -81,7 +90,7 @@ function dadosCliente(input: ClienteInput) {
     telefone: input.telefone || null,
     whatsapp: input.whatsapp || null,
     email: input.email || null,
-    nascimento: input.nascimento ? new Date(input.nascimento) : null,
+    nascimento: input.nascimento ? nascimentoOuNull(input.nascimento) : null,
     avaliacao: input.avaliacao,
     obs: input.obs || null,
   };

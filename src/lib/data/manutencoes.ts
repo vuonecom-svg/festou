@@ -82,5 +82,20 @@ export async function concluirManutencao(id: string): Promise<void> {
 
 export async function deleteManutencao(id: string): Promise<void> {
   const empresaId = await getCurrentEmpresaId();
+  const m = await prisma.manutencao.findFirst({ where: { id, empresaId } });
+  if (!m) return;
   await prisma.manutencao.deleteMany({ where: { id, empresaId } });
+  // Se a manutenção excluída ainda estava aberta, libera o brinquedo — senão
+  // ele ficaria travado em "manutenção" sem nenhuma manutenção existente.
+  if (m.status !== "concluida") {
+    const outraAberta = await prisma.manutencao.findFirst({
+      where: { empresaId, brinquedoId: m.brinquedoId, status: { not: "concluida" } },
+    });
+    if (!outraAberta) {
+      await prisma.brinquedo.updateMany({
+        where: { id: m.brinquedoId, empresaId, status: { in: ["manutencao", "limpeza"] } },
+        data: { status: "disponivel" },
+      });
+    }
+  }
 }

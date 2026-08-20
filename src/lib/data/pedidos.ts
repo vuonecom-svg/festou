@@ -188,12 +188,19 @@ export async function reagendarPedido(
   horaRetirada: string
 ): Promise<{ ok: boolean; erro?: string }> {
   const empresaId = await getCurrentEmpresaId();
-  const pedido = await prisma.pedido.findFirst({ where: { id, empresaId }, include: { reservaItens: true } });
+  const pedido = await prisma.pedido.findFirst({
+    where: { id, empresaId },
+    include: { reservaItens: true, orcamento: { select: { diarias: true } } },
+  });
   if (!pedido) return { ok: false, erro: "Locação não encontrada." };
   if (!dataEvento) return { ok: false, erro: "Informe a data do evento." };
 
+  // Locação por período: preserva o nº de diárias do orçamento de origem —
+  // reagendar um pedido de 3 dias mantém o bloqueio de 3 dias na nova data.
+  const diarias = Math.max(1, pedido.orcamento?.diarias ?? 1);
   const eventoInicio = new Date(`${dataEvento}T${horaEntrega || "12:00"}:00Z`);
-  const eventoFim = new Date(`${dataEvento}T${horaRetirada || "18:00"}:00Z`);
+  const retiradaBase = new Date(`${dataEvento}T${horaRetirada || "18:00"}:00Z`);
+  const eventoFim = new Date(retiradaBase.getTime() + (diarias - 1) * 86_400_000);
   if (isNaN(eventoInicio.getTime()) || isNaN(eventoFim.getTime()) || eventoFim <= eventoInicio) {
     return { ok: false, erro: "Horário inválido (retirada deve ser após a entrega)." };
   }

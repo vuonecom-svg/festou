@@ -133,14 +133,18 @@ export async function createOrcamento(input: OrcamentoInput): Promise<Orcamento>
   for (const it of input.itens) {
     const b = await getBrinquedo(it.brinquedoId);
     if (!b) continue;
-    const { valorUnit: diaria, sufixo } = precoUnitario(b, it.modo ?? "diaria", it.horasExtras ?? 0);
+    const modo = it.modo ?? "diaria";
+    const { valorUnit: base, sufixo } = precoUnitario(b, modo, it.horasExtras ?? 0);
     const qtd = Math.max(1, it.qtd);
-    const valorUnit = diaria * diarias; // valor do item pelo período todo
+    // Diárias multiplicam só a base DIÁRIA. "Período" é preço fechado de pacote
+    // (ex.: fim de semana) — multiplicá-lo pelas diárias cobraria em dobro.
+    const multiplica = modo !== "periodo";
+    const valorUnit = multiplica ? base * diarias : base;
     const valorTotal = valorUnit * qtd;
     subtotal += valorTotal;
     itensData.push({
       brinquedo: { connect: { id: b.id } },
-      descricao: b.nome + sufixo + (diarias > 1 ? ` (${diarias} diárias)` : ""),
+      descricao: b.nome + sufixo + (multiplica && diarias > 1 ? ` (${diarias} diárias)` : ""),
       qtd, valorUnit, valorTotal,
     });
   }

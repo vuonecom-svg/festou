@@ -106,9 +106,12 @@ export function OrcamentoWizard({
   }, [janela, brinquedos, reservas]);
 
   const itensSel = Object.entries(sel).filter(([, q]) => q > 0);
+  // Diárias multiplicam só o modo diária; "período" é preço fechado de pacote.
   const subtotal = itensSel.reduce((s, [id, q]) => {
     const b = brinquedos.find((x) => x.id === id);
-    return s + (b ? preco(b) * q * diasN : 0);
+    if (!b) return s;
+    const mult = modoDe(b) === "periodo" ? 1 : diasN;
+    return s + preco(b) * q * mult;
   }, 0);
   const total = Math.max(0, subtotal - desconto + taxaEntrega + taxaMontagem);
   const restante = Math.max(0, total - valorSinal);
@@ -361,7 +364,10 @@ export function OrcamentoWizard({
           </div>
 
           <div className="border-t border-border mt-4 pt-4 space-y-1.5 text-sm">
-            <Row label={`Subtotal (${itensSel.length} ${itensSel.length === 1 ? "item" : "itens"})`} value={subtotal} />
+            <Row
+              label={`Subtotal (${itensSel.length} ${itensSel.length === 1 ? "item" : "itens"}${diasN > 1 ? ` × ${diasN} diárias` : ""})`}
+              value={subtotal}
+            />
             {desconto > 0 && <Row label="Desconto" value={-desconto} />}
             {taxaEntrega > 0 && <Row label="Taxa entrega" value={taxaEntrega} />}
             {taxaMontagem > 0 && <Row label="Taxa montagem" value={taxaMontagem} />}

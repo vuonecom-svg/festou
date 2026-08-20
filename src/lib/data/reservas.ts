@@ -4,6 +4,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentEmpresaId } from "@/lib/tenant";
+import { diaISO, dtISO } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 import {
   verificarDisponibilidade,
@@ -67,8 +68,10 @@ function statusDoPedido(op: string): ReservaStatus {
 }
 
 function eventoISO(dataEvento: Date, hora: string | null, fallback: string): string {
-  const dia = dataEvento.toISOString().slice(0, 10);
-  return new Date(`${dia}T${(hora || fallback)}:00`).toISOString();
+  // UTC ("Z") — mesma base do resto do sistema (evita deslocamento por fuso do
+  // host). diaISO/dtISO blindam contra data inválida (não derruba a agenda).
+  const dia = diaISO(dataEvento);
+  return dtISO(new Date(`${dia}T${(hora || fallback)}:00Z`));
 }
 
 function toDTO(r: ReservaRow): Reserva {
@@ -80,10 +83,10 @@ function toDTO(r: ReservaRow): Reserva {
     brinquedoNome: r.brinquedo?.nome ?? "",
     clienteNome: ped?.cliente?.nome ?? "",
     cidade: ped?.enderecoEvento?.cidade ?? "",
-    eventoInicio: ped ? eventoISO(ped.dataEvento, ped.horaEntrega, "12:00") : r.janelaInicio.toISOString(),
-    eventoFim: ped ? eventoISO(ped.dataEvento, ped.horaRetirada, "18:00") : r.janelaFim.toISOString(),
-    janelaInicio: r.janelaInicio.toISOString(),
-    janelaFim: r.janelaFim.toISOString(),
+    eventoInicio: ped ? eventoISO(ped.dataEvento, ped.horaEntrega, "12:00") : dtISO(r.janelaInicio),
+    eventoFim: ped ? eventoISO(ped.dataEvento, ped.horaRetirada, "18:00") : dtISO(r.janelaFim),
+    janelaInicio: dtISO(r.janelaInicio),
+    janelaFim: dtISO(r.janelaFim),
     status: ped ? statusDoPedido(ped.statusOperacional) : "confirmado",
   };
 }
