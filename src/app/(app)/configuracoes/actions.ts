@@ -4,8 +4,17 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { updateEmpresa } from "@/lib/data/empresa";
 import { uploadImagem } from "@/lib/upload";
+import { getCurrentEmpresaId } from "@/lib/tenant";
+import { podeGerir } from "@/lib/rbac";
 
 export async function updateEmpresaAction(fd: FormData) {
+  // Auth/tenant ANTES de tocar no storage (server action não passa pelo layout);
+  // e dados da empresa (razão social, CNPJ, logo — saem no contrato) são de
+  // admin/gerente.
+  await getCurrentEmpresaId();
+  if (!(await podeGerir())) {
+    redirect(`/configuracoes?erro=${encodeURIComponent("Sem permissão para alterar os dados da empresa (apenas admin/gerente).")}`);
+  }
   const s = (k: string) => String(fd.get(k) ?? "").trim();
 
   // Logo: upload de arquivo tem prioridade; senão usa o link colado.

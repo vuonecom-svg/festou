@@ -12,21 +12,24 @@ import {
 } from "@/lib/data/brinquedos";
 import { uploadImagem } from "@/lib/upload";
 import { podeGerir } from "@/lib/rbac";
+import { getCurrentEmpresaId } from "@/lib/tenant";
 
 // ── helpers de parsing do FormData ──────────────────────────
 function str(fd: FormData, key: string) {
   return (fd.get(key) as string | null)?.trim() ?? "";
 }
+// Nunca aceita negativo: valores alimentam preço (dinheiro) e buffers de tempo
+// (um buffer negativo ENCOLHE a janela de bloqueio e fura o anti-overbooking).
 function num(fd: FormData, key: string): number {
   const v = str(fd, key);
   const n = Number(v.replace(",", "."));
-  return Number.isFinite(n) ? n : 0;
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
 }
 function numOrNull(fd: FormData, key: string): number | null {
   const v = str(fd, key);
   if (v === "") return null;
   const n = Number(v.replace(",", "."));
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) ? Math.max(0, n) : null;
 }
 function bool(fd: FormData, key: string) {
   return fd.get(key) != null;
@@ -66,6 +69,7 @@ function parse(fd: FormData): BrinquedoInput {
 }
 
 export async function createBrinquedoAction(fd: FormData) {
+  await getCurrentEmpresaId(); // auth/tenant ANTES de gravar no storage
   const input = parse(fd);
   const arquivo = fd.get("fotoFile");
   if (arquivo instanceof File && arquivo.size > 0) {
@@ -82,6 +86,7 @@ export async function createBrinquedoAction(fd: FormData) {
 }
 
 export async function updateBrinquedoAction(id: string, fd: FormData) {
+  await getCurrentEmpresaId(); // auth/tenant ANTES de gravar no storage
   const input = parse(fd);
   const arquivo = fd.get("fotoFile");
   if (arquivo instanceof File && arquivo.size > 0) {
@@ -110,7 +115,11 @@ export async function deleteBrinquedoAction(id: string) {
   redirect("/brinquedos");
 }
 
+const STATUS_VALIDOS = new Set(["disponivel", "alugado", "manutencao", "limpeza", "inativo"]);
+
 export async function setStatusAction(id: string, status: BrinquedoStatus) {
+  // O tipo TS não existe em runtime — valida o valor que veio pela rede.
+  if (!STATUS_VALIDOS.has(status)) return;
   await setBrinquedoStatus(id, status);
   revalidatePath("/brinquedos");
   revalidatePath(`/brinquedos/${id}`);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import crypto from "crypto";
-import { verificarAssinaturaKiwify, classificarEvento } from "../kiwify";
+import { verificarAssinaturaKiwify, classificarEvento, classificarEventoCampos } from "../kiwify";
 
 const token = "segredo-do-webhook-123";
 const raw = '{"order_status":"paid","Customer":{"email":"a@b.com"}}';
@@ -40,5 +40,23 @@ describe("classificarEvento", () => {
   );
   it("bloqueio tem prioridade sobre liberação", () => {
     expect(classificarEvento("paid_then_refunded")).toBe("bloquear");
+  });
+});
+
+describe("classificarEventoCampos (payload real: vários campos ao mesmo tempo)", () => {
+  it("subscription_canceled com order_status paid ao lado → BLOQUEIA (nunca reativa)", () => {
+    expect(classificarEventoCampos(["subscription_canceled", "canceled", null, "paid", ""])).toBe("bloquear");
+  });
+  it("assinatura atrasada com pedido pago original → bloqueia", () => {
+    expect(classificarEventoCampos(["subscription_late", "late", undefined, "paid", undefined])).toBe("bloquear");
+  });
+  it("compra aprovada normal → libera", () => {
+    expect(classificarEventoCampos(["order_approved", null, null, "paid", ""])).toBe("liberar");
+  });
+  it("renovação → libera", () => {
+    expect(classificarEventoCampos(["subscription_renewed", "active", "active", "paid", ""])).toBe("liberar");
+  });
+  it("nada acionável → ignora", () => {
+    expect(classificarEventoCampos(["", null, undefined, "waiting_payment", "pending"])).toBe("ignorar");
   });
 });

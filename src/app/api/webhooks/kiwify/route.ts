@@ -1,5 +1,5 @@
 import { provisionarAcesso, bloquearAcesso } from "@/lib/access";
-import { verificarAssinaturaKiwify, classificarEvento } from "@/lib/kiwify";
+import { verificarAssinaturaKiwify, classificarEventoCampos } from "@/lib/kiwify";
 
 export const runtime = "nodejs";
 
@@ -41,16 +41,32 @@ export async function POST(req: Request) {
 
   const email = String(customer.email ?? customer.Email ?? body.email ?? "").trim().toLowerCase();
   const nome = String(customer.full_name ?? customer.name ?? customer.nome ?? "").trim();
-  const status = String(
-    body.order_status ?? body.status ?? subscription.status ?? body.webhook_event_type ?? ""
-  ).toLowerCase();
-  const ciclo = String(product.product_name ?? product.name ?? body.product_name ?? "").trim();
+  const plan = (subscription.plan ?? {}) as Record<string, unknown>;
+  const ciclo = String(product.product_name ?? product.name ?? body.product_name ?? plan.name ?? "").trim();
   const gatewayRef = String(body.order_id ?? subscription.id ?? body.id ?? "");
 
-  // O webhook é "Todos que sou produtor". Só agimos em vendas do FesFlow —
-  // casando pelo NOME do produto parseado (os produtos são "FesFlow Completo (...)"),
-  // e não por substring no corpo cru (que daria falso-positivo com nome/e-mail do cliente).
-  if (!ciclo.toLowerCase().includes("fesflow")) {
+  // Classifica olhando TODOS os campos de status: eventos de assinatura chegam
+  // com o pedido original junto (order_status "paid" ao lado de um
+  // subscription_canceled). Bloqueio vence liberação em qualquer campo.
+  const evento = classificarEventoCampos([
+    String(body.webhook_event_type ?? ""),
+    String(subscription.status ?? ""),
+    String(plan.status ?? ""),
+    String(body.order_status ?? ""),
+    String(body.status ?? ""),
+  ]);
+
+  // O webhook é "Todos que sou produtor". O filtro por produto vale só para
+  // LIBERAR (nunca conceder acesso por venda de outro produto). Para BLOQUEAR,
+  // só ignora se o evento diz explicitamente que é de OUTRO produto — evento de
+  // bloqueio sem nome de produto segue em frente (bloquear e-mail que não é
+  // cliente FesFlow é um no-op inofensivo; ignorar um bloqueio real é receita
+  // perdida em silêncio).
+  const ehFesflow = ciclo.toLowerCase().includes("fesflow");
+  if (evento === "liberar" && !ehFesflow) {
+    return Response.json({ ok: true, acao: "ignorado-nao-fesflow" });
+  }
+  if (evento === "bloquear" && ciclo && !ehFesflow) {
     return Response.json({ ok: true, acao: "ignorado-nao-fesflow" });
   }
 
@@ -59,7 +75,6 @@ export async function POST(req: Request) {
   }
 
   try {
-    const evento = classificarEvento(status);
     if (evento === "liberar") {
       const r = await provisionarAcesso({ email, nome, ciclo, gatewayRef });
       return Response.json({ ok: true, acao: "liberado", novo: r.novo });
@@ -69,7 +84,7 @@ export async function POST(req: Request) {
       return Response.json({ ok: true, acao: "bloqueado" });
     }
     // Evento não acionável (ex.: waiting_payment) — apenas confirma o recebimento.
-    return Response.json({ ok: true, acao: "ignorado", status });
+    return Response.json({ ok: true, acao: "ignorado" });
   } catch (e) {
     console.error("Erro no webhook Kiwify:", (e as Error).message);
     return new Response("erro interno", { status: 500 });

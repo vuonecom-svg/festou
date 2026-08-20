@@ -45,7 +45,7 @@ export default async function RelatoriosPage() {
 
       {/* Rankings */}
       <section className="grid gap-4 lg:grid-cols-2">
-        <Ranking titulo="Brinquedos mais lucrativos" icon={Package} linhas={r.brinquedos} unidade="locações" />
+        <Ranking titulo="Brinquedos mais lucrativos" icon={Package} linhas={r.brinquedos} unidade="unid. alugadas" />
         <Ranking titulo="Clientes que mais alugam" icon={Users} linhas={r.clientes} unidade="eventos" />
         <Ranking titulo="Cidades com mais eventos" icon={MapPin} linhas={r.cidades} unidade="eventos" />
 

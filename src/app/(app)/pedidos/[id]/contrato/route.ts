@@ -32,6 +32,7 @@ export async function GET(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="contrato-${pedido.numero}.pdf"`,
+      "Cache-Control": "private, no-store, max-age=0",
     },
   });
 }

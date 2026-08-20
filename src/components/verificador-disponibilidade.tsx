@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, XCircle, CalendarSearch } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -72,6 +73,24 @@ export function VerificadorDisponibilidade({
     );
     return { ...r, nome: b.nome, quantidade: b.quantidade };
   }, [brinquedoId, data, horaIni, horaFim, brinquedos, reservas, transporteMin]);
+
+  // Sem brinquedos disponíveis: explica em vez de mostrar um select vazio.
+  if (brinquedos.length === 0) {
+    return (
+      <div className="card p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <CalendarSearch size={18} className="text-primary" />
+          <h2 className="font-semibold">Está livre nesta data?</h2>
+        </div>
+        <p className="text-sm text-muted">
+          Nenhum brinquedo disponível para consulta — cadastre um brinquedo (ou conclua a manutenção dos existentes) para verificar datas aqui.
+        </p>
+        <Link href="/brinquedos/novo" className="mt-3 inline-flex items-center rounded-lg bg-primary text-primary-fg px-4 h-9 text-sm font-medium hover:bg-primary/90">
+          Cadastrar brinquedo
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="card p-5">

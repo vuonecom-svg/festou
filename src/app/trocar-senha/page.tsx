@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { inputClass } from "@/components/ui/form";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { concluirTrocaSenha } from "./actions";
+import { trocarSenhaAction } from "./actions";
 
 type Supa = ReturnType<typeof createSupabaseBrowserClient>;
 
@@ -31,12 +31,10 @@ export default function TrocarSenhaPage() {
     e.preventDefault();
     if (senha.length < 6) { setMsg("A senha precisa ter ao menos 6 caracteres."); setStatus("erro"); return; }
     if (senha !== confirma) { setMsg("As senhas não conferem."); setStatus("erro"); return; }
-    const supa = supaRef.current;
-    if (!supa) { setMsg("Recarregue a página e tente de novo."); setStatus("erro"); return; }
     setStatus("salvando");
-    const { error } = await supa.auth.updateUser({ password: senha });
-    if (error) { setMsg(error.message); setStatus("erro"); return; }
-    await concluirTrocaSenha();
+    // A troca acontece no SERVIDOR (valida sessão, troca a senha e limpa a flag).
+    const r = await trocarSenhaAction(senha);
+    if (!r.ok) { setMsg(r.erro ?? "Não foi possível trocar a senha."); setStatus("erro"); return; }
     window.location.href = "/dashboard";
   }
 

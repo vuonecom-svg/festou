@@ -160,7 +160,7 @@ export default function LandingPage() {
                 <span className="text-4xl font-bold">{b.precoMes}</span>
               </p>
               <p className="text-sm text-muted mt-1">/mês</p>
-              <p className="text-xs text-muted mt-1 min-h-[1rem]">{b.total ? `Referente ao pacote de ${b.meses} meses — R$ ${b.total} em parcela única` : " "}</p>
+              <p className="text-xs text-muted mt-1 min-h-[1rem]">{b.total ? `Pacote de ${b.meses} meses — R$ ${b.total} (parcele em até ${b.meses}x)` : " "}</p>
               <span className={"mt-5 inline-flex items-center justify-center rounded-lg h-11 font-semibold " + (b.destaque ? "bg-primary text-primary-fg hover:bg-primary/90" : "border border-border hover:bg-background")}>
                 Assinar
               </span>

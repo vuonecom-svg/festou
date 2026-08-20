@@ -138,11 +138,15 @@ export function BrinquedoForm({
       <div className="card p-5">
         <SectionTitle>Status e observações</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Status" htmlFor="status">
+          <Field label="Status" htmlFor="status" hint="Para tirar do catálogo, use o interruptor ao lado.">
             <select id="status" name="status" defaultValue={b?.status ?? "disponivel"} className={inputClass}>
-              {Object.entries(BRINQUEDO_STATUS).map(([value, { label }]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
+              {Object.entries(BRINQUEDO_STATUS)
+                // "Inativo" sai do select — havia DOIS controles de inativo que
+                // podiam discordar; o interruptor ao lado é o único caminho.
+                .filter(([value]) => value !== "inativo" || b?.status === "inativo")
+                .map(([value, { label }]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
             </select>
           </Field>
           <div className="flex items-end">

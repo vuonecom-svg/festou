@@ -25,3 +25,14 @@ export function classificarEvento(statusRaw: string): EventoKiwify {
   if (LIBERAM.some((s) => status.includes(s))) return "liberar";
   return "ignorar";
 }
+
+// Classifica considerando VÁRIOS campos do payload (a Kiwify manda o pedido
+// original junto do evento de assinatura: um `subscription_canceled` chega com
+// `order_status: "paid"` do lado). Se QUALQUER campo indicar bloqueio, bloqueia
+// — bloqueio sempre vence liberação, entre campos e dentro de cada campo.
+export function classificarEventoCampos(campos: (string | null | undefined)[]): EventoKiwify {
+  const resultados = campos.filter(Boolean).map((c) => classificarEvento(String(c)));
+  if (resultados.includes("bloquear")) return "bloquear";
+  if (resultados.includes("liberar")) return "liberar";
+  return "ignorar";
+}

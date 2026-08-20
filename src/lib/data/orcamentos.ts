@@ -16,11 +16,17 @@ import { usuarioAtualId } from "../rbac";
 export type OrcStatus =
   | "novo" | "enviado" | "aprovado" | "recusado" | "convertido" | "cancelado";
 
+// Cobre TODOS os valores do enum do banco (valor "extra" via suporte/import
+// não derruba a lista).
 export const ORC_STATUS: Record<string, { label: string; badge: string }> = {
   novo: { label: "Novo", badge: "bg-slate-100 text-slate-700" },
   enviado: { label: "Enviado", badge: "bg-sky-100 text-sky-700" },
+  visualizado: { label: "Visualizado", badge: "bg-sky-100 text-sky-700" },
+  aguardando_resposta: { label: "Aguardando resposta", badge: "bg-amber-100 text-amber-700" },
+  aguardando_sinal: { label: "Aguardando sinal", badge: "bg-orange-100 text-orange-700" },
   aprovado: { label: "Aprovado", badge: "bg-emerald-100 text-emerald-700" },
   recusado: { label: "Recusado", badge: "bg-rose-100 text-rose-700" },
+  expirado: { label: "Expirado", badge: "bg-slate-200 text-slate-600" },
   convertido: { label: "Convertido em pedido", badge: "bg-violet-100 text-violet-700" },
   cancelado: { label: "Cancelado", badge: "bg-slate-200 text-slate-600" },
 };

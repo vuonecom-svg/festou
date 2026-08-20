@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createDespesa, deleteDespesa, DESPESA_CATEGORIAS, type DespesaCategoria } from "@/lib/data/despesas";
 import { createReceita, deleteReceita, RECEITA_CATEGORIAS, type ReceitaCategoria } from "@/lib/data/receitas";
+import { podeGerir } from "@/lib/rbac";
 
 export async function createDespesaAction(fd: FormData) {
   const categoria = String(fd.get("categoria") ?? "outros") as DespesaCategoria;
@@ -16,6 +17,7 @@ export async function createDespesaAction(fd: FormData) {
 }
 
 export async function deleteDespesaAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteDespesa(id);
   revalidatePath("/financeiro");
 }
@@ -33,6 +35,7 @@ export async function createReceitaAction(fd: FormData) {
 }
 
 export async function deleteReceitaAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteReceita(id);
   revalidatePath("/financeiro");
 }

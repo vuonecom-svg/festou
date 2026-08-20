@@ -13,9 +13,10 @@ export async function papelAtual(): Promise<Papel> {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user) return "atendente";
-  const email = user.email?.toLowerCase();
-  let u = await prisma.usuario.findFirst({ where: { authUserId: user.id }, select: { papel: true } });
-  if (!u && email) u = await prisma.usuario.findFirst({ where: { email }, select: { papel: true } });
+  // Só por authUserId (e-mail não é único global — fallback por e-mail poderia
+  // devolver o papel/admin de OUTRA empresa). O vínculo é garantido/self-healed
+  // em getCurrentEmpresaId; sem vínculo, papel mínimo.
+  const u = await prisma.usuario.findFirst({ where: { authUserId: user.id }, select: { papel: true } });
   return (u?.papel as Papel) ?? "atendente";
 }
 
@@ -32,8 +33,8 @@ export async function usuarioAtualId(): Promise<string | null> {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user) return null;
-  const email = user.email?.toLowerCase();
-  let u = await prisma.usuario.findFirst({ where: { authUserId: user.id }, select: { id: true } });
-  if (!u && email) u = await prisma.usuario.findFirst({ where: { email }, select: { id: true } });
+  // Só por authUserId — trilha de auditoria nunca pode apontar para usuário
+  // homônimo de outra empresa.
+  const u = await prisma.usuario.findFirst({ where: { authUserId: user.id }, select: { id: true } });
   return u?.id ?? null;
 }

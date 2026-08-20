@@ -15,7 +15,9 @@ export default async function NovoOrcamentoPage() {
 
   const clientesW = clientes.map((c) => ({ id: c.id, nome: c.nome, cidade: c.cidade }));
   const brinquedosW = brinquedos
-    .filter((b) => b.ativo && b.status !== "inativo")
+    // Em manutenção/limpeza não entra no orçamento (a tela de manutenção promete
+    // o bloqueio; a conversão em pedido também recusa — dupla garantia).
+    .filter((b) => b.ativo && b.status !== "inativo" && b.status !== "manutencao" && b.status !== "limpeza")
     .map((b) => ({
       id: b.id,
       nome: b.nome,

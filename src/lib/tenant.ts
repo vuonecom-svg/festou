@@ -21,7 +21,10 @@ export const getCurrentEmpresaId = cache(async (): Promise<string> => {
     const user = data.user;
     if (!user) redirect("/entrar");
 
-    // Vínculo determinístico: authUserId primeiro; e-mail só como fallback.
+    // Vínculo determinístico: authUserId primeiro. O fallback por e-mail só
+    // considera cadastros AINDA SEM login vinculado (authUserId null) — nunca
+    // rouba o cadastro de outro login homônimo em outra empresa — e é
+    // determinístico (mais antigo primeiro). Ao casar, vincula (self-heal).
     const email = user.email?.toLowerCase();
     let u = await prisma.usuario.findFirst({
       where: { authUserId: user.id },
@@ -29,9 +32,13 @@ export const getCurrentEmpresaId = cache(async (): Promise<string> => {
     });
     if (!u && email) {
       u = await prisma.usuario.findFirst({
-        where: { email },
+        where: { email, authUserId: null },
+        orderBy: { criadoEm: "asc" },
         include: { empresa: { select: { statusAssinatura: true } } },
       });
+      if (u) {
+        await prisma.usuario.update({ where: { id: u.id }, data: { authUserId: user.id } });
+      }
     }
     if (!u) redirect("/acesso-bloqueado");
 

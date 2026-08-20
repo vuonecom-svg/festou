@@ -142,6 +142,11 @@ export async function verificarBrinquedo(
   if (!brinquedo) {
     return { disponivel: false, janela: { inicio: eventoInicio, fim: eventoFim }, conflitos: [], unidadesLivres: [], unidadeLivre: null, brinquedo: null };
   }
+  // Em manutenção/limpeza ou inativo: indisponível — cumpre a promessa da tela
+  // de manutenção ("bloqueado na agenda até concluir").
+  if (brinquedo.status === "manutencao" || brinquedo.status === "limpeza" || brinquedo.status === "inativo" || !brinquedo.ativo) {
+    return { disponivel: false, janela: { inicio: eventoInicio, fim: eventoFim }, conflitos: [], unidadesLivres: [], unidadeLivre: null, brinquedo };
+  }
   const existentes = await reservasDoBrinquedo(empresaId, brinquedoId, ignorarPedidoId);
   const res = verificarDisponibilidade(
     brinquedoId, eventoInicio, eventoFim, buffersDe(brinquedo, transporteMin), brinquedo.quantidade, existentes

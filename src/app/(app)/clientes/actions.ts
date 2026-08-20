@@ -10,6 +10,7 @@ import {
   type ClienteTag,
   CLIENTE_TAGS,
 } from "@/lib/data/clientes";
+import { podeGerir } from "@/lib/rbac";
 
 function str(fd: FormData, key: string) {
   return (fd.get(key) as string | null)?.trim() ?? "";
@@ -59,6 +60,9 @@ export async function updateClienteAction(id: string, fd: FormData) {
 }
 
 export async function deleteClienteAction(id: string) {
+  if (!(await podeGerir())) {
+    redirect(`/clientes/${id}?erro=${encodeURIComponent("Sem permissão para excluir (apenas admin/gerente).")}`);
+  }
   await deleteCliente(id);
   revalidatePath("/clientes");
   redirect("/clientes");

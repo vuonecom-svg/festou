@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createLead, setLeadEtapa, deleteLead, ETAPAS, type LeadEtapa } from "@/lib/data/crm";
+import { podeGerir } from "@/lib/rbac";
 
 export async function createLeadAction(fd: FormData) {
   const clienteId = String(fd.get("clienteId") ?? "");
@@ -18,6 +19,7 @@ export async function setLeadEtapaAction(id: string, fd: FormData) {
 }
 
 export async function deleteLeadAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteLead(id);
   revalidatePath("/crm");
 }

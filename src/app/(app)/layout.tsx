@@ -13,6 +13,7 @@ export default async function AppLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const acesso = await verificarAcesso();
   if (!acesso.ok) {
+    if (acesso.motivo === "trocar-senha") redirect("/trocar-senha");
     redirect(acesso.motivo === "bloqueado" ? "/acesso-bloqueado" : "/entrar");
   }
   const superAdmin = await ehSuperAdmin();

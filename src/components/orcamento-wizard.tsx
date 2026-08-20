@@ -314,8 +314,17 @@ export function OrcamentoWizard({
                       )}
 
                       <div className="ml-auto text-right">
-                        <p className="text-[11px] text-muted">Unitário{qtd > 1 ? ` × ${qtd}` : ""}</p>
-                        <p className="text-sm font-semibold tabular-nums">{formatBRL(preco(b) * qtd)}</p>
+                        {(() => {
+                          const mult = modoDe(b) === "periodo" ? 1 : diasN;
+                          return (
+                            <>
+                              <p className="text-[11px] text-muted">
+                                Unitário{qtd > 1 ? ` × ${qtd}` : ""}{mult > 1 ? ` × ${mult} diárias` : ""}
+                              </p>
+                              <p className="text-sm font-semibold tabular-nums">{formatBRL(preco(b) * qtd * mult)}</p>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}

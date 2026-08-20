@@ -5,6 +5,7 @@ import {
   createFuncionario, deleteFuncionario, createVeiculo, deleteVeiculo,
   FUNCAO, type FuncionarioFuncao,
 } from "@/lib/data/equipe";
+import { podeGerir } from "@/lib/rbac";
 
 export async function createFuncionarioAction(fd: FormData) {
   const nome = String(fd.get("nome") ?? "").trim();
@@ -15,6 +16,7 @@ export async function createFuncionarioAction(fd: FormData) {
 }
 
 export async function deleteFuncionarioAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteFuncionario(id);
   revalidatePath("/equipe");
 }
@@ -29,6 +31,7 @@ export async function createVeiculoAction(fd: FormData) {
 }
 
 export async function deleteVeiculoAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteVeiculo(id);
   revalidatePath("/equipe");
 }

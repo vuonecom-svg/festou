@@ -30,6 +30,7 @@ export async function GET(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="orcamento-${orcamento.numero}.pdf"`,
+      "Cache-Control": "private, no-store, max-age=0",
     },
   });
 }

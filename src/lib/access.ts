@@ -86,10 +86,14 @@ export async function provisionarAcesso(input: {
   const res = await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${email})::int8)`;
 
-    const existente = await tx.usuario.findFirst({ where: { email } });
+    const existente = await tx.usuario.findFirst({ where: { email }, orderBy: { criadoEm: "asc" } });
     if (existente) {
-      // Já existe (renovação / reenvio) — reativa.
-      await tx.usuario.updateMany({ where: { email }, data: { ativo: true } });
+      // Já existe (renovação / reenvio) — reativa SÓ nesta empresa (e-mail não é
+      // único global; sem o escopo, reativaria homônimo de outra empresa).
+      await tx.usuario.updateMany({
+        where: { email, empresaId: existente.empresaId },
+        data: { ativo: true },
+      });
       await tx.empresa.update({
         where: { id: existente.empresaId },
         data: { statusAssinatura: "ativa" },
@@ -144,9 +148,13 @@ export async function provisionarAcesso(input: {
 
 export async function bloquearAcesso(email: string): Promise<void> {
   const e = email.trim().toLowerCase();
-  const u = await prisma.usuario.findFirst({ where: { email: e } });
+  const u = await prisma.usuario.findFirst({ where: { email: e }, orderBy: { criadoEm: "asc" } });
   if (!u) return;
-  await prisma.usuario.updateMany({ where: { email: e }, data: { ativo: false } });
+  // Escopado à empresa do usuário encontrado — nunca derruba homônimo de outra.
+  await prisma.usuario.updateMany({
+    where: { email: e, empresaId: u.empresaId },
+    data: { ativo: false },
+  });
   await prisma.empresa.update({
     where: { id: u.empresaId },
     data: { statusAssinatura: "cancelada" },

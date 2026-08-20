@@ -6,7 +6,7 @@ import { authAtivo } from "@/lib/auth-flag";
 const PROTEGIDAS = [
   "/dashboard", "/agenda", "/orcamentos", "/pedidos", "/clientes", "/brinquedos",
   "/combos", "/equipe", "/rotas", "/manutencao", "/financeiro", "/crm",
-  "/contratos", "/relatorios", "/configuracoes",
+  "/contratos", "/relatorios", "/configuracoes", "/auditoria", "/superadmin",
 ];
 
 export async function proxy(req: NextRequest) {

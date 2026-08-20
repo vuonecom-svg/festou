@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { dtISO } from "@/lib/utils";
+import { ehSuperAdmin } from "@/lib/superadmin";
 
 export type ClienteAdmin = {
   id: string;
@@ -31,6 +32,9 @@ async function contarPor(tabela: string): Promise<Map<string, number>> {
 }
 
 export async function listarClientesAdmin(): Promise<ClienteAdmin[]> {
+  // Gate na PRÓPRIA camada de dados: única query cross-tenant do sistema —
+  // nunca depender só do gate da página.
+  if (!(await ehSuperAdmin())) throw new Error("Acesso restrito ao dono da plataforma.");
   const empresas = await prisma.empresa.findMany({
     orderBy: { criadoEm: "desc" },
     select: {

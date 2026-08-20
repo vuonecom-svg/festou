@@ -228,8 +228,11 @@ export async function deleteBrinquedo(id: string): Promise<{ ok: boolean; erro?:
     return { ok: false, erro: "Este brinquedo tem reservas na agenda e não pode ser excluído. Marque como inativo." };
   }
   try {
-    await prisma.brinquedo.deleteMany({ where: { id, empresaId } });
-    await auditar({ empresaId, usuarioId: await usuarioAtualId(), entidade: "brinquedo", entidadeId: id, acao: "excluir_brinquedo" });
+    const del = await prisma.brinquedo.deleteMany({ where: { id, empresaId } });
+    // Audita só se excluiu de fato (id de outra empresa não gera evento falso).
+    if (del.count > 0) {
+      await auditar({ empresaId, usuarioId: await usuarioAtualId(), entidade: "brinquedo", entidadeId: id, acao: "excluir_brinquedo" });
+    }
     return { ok: true };
   } catch (e) {
     if (ehFkViolation(e)) {

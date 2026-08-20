@@ -50,7 +50,8 @@ export default async function DashboardPage() {
     { feito: oStats.total > 0, titulo: "Monte o primeiro orçamento", href: "/orcamentos/novo" },
     { feito: pStats.total > 0, titulo: "Converta em locação e gere o contrato", href: "/orcamentos" },
   ];
-  const mostrarPassos = pStats.total === 0;
+  // Some só depois da 2ª locação — assim o usuário vê o ciclo fechar em verde.
+  const mostrarPassos = pStats.total < 2;
 
   return (
     <div className="space-y-6">

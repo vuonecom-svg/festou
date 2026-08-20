@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { abrirManutencao, concluirManutencao, deleteManutencao, MANUT_TIPO, type ManutencaoTipo } from "@/lib/data/manutencoes";
+import { podeGerir } from "@/lib/rbac";
 
 export async function abrirManutencaoAction(fd: FormData) {
   const brinquedoId = String(fd.get("brinquedoId") ?? "");
@@ -13,7 +14,7 @@ export async function abrirManutencaoAction(fd: FormData) {
   if (brinquedoId && tipo in MANUT_TIPO) {
     await abrirManutencao({
       brinquedoId, tipo, descricao,
-      custo: Number.isFinite(custoNum) ? custoNum : null,
+      custo: Number.isFinite(custoNum) && custoNum >= 0 ? custoNum : null,
       responsavel,
     });
   }
@@ -29,6 +30,8 @@ export async function concluirManutencaoAction(id: string) {
 }
 
 export async function deleteManutencaoAction(id: string) {
+  if (!(await podeGerir())) return;
   await deleteManutencao(id);
   revalidatePath("/manutencao");
+  revalidatePath("/brinquedos");
 }

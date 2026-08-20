@@ -5,7 +5,7 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { inputClass } from "@/components/ui/form";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { concluirTrocaSenha } from "@/app/trocar-senha/actions";
+import { trocarSenhaAction } from "@/app/trocar-senha/actions";
 
 type Supa = ReturnType<typeof createSupabaseBrowserClient>;
 
@@ -57,9 +57,9 @@ export default function DefinirSenhaPage() {
     const supa = supaRef.current;
     if (!supa) { setMsg("Não foi possível iniciar. Recarregue a página."); setStatus("erro"); return; }
     setStatus("salvando");
-    const { error } = await supa.auth.updateUser({ password: senha });
-    if (error) { setMsg(error.message); setStatus("erro"); return; }
-    await concluirTrocaSenha();
+    // Troca no SERVIDOR (valida sessão, troca e limpa a flag de senha temporária).
+    const r = await trocarSenhaAction(senha);
+    if (!r.ok) { setMsg(r.erro ?? "Não foi possível criar a senha."); setStatus("erro"); return; }
     setStatus("ok");
     setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
   }

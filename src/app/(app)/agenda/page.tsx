@@ -24,7 +24,10 @@ export default async function AgendaPage() {
     porDia.get(dia)!.push(r);
   }
 
-  const brinquedosDisp = brinquedos.map((b) => ({
+  // Manutenção/limpeza/inativo fora do verificador — indisponíveis por definição.
+  const brinquedosDisp = brinquedos.filter(
+    (b) => b.ativo && b.status !== "inativo" && b.status !== "manutencao" && b.status !== "limpeza"
+  ).map((b) => ({
     id: b.id,
     nome: b.nome,
     quantidade: b.quantidade,
