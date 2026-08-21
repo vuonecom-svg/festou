@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { MapPin, User, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { VerificadorDisponibilidade } from "@/components/verificador-disponibilidade";
+import { ProgramacaoForm } from "@/components/programacao-form";
 import { listBrinquedos } from "@/lib/data/brinquedos";
 import { listReservas, reservasParaEngine, RESERVA_STATUS } from "@/lib/data/reservas";
 
@@ -46,9 +47,10 @@ export default async function AgendaPage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
-        {/* Verificador (diferencial) */}
-        <div className="lg:col-span-1 lg:sticky lg:top-0 lg:self-start">
+        {/* Verificador (diferencial) + relatório de programação */}
+        <div className="lg:col-span-1 lg:sticky lg:top-0 lg:self-start space-y-5">
           <VerificadorDisponibilidade brinquedos={brinquedosDisp} reservas={engineReservas} />
+          <ProgramacaoForm />
         </div>
 
         {/* Lista por dia */}
